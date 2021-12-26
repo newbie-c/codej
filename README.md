@@ -1,3 +1,3 @@
-This is the next incarnation of web-application for my personal blog on
-*https://codej.ru*.
+More information about this app can be found on my personal web-site -
+*[CodeJ.ru](https://codej.ru/arts/author/newbie/label/codej)*.
 
