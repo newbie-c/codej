@@ -13,4 +13,5 @@ starlette==0.17.1
 uvicorn==0.16.0
 uvloop==0.16.0
 watchgod==0.7
+webassets==2.0
 websockets==10.1

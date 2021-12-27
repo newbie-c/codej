@@ -2,3 +2,6 @@ __pycache__
 *.pyc
 .env
 venv/
+codej/static/vendor
+codej/static/generic
+codej/static/.webassets-cache

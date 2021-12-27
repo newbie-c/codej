@@ -9,5 +9,10 @@
   </head>
   <body>
     <p>Сайт в стадии разработки, попробуйте зайти позже.</p>
+    {% assets filters='rjsmin', output='generic/js/vendor.js',
+              'vendor/jquery-3.6.0.js',
+              'vendor/bootstrap-3.4.1/js/bootstrap.js' %}
+      <script src="{{ ASSET_URL }}"></script>
+    {% endassets %}
   </body>
 </html>
