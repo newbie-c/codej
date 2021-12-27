@@ -1,25 +1,16 @@
 import os
 
-from starlette.responses import FileResponse, HTMLResponse, PlainTextResponse
+from starlette.responses import FileResponse, PlainTextResponse
 
-html = '''<!DOCTYPE html>
-<html>
-  <head>
-    <title>CodeJ</title>
-    <link rel="icon" href="/favicon.ico" type="image/vnd.microsoft.icon">
-  </head>
-  <body>
-    <p>Сайт в стадии разработки, попробуйте зайти позже.</p>
-  </body>
-</html>
-'''
 robots = """User-agent: *
 Disallow: /
 """
 
 
 async def show_index(request):
-   return HTMLResponse(html)
+   return request.app.jinja.TemplateResponse(
+          'main/index.html',
+          {'request': request})
 
 
 async def show_robots(request):
