@@ -1,18 +1,21 @@
-<!DOCTYPE html>
-<html lang="ru">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-COMPATIBLE" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>CodeJ</title>
-    <link rel="icon" href="/favicon.ico" type="image/vnd.microsoft.icon">
-  </head>
-  <body>
-    <p>Сайт в стадии разработки, попробуйте зайти позже.</p>
-    {% assets filters='rjsmin', output='generic/js/vendor.js',
-              'vendor/jquery-3.6.0.js',
-              'vendor/bootstrap-3.4.1/js/bootstrap.js' %}
-      <script src="{{ ASSET_URL }}"></script>
-    {% endassets %}
-  </body>
-</html>
+{% extends "base.html" %}
+
+{% block metas %}
+  {{ super() }}
+  <meta name="description"
+        content="{{ request.app.config.get('SITE_DESCRIPTION') }}">
+{% endblock metas %}
+
+{% block title %}Сначала{% endblock title %}
+
+{% block styles %}
+  {{ super() }}
+{% endblock styles %}
+
+{% block page_body %}
+  <p>Сайт в стадии разработки</p>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+{% endblock scripts %}

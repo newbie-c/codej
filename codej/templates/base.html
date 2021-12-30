@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    {% block metas %}
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-COMPATIBLE" content="IE=edge">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+    {% endblock metas %}
+    {% block title_tag %}
+      <title>
+        {{ request.app.config.get(
+          'SITE_NAME') }}: {% block title %}{% endblock title %}
+      </title>
+    {% endblock title_tag %}
+    {% block styles %}
+      <link rel="icon"
+            href="{{ url_for('favicon') }}"
+            type="image/vnd.microsoft.icon">
+    {% endblock styles %}
+  </head>
+  <body>
+    {% block page_body %}{% endblock page_body %}
+    {% block scripts %}
+      {% assets filters='rjsmin', output='generic/js/vendor.js',
+                'vendor/jquery-3.6.0.js',
+                'vendor/bootstrap-3.4.1/js/bootstrap.js' %}
+        <script src="{{ ASSET_URL }}"><script>
+      {% endassets %}
+    {% endblock scripts %}
+  </body>
+</html>
