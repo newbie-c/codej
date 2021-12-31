@@ -16,15 +16,93 @@
       <link rel="icon"
             href="{{ url_for('favicon') }}"
             type="image/vnd.microsoft.icon">
+      {% assets filters='cssmin', output='generic/css/vendor.css',
+                'vendor/bootstrap-3.4.1/css/bootstrap.css',
+                'vendor/bootstrap-3.4.1/css/bootstrap-theme.css' %}
+        <link rel="stylesheet" type="text/css"
+              href="{{ ASSET_URL }}">
+      {% endassets %}
     {% endblock styles %}
   </head>
   <body>
+    <nav id="navigation" class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle"
+                  data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand"
+             href="{{ url_for('index') }}">
+            <img alt="logo"
+                 src="{{ url_for('static', path='images/logo.png') }}"
+                 width="28" height="28">
+          </a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                Почитать <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a href="">Блоги</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                Действия <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a href="">Войти</a>
+                </li>
+                <li>
+                  <a href="">Получить пароль</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
     {% block page_body %}{% endblock page_body %}
+    <footer id="footer">
+      <div class="container-fluid">
+        <div class="footer-block"></div>
+        <div class="footer-content">
+          <div class="footer-left text-left">
+            <img alt="right finger"
+                 src="{{ url_for('static', path='images/footer-left.png') }}"
+                 width="24" height="24">
+          </div>
+          <div class="footer-center text-center">
+            <a id="footer-link"
+               href="{{ url_for('index') }}">
+              {{ request.app.config.get('SITE_NAME') }}
+            </a>
+          </div>
+          <div class="footer-right text-right">
+            <img alt="left finger"
+                 src="{{ url_for('static', path='images/footer-right.png') }}"
+                 width="24" height="24">
+          </div>
+          <div class="footer-bottom"></div>
+        </div>
+        <div class="footer-block"></div>
+      </div>
+    </footer>
     {% block scripts %}
       {% assets filters='rjsmin', output='generic/js/vendor.js',
                 'vendor/jquery-3.6.0.js',
                 'vendor/bootstrap-3.4.1/js/bootstrap.js' %}
-        <script src="{{ ASSET_URL }}"><script>
+        <script src="{{ ASSET_URL }}"></script>
       {% endassets %}
     {% endblock scripts %}
   </body>

@@ -10,12 +10,32 @@
 
 {% block styles %}
   {{ super() }}
+  {% assets filters='cssmin', output='generic/css/main/index.css',
+            'css/base.css',
+            'css/main/index.css' %}
+    <link rel="stylesheet" type="text/css"
+          href="{{ ASSET_URL }}">
+    <link rel="canonical"
+	  href="{{ url_for('index') }}">
+  {% endassets %}
 {% endblock styles %}
 
 {% block page_body %}
-  <p>Сайт в стадии разработки</p>
+  <!-- main/index.html -->
+  <div id="main-container">
+    <div class="alert alert-warning">
+      <div class="message-text">
+        Сайт в стадии разработки, попробуйте зайти позже
+      </div>
+    </div>
+  </div>
 {% endblock page_body %}
 
 {% block scripts %}
   {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/main/index.js',
+            'js/check-mc.js',
+            'js/main/index.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
 {% endblock scripts %}
