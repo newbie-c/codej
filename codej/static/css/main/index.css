@@ -3,3 +3,13 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+.today-field {
+  font-style: italic;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.message-text {
+  font-style: italic;
+}

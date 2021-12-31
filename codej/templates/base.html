@@ -101,7 +101,8 @@
     {% block scripts %}
       {% assets filters='rjsmin', output='generic/js/vendor.js',
                 'vendor/jquery-3.6.0.js',
-                'vendor/bootstrap-3.4.1/js/bootstrap.js' %}
+                'vendor/bootstrap-3.4.1/js/bootstrap.js',
+		'vendor/luxon.js' %}
         <script src="{{ ASSET_URL }}"></script>
       {% endassets %}
     {% endblock scripts %}

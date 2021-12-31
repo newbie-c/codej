@@ -24,8 +24,9 @@
   <!-- main/index.html -->
   <div id="main-container">
     <div class="alert alert-warning">
+      <div class="today-field"></div>
       <div class="message-text">
-        Сайт в стадии разработки, попробуйте зайти позже
+        Сайт в стадии разработки, попробуйте зайти позже.
       </div>
     </div>
   </div>
@@ -35,6 +36,8 @@
   {{ super() }}
   {% assets filters='rjsmin', output='generic/js/main/index.js',
             'js/check-mc.js',
+	    'js/render-tf.js',
+	    'js/footer.js',
             'js/main/index.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
