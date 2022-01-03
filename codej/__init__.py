@@ -11,6 +11,7 @@ from starlette.templating import Jinja2Templates
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import assets
 
+from .captcha.views import show_captcha
 from .main.views import show_index, show_robots, show_favicon
 
 base = os.path.dirname(__file__)
@@ -42,6 +43,8 @@ app = Starlette(
     routes=[Route('/', show_index, name='index'),
             Route('/robots.txt', show_robots, name='robots'),
             Route('/favicon.ico', show_favicon, name='favicon'),
+            Mount('/captcha', routes=[
+                Route('/{suffix}', show_captcha, name='captcha')]),
             Mount('/static',
                   app=StaticFiles(directory=static), name='static')])
 app.config = settings

@@ -1,0 +1,7 @@
+postgresql
+python3-venv
+python3-dev
+build-essential
+fonts-dejavu
+fonts-liberation2
+ttf-bitstream-vera
