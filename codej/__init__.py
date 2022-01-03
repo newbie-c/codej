@@ -5,6 +5,8 @@ import typing
 
 from starlette.applications import Starlette
 from starlette.config import Config
+from starlette.middleware import Middleware
+from starlette.middleware.sessions import SessionMiddleware
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
@@ -12,6 +14,8 @@ from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import assets
 
 from .captcha.views import show_captcha
+from .errors import (
+        notify_not_found_page, refuse_method, refuse_request)
 from .main.views import show_index, show_robots, show_favicon
 
 base = os.path.dirname(__file__)
@@ -38,6 +42,13 @@ class J2Templates(Jinja2Templates):
         return env
 
 
+middleware = [
+    Middleware(
+        SessionMiddleware,
+        secret_key=settings.get('SESSION_LIFETIME', cast=int))]
+errs = {403: refuse_request,
+        404: notify_not_found_page,
+        405: refuse_method}
 app = Starlette(
     debug=settings.get('DEBUG', cast=bool),
     routes=[Route('/', show_index, name='index'),
@@ -46,6 +57,8 @@ app = Starlette(
             Mount('/captcha', routes=[
                 Route('/{suffix}', show_captcha, name='captcha')]),
             Mount('/static',
-                  app=StaticFiles(directory=static), name='static')])
+                  app=StaticFiles(directory=static), name='static')],
+    middleware=middleware,
+    exception_handlers=errs)
 app.config = settings
 app.jinja = J2Templates(directory=templates)

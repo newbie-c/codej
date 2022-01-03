@@ -1,0 +1,9 @@
+.main-container {
+  width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+p {
+  text-align: justify;
+}

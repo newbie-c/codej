@@ -8,9 +8,9 @@ Disallow: /
 
 
 async def show_index(request):
-   return request.app.jinja.TemplateResponse(
-          'main/index.html',
-          {'request': request})
+    return request.app.jinja.TemplateResponse(
+        'main/index.html',
+        {'request': request})
 
 
 async def show_robots(request):
