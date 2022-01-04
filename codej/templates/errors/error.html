@@ -6,6 +6,7 @@
   {{ super() }}
   {% assets filters='cssmin', output='generic/css/main/error.css',
             'css/base.css',
+	    'css/mc780.css',
             'css/errors/error.css' %}
     <link rel="stylesheet" type="text/css"
           href="{{ ASSET_URL }}">

@@ -12,6 +12,7 @@
   {{ super() }}
   {% assets filters='cssmin', output='generic/css/main/index.css',
             'css/base.css',
+	    'css/mc780.css',
             'css/main/index.css' %}
     <link rel="stylesheet" type="text/css"
           href="{{ ASSET_URL }}">
