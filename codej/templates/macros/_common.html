@@ -1,0 +1,12 @@
+{% macro show_messages(flashed) %}
+  {% for message in flashed %}
+    <div class="flashed-message
+                {% if not loop.first %}next-block{% endif %}">
+      <div class="alert alert-warning">
+        <button class="close close-top-flashed" type="button">
+          &times;</button>
+        {{ message|safe }}
+      </div>
+    </div>
+  {% endfor %}
+{% endmacro %}

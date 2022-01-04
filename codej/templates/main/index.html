@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
 
 {% block metas %}
   {{ super() }}
@@ -13,6 +14,8 @@
   {% assets filters='cssmin', output='generic/css/main/index.css',
             'css/base.css',
 	    'css/mc780.css',
+	    'css/top-flashed.css',
+	    'css/next-block.css',
             'css/main/index.css' %}
     <link rel="stylesheet" type="text/css"
           href="{{ ASSET_URL }}">
@@ -24,12 +27,21 @@
 {% block page_body %}
   <!-- main/index.html -->
   <div id="main-container">
-    <div class="alert alert-warning">
-      <div class="today-field"></div>
-      <div class="message-text">
-        Сайт в стадии разработки, попробуйте зайти позже.
+    {% if flashed %}
+      <div class="top-flashed-block">
+	{{ show_messages(flashed) }}
       </div>
-    </div>
+    {% endif %}
+    {% if target %}
+      <!-- this block is not available yet -->
+    {% else %}
+      <div class="alert alert-warning">
+        <div class="today-field"></div>
+        <div class="message-text">
+          Сайт в стадии разработки, попробуйте зайти позже.
+        </div>
+      </div>
+    {% endif %}
   </div>
 {% endblock page_body %}
 
@@ -39,6 +51,7 @@
             'js/check-mc.js',
 	    'js/render-tf.js',
 	    'js/footer.js',
+	    'js/top-flashed.js',
             'js/main/index.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
