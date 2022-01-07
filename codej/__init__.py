@@ -45,7 +45,8 @@ class J2Templates(Jinja2Templates):
 middleware = [
     Middleware(
         SessionMiddleware,
-        secret_key=settings.get('SESSION_LIFETIME', cast=int))]
+        secret_key=settings.get('SECRET_KEY'),
+        max_age=settings.get('SESSION_LIFETIME', cast=int))]
 errs = {403: refuse_request,
         404: notify_not_found_page,
         405: refuse_method}
