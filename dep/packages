@@ -1,4 +1,5 @@
 postgresql
+redis
 python3-venv
 python3-dev
 build-essential

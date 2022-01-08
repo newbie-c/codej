@@ -23,3 +23,12 @@ async def refuse_method(request, exc):
          'request': request,
          'error': exc.status_code},
         status_code=exc.status_code)
+
+
+async def handle_csrf_error(request, exc):
+    return request.app.jinja.TemplateResponse(
+        'errors/error.html',
+        {'reason': 'CSRF-брелок устарел или подделан.',
+         'request': request,
+         'error': 'CSRF-error'},
+        status_code=exc.status_code)

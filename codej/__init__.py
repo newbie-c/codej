@@ -10,12 +10,14 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
+from starlette_wtf import CSRFProtectMiddleware, CSRFError
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import assets
 
 from .captcha.views import show_captcha
 from .errors import (
-        notify_not_found_page, refuse_method, refuse_request)
+        handle_csrf_error, notify_not_found_page,
+        refuse_method, refuse_request)
 from .main.views import show_index, show_robots, show_favicon
 
 base = os.path.dirname(__file__)
@@ -46,10 +48,12 @@ middleware = [
     Middleware(
         SessionMiddleware,
         secret_key=settings.get('SECRET_KEY'),
-        max_age=settings.get('SESSION_LIFETIME', cast=int))]
+        max_age=settings.get('SESSION_LIFETIME', cast=int)),
+    Middleware(CSRFProtectMiddleware, csrf_secret=settings.get('SECRET_KEY'))]
 errs = {403: refuse_request,
         404: notify_not_found_page,
-        405: refuse_method}
+        405: refuse_method,
+        CSRFError: handle_csrf_error}
 app = Starlette(
     debug=settings.get('DEBUG', cast=bool),
     routes=[Route('/', show_index, name='index'),
