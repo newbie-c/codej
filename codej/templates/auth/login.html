@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
+
+{% block title %}Вход в сервис{% endblock title %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/auth/login.css',
+            'css/base.css',
+            'css/mc780.css',
+            'css/top-flashed.css',
+            'css/content-block.css',
+            'css/next-block.css',
+            'css/labeled-form.css' %}
+    <link rel="stylesheet" type="text/css"
+          href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- auth/login.html -->
+  <div id="main-container">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    <div class="form-block content-block">
+      <div class="block-header">
+        <h3 class="panel-title">Вход в сервис</h3>
+      </div>
+      <div class="block-body">
+        <div class="today-field"></div>
+        <div class="form-help">
+          <p>
+            Для входа в сервис введите свой логин, пароль и код с картинки,
+            нажмите кнопку "Войти в сервис". Логином может быть
+            зарегистрированный псевдоним или адрес электронной почты. Форма
+            действительна в течение 3-х минут. Если код на картинке плохо
+            читается, можно обновить картинку кнопкой со стрелками и найти
+            картинку с хорошо читаемым кодом. Код состоит из строчных
+            латинских букв и цифр без повторов.
+          </p>
+        </div>
+        <div class="form-form"></div>
+      </div>
+    </div>
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/auth/login.js',
+            'js/check-mc.js',
+            'js/render-tf.js',
+            'js/top-flashed.js',
+            'js/footer.js',
+            'js/auth/login.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}

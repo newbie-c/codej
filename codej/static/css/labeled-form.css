@@ -1,0 +1,11 @@
+.today-field {
+  font-size: 0.85em;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.form-help {
+  font-style: italic;
+  text-align: justify;
+  margin: 4px 0 2px;
+}

@@ -1,0 +1,15 @@
+.content-block {
+  border-radius: 3px;
+  border: 1px solid #d3ddd3;
+  box-shadow: 0 0 6px #f1dbc2;
+}
+
+.block-header {
+  border-radius: 3px;
+  background: linear-gradient(to bottom, #fffef2, #f3f2e7);
+  padding: 10px;
+}
+
+.block-body {
+  margin: 8px 12px;
+}
