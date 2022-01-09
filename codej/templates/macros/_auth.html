@@ -1,0 +1,56 @@
+{% macro show_error(form, field) %}
+  {% if form.errors[field] %}
+    {% for error in form.errors[field] %}
+      <div class="error">{{ error }}</div>
+    {% endfor %}
+  {% endif %}
+{% endmacro %}
+
+{% macro render_form_group(form, field, fieldname, placeholder) %}
+  <div class="form-group {% if form.errors[fieldname] %}has-error{% endif %}">
+    <div class="form-label {% if form.errors[fieldname] %}error{% endif %}
+                 text-right">
+      {{ field.label }}
+    </div>
+    <div class="form-input">
+      {{ field(class="form-control", placeholder=placeholder) }}
+      {{ show_error(form, fieldname) }}
+    </div>
+    <div class="footer-bottom"></div>
+  </div>
+{% endmacro %}
+
+{% macro render_form_boolean(form, field, checked=False) %}
+  <div class="form-group">
+    <div class="form-input checkbox">
+      <label>
+        {{ field(checked=checked) }}{{ field.label }}
+      </label>
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro render_captcha_group(request, form, suffix) %}
+  <div class="form-group">
+    <div class="form-label captcha-options text-right">
+      <button type="button" title="обновить картинку"
+              data-url=""
+              class="btn btn-default reload-button">
+        <span class="glyphicon glyphicon-refresh"
+              aria-hidden="true"></span>
+      </button>
+    </div>
+    <div class="form-input captcha-field"
+         style="background:
+                url({{ request.url_for('captcha:captcha', suffix=suffix)}}">
+    </div>
+    <div class="footer-bottom"></div>
+  </div>
+  {{ render_form_group(
+    form, form.captcha, 'captcha', 'введите код с картинки') }}
+  <div class="form-group hidden">
+    <div class="form-input">
+      {{ form.suffix(class="form-control") }}
+    </div>
+  </div>
+{% endmacro %}

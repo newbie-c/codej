@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% from "macros/_common.html" import show_messages %}
+{% from "macros/_auth.html" import render_form_group %}
+{% from "macros/_auth.html" import render_form_boolean %}
+{% from "macros/_auth.html" import render_captcha_group %}
 
 {% block title %}Вход в сервис{% endblock title %}
 
@@ -11,7 +14,8 @@
             'css/top-flashed.css',
             'css/content-block.css',
             'css/next-block.css',
-            'css/labeled-form.css' %}
+            'css/labeled-form.css',
+            'css/captcha.css' %}
     <link rel="stylesheet" type="text/css"
           href="{{ ASSET_URL }}">
   {% endassets %}
@@ -42,7 +46,26 @@
             латинских букв и цифр без повторов.
           </p>
         </div>
-        <div class="form-form"></div>
+        <div class="form-form">
+          <form class="form" method="POST" role="form">
+            {{ form.csrf_token }}
+            {{ render_form_group(
+              form, form.login, 'login', 'введите свой логин') }}
+            {{ render_form_group(
+              form, form.password, 'password', 'введите свой пароль') }}
+            {{ render_form_boolean(form, form.remember_me) }}
+            {{ render_captcha_group(request, form, captcha.get('suffix')) }}
+            <div class="form-group">
+              <div class="form-input">
+                {{ form.submit(class="btn btn-primary") }}
+                <a class="btn btn-info"
+                   href="">
+                  Получить пароль
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>

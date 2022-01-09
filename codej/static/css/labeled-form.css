@@ -9,3 +9,29 @@
   text-align: justify;
   margin: 4px 0 2px;
 }
+
+.form-form {
+  margin: 0;
+}
+
+.form-group {
+  margin: 6px 0 0;
+}
+
+.form-label {
+  width: 25%;
+  float: left;
+  padding-top: 7px;
+}
+
+.checkbox {
+  margin: 0;
+}
+
+.checkbox label label {
+  padding-left: 3px;
+}
+
+.form-input {
+  margin-left: 26%;
+}
