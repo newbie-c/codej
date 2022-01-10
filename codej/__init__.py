@@ -14,7 +14,7 @@ from starlette_wtf import CSRFProtectMiddleware, CSRFError
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import assets
 
-from .auth.views import login
+from .auth.views import login, update_captcha
 from .captcha.views import show_captcha
 from .errors import (
         handle_csrf_error, notify_not_found_page,
@@ -62,7 +62,9 @@ app = Starlette(
             Route('/favicon.ico', show_favicon, name='favicon'),
             Mount('/auth', name='auth', routes=[
                 Route('/login', login,
-                      name='login', methods=['GET', 'POST'])]),
+                      name='login', methods=['GET', 'POST']),
+                Route('/ajax/upd-captcha', update_captcha,
+                      name='upd-captcha', methods=['POST'])]),
             Mount('/captcha', name='captcha', routes=[
                 Route('/{suffix}', show_captcha, name='captcha')]),
             Mount('/static',
