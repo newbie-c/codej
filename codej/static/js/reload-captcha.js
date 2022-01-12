@@ -1,4 +1,4 @@
-function ReloadCaptcha(event) {
+function reloadCaptcha(event) {
   $(this).blur();
   $.ajax({
     method: "POST",

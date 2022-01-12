@@ -1,5 +1,6 @@
 import os
 
+import aioredis
 import jinja2
 import typing
 
@@ -73,3 +74,4 @@ app = Starlette(
     exception_handlers=errs)
 app.config = settings
 app.jinja = J2Templates(directory=templates)
+app.rc = aioredis.from_url(settings.get('REDI'), decode_responses=True)
