@@ -1,3 +1,5 @@
+import asyncio
+
 import asyncpg
 
 from passlib.hash import pbkdf2_sha256
@@ -8,6 +10,7 @@ from ..common.flashed import get_flashed, set_flashed
 from .forms import LoginForm
 from .pg import filter_user
 from .redi import assign_cache, assign_uid, extract_cache
+from .tasks import change_pattern
 
 captchaq = 'SELECT val, suffix FROM captchas ORDER BY random() LIMIT 1'
 
@@ -23,6 +26,8 @@ async def login(request):
         if val != form.captcha.data:
             await set_flashed(
                 request, 'Тест провален, либо устарел, попробуйте снова.')
+            asyncio.ensure_future(
+                change_pattern(request.app.config.get('DB'), suffix))
             await conn.close()
             return RedirectResponse(request.url_for('auth:login'), 302)
         user = await filter_user(conn, form.login.data)
@@ -32,6 +37,8 @@ async def login(request):
                 request.app.rc, 'uid:',
                 form.remember_me.data, user)
             await set_flashed(request, f'Привет {user.get("username")}!')
+            asyncio.ensure_future(
+                change_pattern(request.app.config.get('DB'), suffix))
             await conn.close()
             return RedirectResponse(
                 request.url_for('index'), 302)
