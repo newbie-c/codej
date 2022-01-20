@@ -1,14 +1,16 @@
 import asyncio
 import functools
 
-import asyncpg
-
+from ..common.pg import get_conn
 from ..captcha.common import check_val
 from ..captcha.picturize.picture import generate_image
 
 
-async def change_pattern(db, suffix):
-    conn = await asyncpg.connect(db)
+async def change_pattern(conf, suffix):
+    conn = await get_conn(conf)
+    #conn = await asyncpg.connect(
+    #    user=conf.get('DBU'),
+    #    database=conf.get('DB'))
     val = await check_val(conn)
     loop = asyncio.get_running_loop()
     pic = await loop.run_in_executor(

@@ -28,7 +28,7 @@ def get_username():
             print(MESSAGE)
             username = input(USERNAME)
             continue
-        if asyncio.run(check_username(settings.get('DB'), username)):
+        if asyncio.run(check_username(settings, username)):
             print('This name is already registered. Try again.\n')
             username = input(USERNAME)
             continue
@@ -42,7 +42,7 @@ def get_email():
             print('This is not a valid email address.\n')
             address = input(EMAIL)
             continue
-        if asyncio.run(check_address(settings.get('DB'), address)):
+        if asyncio.run(check_address(settings, address)):
             print('This email address cannot be registered. Try another.\n')
             address = input(EMAIL)
             continue
@@ -61,8 +61,8 @@ def get_password():
 
 
 async def main(username, address, pwd):
-    await insert_permissions(settings.get('DB'))
-    await create_user(settings.get('DB'), username, address, pwd, roots)
+    await insert_permissions(settings)
+    await create_user(settings, username, address, pwd, roots)
 
 
 if __name__ == '__main__':

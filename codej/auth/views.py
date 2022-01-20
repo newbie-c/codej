@@ -1,12 +1,11 @@
 import asyncio
 
-import asyncpg
-
 from passlib.hash import pbkdf2_sha256
 from starlette.responses import JSONResponse, RedirectResponse
 from starlette_wtf import csrf_protect
 
 from ..common.flashed import get_flashed, set_flashed
+from ..common.pg import get_conn
 from .forms import LoginForm
 from .pg import filter_user
 from .redi import assign_cache, assign_uid, extract_cache
@@ -17,7 +16,10 @@ captchaq = 'SELECT val, suffix FROM captchas ORDER BY random() LIMIT 1'
 
 async def login(request):
     print(request.session)
-    conn = await asyncpg.connect(request.app.config.get('DB'))
+    conn = await get_conn(request.app.config)
+    #conn = await asyncpg.connect(
+    #        user=request.app.config.get('DBU'),
+    #        database=request.app.config.get('DB'))
     form = await LoginForm.from_formdata(request)
     captcha = await conn.fetchrow(captchaq)
     if await form.validate_on_submit():
@@ -27,7 +29,7 @@ async def login(request):
             await set_flashed(
                 request, 'Тест провален, либо устарел, попробуйте снова.')
             asyncio.ensure_future(
-                change_pattern(request.app.config.get('DB'), suffix))
+                change_pattern(request.app.config, suffix))
             await conn.close()
             return RedirectResponse(request.url_for('auth:login'), 302)
         user = await filter_user(conn, form.login.data)
@@ -38,7 +40,7 @@ async def login(request):
                 form.remember_me.data, user)
             await set_flashed(request, f'Привет {user.get("username")}!')
             asyncio.ensure_future(
-                change_pattern(request.app.config.get('DB'), suffix))
+                change_pattern(request.app.config, suffix))
             await conn.close()
             return RedirectResponse(
                 request.url_for('index'), 302)
@@ -62,7 +64,10 @@ async def login(request):
 
 @csrf_protect
 async def update_captcha(request):
-    conn = await asyncpg.connect(request.app.config.get('DB'))
+    conn = await get_conn(request.app.config)
+    #conn = await asyncpg.connect(
+    #       user=request.app.config.get('DBU'),
+    #       database=request.app.config.get('DB'))
     captcha = await conn.fetchrow(captchaq)
     res = {'cache': await assign_cache(
         request.app.rc, 'captcha:',

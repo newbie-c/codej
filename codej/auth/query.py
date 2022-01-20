@@ -1,14 +1,15 @@
-import asyncpg
-
 from datetime import datetime
 from hashlib import md5
 from passlib.hash import pbkdf2_sha256
 
+from ..common.pg import get_conn
 from .attri import initials, permissions
 
 
-async def insert_permissions(db):
-    conn = await asyncpg.connect(db)
+async def insert_permissions(conf):
+    conn = await get_conn(conf)
+    #conn = await asyncpg.connect(
+    #        user=conf.get('DBU'), database=conf.get('DB'))
     current = await conn.fetch('SELECT * FROM permissions')
     if current:
         for each in current:
@@ -29,17 +30,21 @@ async def insert_permissions(db):
     await conn.close()
 
 
-async def check_username(db, username):
-    conn = await asyncpg.connect(db)
+async def check_username(conf, username):
+    conn = await get_conn(conf)
+    #conn = await asyncpg.connect(
+    #    user=conf.get('DBU'), database=conf.get('DB'))
     res = await conn.fetchrow(
         'SELECT username FROM users WHERE username = $1', username)
     await conn.close()
     return bool(res)
 
 
-async def check_address(db, address):
+async def check_address(conf, address):
     res = False
-    conn = await asyncpg.connect(db)
+    conn = await get_conn(conf)
+    #conn = await asyncpg.connect(
+    #    user=conf.get('DBU'), database=conf.get('DB'))
     account = await conn.fetchrow(
         'SELECT address, user_id FROM accounts WHERE address = $1', address)
     swap = await conn.fetchrow(
@@ -50,10 +55,12 @@ async def check_address(db, address):
     return res
 
 
-async def create_user(db, username, address, password, perms):
+async def create_user(conf, username, address, password, perms):
     password = pbkdf2_sha256.hash(password)
     now = datetime.utcnow()
-    conn = await asyncpg.connect(db)
+    conn = await get_conn(conf)
+    #conn = await asyncpg.connect(
+    #    user=conf.get('DBU'), database=conf.get('DB'))
     await conn.execute(
         '''INSERT INTO users
            (username, registered, last_visit, password_hash, permissions)

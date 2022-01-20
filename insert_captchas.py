@@ -2,9 +2,8 @@ import argparse
 import asyncio
 import functools
 
-import asyncpg
-
 from codej import settings
+from codej.common.pg import get_conn
 from codej.captcha.common import check_suffix, check_val
 from codej.captcha.picturize.picture import generate_image
 
@@ -22,7 +21,10 @@ def parse_args():
 
 
 async def gen_row():
-    conn = await asyncpg.connect(settings.get('DB'))
+    conn = await get_conn(settings)
+    #conn = await asyncpg.connect(
+    #        user=settings.get('DBU'),
+    #        database=settings.get('DB'))
     val = await check_val(conn)
     suffix = await check_suffix(conn)
     loop = asyncio.get_running_loop()
