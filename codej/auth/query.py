@@ -8,8 +8,6 @@ from .attri import initials, permissions
 
 async def insert_permissions(conf):
     conn = await get_conn(conf)
-    #conn = await asyncpg.connect(
-    #        user=conf.get('DBU'), database=conf.get('DB'))
     current = await conn.fetch('SELECT * FROM permissions')
     if current:
         for each in current:
@@ -32,8 +30,6 @@ async def insert_permissions(conf):
 
 async def check_username(conf, username):
     conn = await get_conn(conf)
-    #conn = await asyncpg.connect(
-    #    user=conf.get('DBU'), database=conf.get('DB'))
     res = await conn.fetchrow(
         'SELECT username FROM users WHERE username = $1', username)
     await conn.close()
@@ -43,8 +39,6 @@ async def check_username(conf, username):
 async def check_address(conf, address):
     res = False
     conn = await get_conn(conf)
-    #conn = await asyncpg.connect(
-    #    user=conf.get('DBU'), database=conf.get('DB'))
     account = await conn.fetchrow(
         'SELECT address, user_id FROM accounts WHERE address = $1', address)
     swap = await conn.fetchrow(
@@ -59,8 +53,6 @@ async def create_user(conf, username, address, password, perms):
     password = pbkdf2_sha256.hash(password)
     now = datetime.utcnow()
     conn = await get_conn(conf)
-    #conn = await asyncpg.connect(
-    #    user=conf.get('DBU'), database=conf.get('DB'))
     await conn.execute(
         '''INSERT INTO users
            (username, registered, last_visit, password_hash, permissions)

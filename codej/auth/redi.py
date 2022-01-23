@@ -22,22 +22,11 @@ async def extract_cache(rc, cache):
 
 
 async def assign_uid(rc, prefix, remember_me, user):
-    user_ = {'id': user.get('id'),
-             'username': user.get('username'),
-             'registered': user.get('registered').isoformat() + 'Z',
-             'ava': user.get('ava_hash'),
-             'tape': user.get('tape') or 0,
-             'author': user.get('author') or 0}
-    if await rc.exists(f'perm:{user.get("id")}'):
-        await rc.delete(f'perm:{user.get("id")}')
-    for perm in user.get('permissions'):
-        await rc.rpush(f'perm:{user.get("id")}', perm)
     if remember_me:
         expiration = 30 * 24 * 60 * 60
     else:
         expiration = 2 * 60 * 60
     cache = await get_unique(rc, prefix, 9)
-    await rc.hmset(cache, user_)
+    await rc.set(cache, user.get('id'))
     await rc.expire(cache, expiration)
-    await rc.expire(f'perm:{user.get("id")}', 30*24*60*60)
     return cache

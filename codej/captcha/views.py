@@ -6,9 +6,6 @@ from ..common.pg import get_conn
 
 async def show_captcha(request):
     conn = await get_conn(request.app.config)
-    #conn = await asyncpg.connect(
-    #        user=request.app.config.get('DBU'),
-    #        database=request.app.config.get('DB'))
     res = await conn.fetchrow(
         'SELECT * FROM captchas WHERE suffix = $1',
         request.path_params.get('suffix'))

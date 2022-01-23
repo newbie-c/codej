@@ -22,9 +22,6 @@ def parse_args():
 
 async def gen_row():
     conn = await get_conn(settings)
-    #conn = await asyncpg.connect(
-    #        user=settings.get('DBU'),
-    #        database=settings.get('DB'))
     val = await check_val(conn)
     suffix = await check_suffix(conn)
     loop = asyncio.get_running_loop()
