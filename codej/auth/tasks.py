@@ -6,6 +6,19 @@ from ..captcha.common import check_val
 from ..captcha.picturize.picture import generate_image
 
 
+async def rem_user_session(request, session, username):
+    conn = await get_conn(request.app.config)
+    sessions = await conn.fetchval(
+        'SELECT sessions FROM users WHERE username = $1', username)
+    if sessions and session in sessions:
+        sessions.remove(session)
+        await conn.execute(
+            'UPDATE users SET sessions = $1 WHERE username = $2',
+            sessions or None, username)
+    await conn.close()
+    return None
+
+
 async def ping_user(request, timestamp, uid):
     conn = await get_conn(request.app.config)
     await conn.execute(

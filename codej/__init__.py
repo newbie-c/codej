@@ -15,7 +15,8 @@ from starlette_wtf import CSRFProtectMiddleware, CSRFError
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import assets
 
-from .auth.views import login, update_captcha
+from .auth.attri import permissions
+from .auth.views import fake_index, login, logout, update_captcha
 from .captcha.views import show_captcha
 from .errors import (
         handle_csrf_error, notify_not_found_page,
@@ -43,6 +44,7 @@ class J2Templates(Jinja2Templates):
             loader=loader, autoescape=True, extensions=[assets])
         env.assets_environment = assets_env
         env.globals["url_for"] = url_for
+        env.globals["permissions"] = permissions
         return env
 
 
@@ -62,8 +64,11 @@ app = Starlette(
             Route('/robots.txt', show_robots, name='robots'),
             Route('/favicon.ico', show_favicon, name='favicon'),
             Mount('/auth', name='auth', routes=[
+                Route('/index', fake_index,
+                      name='fake-index'),
                 Route('/login', login,
                       name='login', methods=['GET', 'POST']),
+                Route('/logout', logout, name='logout'),
                 Route('/ajax/upd-captcha', update_captcha,
                       name='upd-captcha', methods=['POST'])]),
             Mount('/captcha', name='captcha', routes=[

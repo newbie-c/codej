@@ -2,7 +2,9 @@ import os
 
 from starlette.responses import FileResponse, PlainTextResponse
 
+from ..auth.common import get_current_user
 from ..common.flashed import get_flashed
+from ..common.pg import get_conn
 
 robots = """User-agent: *
 Disallow: /
@@ -11,11 +13,15 @@ Disallow: /
 
 async def show_index(request):
     print(request.session)
+    conn = await get_conn(request.app.config)
+    current_user = await get_current_user(request, conn)
+    await conn.close()
     return request.app.jinja.TemplateResponse(
         'main/index.html',
         {'request': request,
          'flashed': await get_flashed(request),
-         'target': None})
+         'target': None,
+         'current_user': current_user})
 
 
 async def show_robots(request):
