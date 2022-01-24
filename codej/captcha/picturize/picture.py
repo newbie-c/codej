@@ -75,7 +75,7 @@ def create_captcha_image(chars, width, height, color, background):
     average = int(text_width / len(chars))
     rand = int(0.25 * average)
     offset = int(average * 0.1)
-    table = [i * 1.97 for i in range(256)]
+    table = [int(i * 1.97) for i in range(256)]
     for each in images:
         w, h = each.size
         mask = each.convert('L').point(table)
