@@ -59,7 +59,7 @@
               <div class="form-input">
                 {{ form.submit(class="btn btn-primary") }}
                 <a class="btn btn-info"
-                   href="">
+		   href="{{ url_for('auth:get-password') }}">
                   Получить пароль
                 </a>
               </div>

@@ -89,7 +89,8 @@
 	          <a href="{{ url_for('auth:login') }}">Войти</a>
                 </li>
                 <li>
-                  <a href="">Получить пароль</a>
+                  <a href="{{ url_for('auth:get-password') }}">
+                    Получить пароль</a>
                 </li>
 		{% endif %}
               </ul>
