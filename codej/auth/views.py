@@ -1,18 +1,28 @@
 import asyncio
 
 from passlib.hash import pbkdf2_sha256
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import (
+        PlainTextResponse, JSONResponse, RedirectResponse)
 from starlette_wtf import csrf_protect
 
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from .common import get_current_user
 from .forms import GetPassword, LoginForm
-from .pg import filter_user
+from .pg import check_address, filter_user
 from .redi import assign_cache, assign_uid, extract_cache
-from .tasks import change_pattern, rem_old_session, rem_user_session
+from .tasks import (
+    change_pattern, rem_old_session, rem_user_session, request_password)
 
 captchaq = 'SELECT val, suffix FROM captchas ORDER BY random() LIMIT 1'
+
+
+async def create_password(request):
+    return PlainTextResponse('Страница создания пароля')
+
+
+async def reset_password(request):
+    return PlainTextResponse('Страница сброса забытого пароля')
 
 
 @csrf_protect
@@ -24,6 +34,33 @@ async def get_password(request):
         return RedirectResponse(request.url_for('index'), 302)
     captcha = await conn.fetchrow(captchaq)
     form = await GetPassword.from_formdata(request)
+    if await form.validate_on_submit():
+        suffix, val = await extract_cache(
+            request.app.rc, form.suffix.data)
+        if val != form.captcha.data:
+            await set_flashed(
+                request, 'Тест провален, либо устарел, попробуйте снова.')
+            asyncio.ensure_future(
+                change_pattern(request.app.config, suffix))
+            await conn.close()
+            return RedirectResponse(request.url_for('auth:get-password'), 302)
+        message, account = await check_address(
+            request, conn, form.address.data)
+        if message:
+            await set_flashed(request, message)
+            asyncio.ensure_future(
+                change_pattern(request.app.config, suffix))
+            await conn.close()
+            return RedirectResponse(
+                request.url_for('auth:get-password'), 302)
+        asyncio.ensure_future(
+            request_password(request, account, form.address.data))
+        asyncio.ensure_future(
+            change_pattern(request.app.config, suffix))
+        await set_flashed(
+            request, 'На ваш адрес выслано письмо с инструкциями.')
+        await conn.close()
+        return RedirectResponse(request.url_for('index'), 302)
     form.captcha.data = ''
     form.suffix.data = await assign_cache(
         request.app.rc, 'captcha:',
@@ -34,36 +71,6 @@ async def get_password(request):
          'flashed': await get_flashed(request),
          'form': form,
          'captcha': captcha})
-
-
-async def logout(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
-    response = RedirectResponse(request.url_for('index'), 302)
-    if current_user is None:
-        await conn.close()
-        return response
-    uid = request.session['_uid']
-    if uid:
-        await request.app.rc.delete(uid)
-        del request.session['_uid']
-        asyncio.ensure_future(
-            rem_user_session(request, uid, current_user['username']))
-    await set_flashed(request, f'Пока, {current_user.get("username")}')
-    await conn.close()
-    return response
-
-
-async def fake_index(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
-    await conn.close()
-    return request.app.jinja.TemplateResponse(
-        'main/index.html',
-        {'request': request,
-         'flashed': await get_flashed(request),
-         'target': None,
-         'current_user': current_user})
 
 
 @csrf_protect
@@ -118,6 +125,24 @@ async def login(request):
          'captcha': captcha})
 
 
+async def logout(request):
+    conn = await get_conn(request.app.config)
+    current_user = await get_current_user(request, conn)
+    response = RedirectResponse(request.url_for('index'), 302)
+    if current_user is None:
+        await conn.close()
+        return response
+    uid = request.session['_uid']
+    if uid:
+        await request.app.rc.delete(uid)
+        del request.session['_uid']
+        asyncio.ensure_future(
+            rem_user_session(request, uid, current_user['username']))
+    await set_flashed(request, f'Пока, {current_user.get("username")}')
+    await conn.close()
+    return response
+
+
 @csrf_protect
 async def update_captcha(request):
     conn = await get_conn(request.app.config)
@@ -129,3 +154,15 @@ async def update_captcha(request):
                'captcha:captcha', suffix=captcha.get('suffix'))}
     await conn.close()
     return JSONResponse(res)
+
+
+async def fake_index(request):
+    conn = await get_conn(request.app.config)
+    current_user = await get_current_user(request, conn)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'main/index.html',
+        {'request': request,
+         'flashed': await get_flashed(request),
+         'target': None,
+         'current_user': current_user})

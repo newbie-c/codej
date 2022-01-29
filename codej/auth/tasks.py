@@ -1,9 +1,48 @@
 import asyncio
 import functools
 
+from aiosmtplib import send
+from email.message import EmailMessage
+
 from ..common.pg import get_conn
 from ..captcha.common import check_val
 from ..captcha.picturize.picture import generate_image
+from .pg import define_a, get_acc
+from .tokens import get_request_token
+from .tools import define_target_url
+
+
+async def request_password(request, account, address):
+    conn = await get_conn(request.app.config)
+    username, subject, template = await define_a(conn, account)
+    account = await get_acc(conn, account, address)
+    url = await define_target_url(
+        request, account,
+        await get_request_token(request, account.get('id')))
+    content = request.app.jinja.get_template(template).render(
+        username=username, index=request.url_for('index'),
+        target=url, length=request.app.config.get('TOKEN_LENGTH', cast=float),
+        interval=request.app.config.get('REQUEST_INTERVAL', cast=float))
+    if request.app.config.get('DEBUG', cast=bool):
+        print(content)
+    else:
+        message = EmailMessage()
+        message["From"] = request.app.config.get('SENDER', cast=str)
+        message["To"] = account.get('address')
+        message["Subject"] = request.app.config.get(
+            'SUBJECT_PREFIX', cast=str) + subject
+        message.set_content(content)
+        message.replace_header('Content-Type', 'text/html; charset="utf-8"')
+        await send(
+            message,
+            recipients=[account.get('address')],
+            hostname=request.app.config.get('MAIL_SERVER', cast=str),
+            port=request.app.config.get('MAIL_PORT', cast=str),
+            username=request.app.config.get('MAIL_USERNAME', cast=str),
+            password=request.app.config.get('MAIL_PASSWORD', cast=str),
+            use_tls=request.app.config.get('MAIL_USE_SSL', cast=bool))
+    await conn.close()
+    return None
 
 
 async def rem_user_session(request, session, username):

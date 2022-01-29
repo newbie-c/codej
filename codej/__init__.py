@@ -17,7 +17,8 @@ from webassets.ext.jinja2 import assets
 
 from .auth.attri import permissions
 from .auth.views import (
-        get_password, fake_index, login, logout, update_captcha)
+        create_password, get_password, fake_index, login, logout,
+        reset_password, update_captcha)
 from .captcha.views import show_captcha
 from .errors import (
         handle_csrf_error, notify_not_found_page,
@@ -72,6 +73,10 @@ app = Starlette(
                 Route('/logout', logout, name='logout'),
                 Route('/get-password', get_password,
                       name='get-password', methods=['GET', 'POST']),
+                Route('/create-password/{token}', create_password,
+                      name='create-password', methods=['GET', 'POST']),
+                Route('/reset-password/{token}', reset_password,
+                      name='reset-password', methods=['GET', 'POST']),
                 Route('/ajax/upd-captcha', update_captcha,
                       name='upd-captcha', methods=['POST'])]),
             Mount('/captcha', name='captcha', routes=[

@@ -17,9 +17,10 @@ CREATE TABLE users (
 );
 
 CREATE TABLE accounts (
-    address   varchar(128) UNIQUE,
+    id        serial        PRIMARY KEY,
+    address   varchar(128)  UNIQUE,
     swap      varchar(128),
     ava_hash  varchar(32),
     requested timestamp,
-    user_id   integer      REFERENCES users(id) UNIQUE
+    user_id   integer       REFERENCES users(id) UNIQUE
 );
