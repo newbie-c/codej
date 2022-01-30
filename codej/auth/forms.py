@@ -1,7 +1,31 @@
 from starlette_wtf import StarletteForm
 from wtforms.fields import (
     BooleanField, PasswordField, StringField, SubmitField)
-from wtforms.validators import DataRequired, Email, Length
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Regexp
+
+
+class Passwords:
+    password = PasswordField(
+        'Новый пароль:',
+        validators=[DataRequired(message='необходимо придумать пароль'),
+                    EqualTo('confirmation', message='пароли не совпадают')])
+    confirmation = PasswordField(
+        'Повторите его:',
+        validators=[DataRequired(message='необходимо повторить пароль')])
+
+
+class CreatePassword(Passwords, StarletteForm):
+    username = StringField(
+        'Псевдоним:',
+        validators=[
+            DataRequired(message='необходимо ввести желаемый псевдоним'),
+            Length(min=3, max=16, message='от 3-х до 16-ти символов'),
+            Regexp(r'^[A-ZА-ЯЁa-zа-яё][A-ZА-ЯЁa-zа-яё0-9\-_.]{2,15}$',
+                   message='латинские буквы, буквы русского алфавита, \
+                            цифры, дефис, знак подчёркивания, точка, \
+                            первый символ - латинская или русская буква, \
+                            не более 16 символов')])
+    submit = SubmitField('Создать пароль')
 
 
 class GetPassword(StarletteForm):

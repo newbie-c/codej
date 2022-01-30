@@ -1,6 +1,7 @@
 import asyncio
 
 from passlib.hash import pbkdf2_sha256
+from starlette.exceptions import HTTPException
 from starlette.responses import (
         PlainTextResponse, JSONResponse, RedirectResponse)
 from starlette_wtf import csrf_protect
@@ -8,17 +9,48 @@ from starlette_wtf import csrf_protect
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from .common import get_current_user
-from .forms import GetPassword, LoginForm
-from .pg import check_address, filter_user
+from .forms import CreatePassword, GetPassword, LoginForm
+from .pg import check_address, create_user, filter_user
 from .redi import assign_cache, assign_uid, extract_cache
 from .tasks import (
     change_pattern, rem_old_session, rem_user_session, request_password)
+from .tokens import check_token
 
 captchaq = 'SELECT val, suffix FROM captchas ORDER BY random() LIMIT 1'
 
 
+@csrf_protect
 async def create_password(request):
-    return PlainTextResponse('Страница создания пароля')
+    conn = await get_conn(request.app.config)
+    current_user = await get_current_user(request, conn)
+    acc = await check_token(request, conn)
+    if acc is None or current_user or acc.get('user_id'):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    form = await CreatePassword.from_formdata(request)
+    if await form.validate_on_submit():
+        if await conn.fetchval(
+                'SELECT username FROM users WHERE username = $1',
+                form.username.data):
+            await set_flashed(
+                request, f'Псевдоним "{form.username.data}" уже занят.')
+            await conn.close()
+            return RedirectResponse(
+                request.url_for('auth:create-password',
+                    token=request.path_params['token']), 302)
+        await create_user(
+            conn, form.username.data, form.password.data, acc.get('address'))
+        await set_flashed(request, 'Ваш аккаунт успешно зарегистрирован.')
+        await conn.close()
+        return RedirectResponse(request.url_for('auth:login'), 302)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'auth/create-password.html',
+        {'request': request,
+         'flashed': await get_flashed(request),
+         'form': form,
+         'interval': request.app.config.get('REQUEST_INTERVAL', cast=float)})
 
 
 async def reset_password(request):

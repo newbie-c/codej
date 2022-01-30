@@ -1,9 +1,28 @@
 from datetime import datetime, timedelta
 from hashlib import md5
 
+from passlib.hash import pbkdf2_sha256
 from validate_email import validate_email
 
 from .attri import permissions
+
+
+async def create_user(conn, username, password, address):
+    now = datetime.utcnow()
+    perms = await conn.fetch(
+        'SELECT permission FROM permissions WHERE init = true')
+    await conn.execute(
+        '''INSERT INTO users
+             (username, registered, last_visit, password_hash, permissions)
+             VALUES ($1, $2, $3, $4, $5)''',
+        username, now, now,
+        pbkdf2_sha256.hash(password),
+        [each.get('permission') for each in perms])
+    user_id = await conn.fetchval(
+        'SELECT id FROM users WHERE username = $1', username)
+    await conn.execute(
+        'UPDATE accounts SET user_id = $1 WHERE address = $2',
+        user_id, address)
 
 
 async def define_a(conn, account):
