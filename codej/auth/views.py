@@ -2,21 +2,60 @@ import asyncio
 
 from passlib.hash import pbkdf2_sha256
 from starlette.exceptions import HTTPException
-from starlette.responses import (
-        PlainTextResponse, JSONResponse, RedirectResponse)
+from starlette.responses import JSONResponse, RedirectResponse
 from starlette_wtf import csrf_protect
 
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from .common import get_current_user
-from .forms import CreatePassword, GetPassword, LoginForm
-from .pg import check_address, create_user, filter_user
+from .forms import CreatePassword, GetPassword, LoginForm, ResetPassword
+from .pg import check_address, change_pwd, create_user, filter_user
 from .redi import assign_cache, assign_uid, extract_cache
 from .tasks import (
     change_pattern, rem_old_session, rem_user_session, request_password)
 from .tokens import check_token
 
 captchaq = 'SELECT val, suffix FROM captchas ORDER BY random() LIMIT 1'
+
+
+@csrf_protect
+async def reset_password(request):
+    conn = await get_conn(request.app.config)
+    if await get_current_user(request, conn):
+        await conn.close()
+        raise HTTPException(
+                status_code=404, detail='Такой страницы у нас нет.')
+    source = await check_token(request, conn, wide=True)
+    if source is None or source.get('user_id') is None \
+            or source.get('last_visit') > source.get('requested') \
+            or source.get('swap'):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    form = await ResetPassword.from_formdata(request)
+    if await form.validate_on_submit():
+        acc_id = await conn.fetchval(
+            'SELECT id FROM accounts WHERE address = $1', form.address.data)
+        if source.get('id') != acc_id:
+            await conn.close()
+            await set_flashed(request, 'Неверный запрос, действие отклонено.')
+            return RedirectResponse(
+                request.url_for('auth:reset-password',
+                    token=request.path_params['token']), 302)
+        await change_pwd(conn, source.get('username'), form.password.data)
+        await set_flashed(
+            request,
+            f'Уважаемый {source.get("username")}, у Вас новый пароль.')
+        await conn.close()
+        return RedirectResponse(request.url_for('auth:login'), 302)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'auth/reset-password.html',
+        {'request': request,
+         'flashed': await get_flashed(request),
+         'username': source.get('username'),
+         'form': form,
+         'interval': request.app.config.get('REQUEST_INTERVAL', cast=float)})
 
 
 @csrf_protect
@@ -51,10 +90,6 @@ async def create_password(request):
          'flashed': await get_flashed(request),
          'form': form,
          'interval': request.app.config.get('REQUEST_INTERVAL', cast=float)})
-
-
-async def reset_password(request):
-    return PlainTextResponse('Страница сброса забытого пароля')
 
 
 @csrf_protect

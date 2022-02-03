@@ -7,6 +7,13 @@ from validate_email import validate_email
 from .attri import permissions
 
 
+async def change_pwd(conn, username, password):
+    await conn.execute(
+        '''UPDATE users SET password_hash = $1, last_visit = $2
+             WHERE username = $3''',
+        pbkdf2_sha256.hash(password), datetime.utcnow(), username)
+
+
 async def create_user(conn, username, password, address):
     now = datetime.utcnow()
     perms = await conn.fetch(

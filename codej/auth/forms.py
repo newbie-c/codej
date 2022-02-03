@@ -14,6 +14,20 @@ class Passwords:
         validators=[DataRequired(message='необходимо повторить пароль')])
 
 
+class Address:
+    address = StringField(
+        'Адрес эл.почты:',
+        validators=[DataRequired(message='необходима эл.почта'),
+                    Email(message='нужен адрес электронной почты'),
+                    Length(
+                        max=128,
+                        message='максимальная длина адреса - 128 символов')])
+
+
+class ResetPassword(Passwords, Address, StarletteForm):
+    submit = SubmitField('Обновить пароль')
+
+
 class CreatePassword(Passwords, StarletteForm):
     username = StringField(
         'Псевдоним:',
@@ -28,14 +42,7 @@ class CreatePassword(Passwords, StarletteForm):
     submit = SubmitField('Создать пароль')
 
 
-class GetPassword(StarletteForm):
-    address = StringField(
-        'Адрес эл.почты:',
-        validators=[DataRequired(message='необходима эл.почта'),
-                    Email(message='нужен адрес электронной почты'),
-                    Length(
-                        max=128,
-                        message='максимальная длина адреса - 128 символов')])
+class GetPassword(Address, StarletteForm):
     captcha = StringField(
         'Код с картинки:',
         validators=[DataRequired(message='необходимо ввести код с картинки')])
