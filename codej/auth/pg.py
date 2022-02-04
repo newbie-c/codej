@@ -14,24 +14,6 @@ async def change_pwd(conn, username, password):
         pbkdf2_sha256.hash(password), datetime.utcnow(), username)
 
 
-async def create_user(conn, username, password, address):
-    now = datetime.utcnow()
-    perms = await conn.fetch(
-        'SELECT permission FROM permissions WHERE init = true')
-    await conn.execute(
-        '''INSERT INTO users
-             (username, registered, last_visit, password_hash, permissions)
-             VALUES ($1, $2, $3, $4, $5)''',
-        username, now, now,
-        pbkdf2_sha256.hash(password),
-        [each.get('permission') for each in perms])
-    user_id = await conn.fetchval(
-        'SELECT id FROM users WHERE username = $1', username)
-    await conn.execute(
-        'UPDATE accounts SET user_id = $1 WHERE address = $2',
-        user_id, address)
-
-
 async def define_a(conn, account):
     if account and account.get('user_id'):
         username = await conn.fetchval(

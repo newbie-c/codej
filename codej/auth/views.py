@@ -9,10 +9,11 @@ from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from .common import get_current_user
 from .forms import CreatePassword, GetPassword, LoginForm, ResetPassword
-from .pg import check_address, change_pwd, create_user, filter_user
+from .pg import check_address, change_pwd, filter_user
 from .redi import assign_cache, assign_uid, extract_cache
 from .tasks import (
-    change_pattern, rem_old_session, rem_user_session, request_password)
+    change_pattern, create_user, rem_old_session,
+    rem_user_session, request_password)
 from .tokens import check_token
 
 captchaq = 'SELECT val, suffix FROM captchas ORDER BY random() LIMIT 1'
@@ -78,8 +79,10 @@ async def create_password(request):
             return RedirectResponse(
                 request.url_for('auth:create-password',
                     token=request.path_params['token']), 302)
-        await create_user(
-            conn, form.username.data, form.password.data, acc.get('address'))
+        asyncio.ensure_future(
+            create_user(
+                request, form.username.data,
+                form.password.data, acc.get('address')))
         await set_flashed(request, 'Ваш аккаунт успешно зарегистрирован.')
         await conn.close()
         return RedirectResponse(request.url_for('auth:login'), 302)
@@ -165,7 +168,7 @@ async def login(request):
             request.session['_uid'] = await assign_uid(
                 request.app.rc, 'uid:',
                 form.remember_me.data, user)
-            await set_flashed(request, f'Привет {user.get("username")}!')
+            await set_flashed(request, f'Привет, {user.get("username")}!')
             if form.remember_me.data:
                 asyncio.ensure_future(
                     rem_old_session(

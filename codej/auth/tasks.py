@@ -1,8 +1,11 @@
 import asyncio
 import functools
 
+from datetime import datetime
+
 from aiosmtplib import send
 from email.message import EmailMessage
+from passlib.hash import pbkdf2_sha256
 
 from ..common.pg import get_conn
 from ..captcha.common import check_val
@@ -10,6 +13,26 @@ from ..captcha.picturize.picture import generate_image
 from .pg import define_a, get_acc
 from .tokens import get_request_token
 from .tools import define_target_url
+
+
+async def create_user(request, username, password, address):
+    conn = await get_conn(request.app.config)
+    now = datetime.utcnow()
+    perms = await conn.fetch(
+        'SELECT permission FROM permissions WHERE init = true')
+    await conn.execute(
+        '''INSERT INTO users
+             (username, registered, last_visit, password_hash, permissions)
+             VALUES ($1, $2, $3, $4, $5)''',
+        username, now, now,
+        pbkdf2_sha256.hash(password),
+        [each.get('permission') for each in perms])
+    user_id = await conn.fetchval(
+        'SELECT id FROM users WHERE username = $1', username)
+    await conn.execute(
+        'UPDATE accounts SET user_id = $1 WHERE address = $2',
+        user_id, address)
+    await conn.close()
 
 
 async def request_password(request, account, address):
