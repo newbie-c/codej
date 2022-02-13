@@ -7,6 +7,16 @@ from validate_email import validate_email
 from .attri import permissions
 
 
+async def check_pwd(conn, username, password):
+    if pbkdf2_sha256.verify(
+            password,
+            await conn.fetchval(
+                'SELECT password_hash FROM users WHERE username = $1',
+                username)):
+        return True
+    return False
+
+
 async def change_pwd(conn, username, password):
     await conn.execute(
         '''UPDATE users SET password_hash = $1, last_visit = $2

@@ -8,8 +8,9 @@ from starlette_wtf import csrf_protect
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from .common import get_current_user
-from .forms import CreatePassword, GetPassword, LoginForm, ResetPassword
-from .pg import check_address, change_pwd, filter_user
+from .forms import (
+        ChangePassword, CreatePassword, GetPassword, LoginForm, ResetPassword)
+from .pg import change_pwd, check_address, check_pwd, filter_user
 from .redi import assign_cache, assign_uid, extract_cache
 from .tasks import (
     change_pattern, create_user, rem_old_session,
@@ -20,12 +21,43 @@ captchaq = 'SELECT val, suffix FROM captchas ORDER BY random() LIMIT 1'
 
 
 @csrf_protect
+async def change_password(request):
+    conn = await get_conn(request.app.config)
+    current_user = await get_current_user(request, conn)
+    if current_user is None:
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    form = await ChangePassword.from_formdata(request)
+    if await form.validate_on_submit():
+        if await check_pwd(conn, current_user['username'], form.current.data):
+            await change_pwd(
+                conn, current_user['username'], form.password.data)
+            await set_flashed(
+                request,
+                f'Уважаемый {current_user["username"]}, у Вас новый пароль.')
+            await conn.close()
+            return RedirectResponse(
+                request.url_for('auth:fake-index'), 302)
+        await set_flashed(request, 'Текущий пароль недействителен.')
+        await conn.close()
+        return RedirectResponse(request.url_for('auth:change-password'), 302)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'auth/change-password.html',
+        {'request': request,
+         'current_user': current_user,
+         'form': form,
+         'flashed': await get_flashed(request)})
+
+
+@csrf_protect
 async def reset_password(request):
     conn = await get_conn(request.app.config)
     if await get_current_user(request, conn):
         await conn.close()
         raise HTTPException(
-                status_code=404, detail='Такой страницы у нас нет.')
+            status_code=404, detail='Такой страницы у нас нет.')
     source = await check_token(request, conn, wide=True)
     if source is None or source.get('user_id') is None \
             or source.get('last_visit') > source.get('requested') \

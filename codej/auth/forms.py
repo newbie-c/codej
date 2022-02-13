@@ -14,6 +14,13 @@ class Passwords:
         validators=[DataRequired(message='необходимо повторить пароль')])
 
 
+class ChangePassword(Passwords, StarletteForm):
+    current = PasswordField(
+        'Текущий пароль:',
+        validators=[DataRequired(message='необходимо ввести текущий пароль')])
+    submit = SubmitField('Сменить пароль')
+
+
 class Address:
     address = StringField(
         'Адрес эл.почты:',
