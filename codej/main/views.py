@@ -12,7 +12,6 @@ Disallow: /
 
 
 async def show_index(request):
-    print(request.session)
     conn = await get_conn(request.app.config)
     current_user = await get_current_user(request, conn)
     await conn.close()

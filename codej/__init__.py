@@ -18,8 +18,7 @@ from webassets.ext.jinja2 import assets
 from .auth.attri import permissions
 from .auth.views import (
         change_password, create_password, get_password,
-        fake_index, login, logout,
-        reset_password, update_captcha)
+        login, logout, reset_password, update_captcha)
 from .captcha.views import show_captcha
 from .errors import (
         handle_csrf_error, notify_not_found_page,
@@ -67,8 +66,6 @@ app = Starlette(
             Route('/robots.txt', show_robots, name='robots'),
             Route('/favicon.ico', show_favicon, name='favicon'),
             Mount('/auth', name='auth', routes=[
-                Route('/index', fake_index,
-                      name='fake-index'),
                 Route('/login', login,
                       name='login', methods=['GET', 'POST']),
                 Route('/logout', logout, name='logout'),

@@ -38,7 +38,7 @@ async def change_password(request):
                 f'Уважаемый {current_user["username"]}, у Вас новый пароль.')
             await conn.close()
             return RedirectResponse(
-                request.url_for('auth:fake-index'), 302)
+                request.url_for('index'), 302)
         await set_flashed(request, 'Текущий пароль недействителен.')
         await conn.close()
         return RedirectResponse(request.url_for('auth:change-password'), 302)
@@ -209,7 +209,7 @@ async def login(request):
                 change_pattern(request.app.config, suffix))
             await conn.close()
             return RedirectResponse(
-                request.url_for('auth:fake-index'), 302)
+                request.url_for('index'), 302)
         await set_flashed(
             request, 'Неверный логин или пароль, вход невозможен.')
         await conn.close()
@@ -256,15 +256,3 @@ async def update_captcha(request):
                'captcha:captcha', suffix=captcha.get('suffix'))}
     await conn.close()
     return JSONResponse(res)
-
-
-async def fake_index(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
-    await conn.close()
-    return request.app.jinja.TemplateResponse(
-        'main/index.html',
-        {'request': request,
-         'flashed': await get_flashed(request),
-         'target': None,
-         'current_user': current_user})
