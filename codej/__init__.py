@@ -23,7 +23,8 @@ from .captcha.views import show_captcha
 from .errors import (
         handle_csrf_error, notify_not_found_page,
         refuse_method, refuse_request)
-from .main.views import show_index, show_robots, show_favicon
+from .main.views import (
+        show_index, show_profile, show_robots, show_favicon)
 
 base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
@@ -65,6 +66,7 @@ app = Starlette(
     routes=[Route('/', show_index, name='index'),
             Route('/robots.txt', show_robots, name='robots'),
             Route('/favicon.ico', show_favicon, name='favicon'),
+            Route('/society/{username}', show_profile, name='profile'),
             Mount('/auth', name='auth', routes=[
                 Route('/login', login,
                       name='login', methods=['GET', 'POST']),

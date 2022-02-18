@@ -38,7 +38,8 @@ async def change_password(request):
                 f'Уважаемый {current_user["username"]}, у Вас новый пароль.')
             await conn.close()
             return RedirectResponse(
-                request.url_for('index'), 302)
+                request.url_for('profile', username=current_user['username']),
+                302)
         await set_flashed(request, 'Текущий пароль недействителен.')
         await conn.close()
         return RedirectResponse(request.url_for('auth:change-password'), 302)
@@ -182,6 +183,11 @@ async def login(request):
         await set_flashed(request, 'Вы уже авторизованы!')
         await conn.close()
         return RedirectResponse(request.url_for('index'), 302)
+    next_ = request.query_params.get('next')
+    if next_:
+        redirect = f'{request.url_for("auth:login")}?next={next_}'
+    else:
+        redirect = request.url_for('auth:login')
     form = await LoginForm.from_formdata(request)
     captcha = await conn.fetchrow(captchaq)
     if await form.validate_on_submit():
@@ -193,7 +199,7 @@ async def login(request):
             asyncio.ensure_future(
                 change_pattern(request.app.config, suffix))
             await conn.close()
-            return RedirectResponse(request.url_for('auth:login'), 302)
+            return RedirectResponse(redirect, 302)
         user = await filter_user(conn, form.login.data)
         if user and pbkdf2_sha256.verify(
                 form.password.data, user.get('password_hash')):
@@ -209,12 +215,11 @@ async def login(request):
                 change_pattern(request.app.config, suffix))
             await conn.close()
             return RedirectResponse(
-                request.url_for('index'), 302)
+                next_ or request.url_for('index'), 302)
         await set_flashed(
             request, 'Неверный логин или пароль, вход невозможен.')
         await conn.close()
-        return RedirectResponse(
-            request.url_for('auth:login'), 302)
+        return RedirectResponse(redirect, 302)
     form.suffix.data = await assign_cache(
         request.app.rc, 'captcha:',
         captcha.get('suffix'), captcha.get('val'), 180)

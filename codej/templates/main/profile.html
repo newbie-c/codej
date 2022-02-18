@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
+
+{% block title %}Профиль {{ target['username'] }}{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/main/profile.css',
+            'css/base.css',
+	    'css/mc780.css',
+	    'css/top-flashed.css',
+	    'css/next-block.css',
+	    'css/content-block.css',
+	    'css/avatar.css',
+	    'css/main/profile.css' %}
+    <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- main/profile.html -->
+  <div id="main-container">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    <div class="content-block">
+      <div class="block-header">
+        <h3 class="panel-title">Профиль {{ target['username'] }}</h3>
+      </div>
+      <div class="block-body user-info-block">
+        <div class="user-avatar avatar"
+	     style="background:url({{ target['ava'] }})"></div>
+	<div class="user-info">
+          <h3>{{ target['username'] }}</h3>
+	  <div class="personal-details">
+            <table class="user-info-table">
+              <tbody>
+                <tr>
+                  <td>Группа:&nbsp;</td>
+		  <td>not implemented yet</td>
+		</tr>
+		<tr class="address-row">
+                  <td>Почта:&nbsp;</td>
+		  <td>{{ target['address'] }}</td>
+		</tr>
+		<tr>
+                  <td>Зарегистрирован:&nbsp;</td>
+		  <td class="date-field">{{ target['registered'] }}</td>
+		</tr>
+		<tr>
+                  <td>Последний визит:&nbsp;</td>
+		  <td class="last-seen">{{ target['last_visit'] }}</td>
+		</tr>
+	      </tbody>
+	    </table>
+	  </div>
+	</div>
+	<div class="footer-bottom"></div>
+      </div>
+    </div>
+    {% if current_user['username'] == target['username'] %}
+      <div class="content-block slidable next-block">
+        <div class="block-header">
+          <h3 class="panel-title">Действия</h3>
+	</div>
+	<div class="block-body to-be-hidden text-center">
+          <a href="{{ url_for('auth:change-password') }}"
+	     class="btn btn-info">Сменить пароль</a>
+	</div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/main/profile.js',
+            'js/check-mc.js',
+	    'js/footer.js',
+	    'js/top-flashed.js',
+	    'js/main/profile.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}

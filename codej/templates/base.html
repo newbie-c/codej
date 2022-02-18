@@ -78,7 +78,10 @@
 		  </li>
 		  {% endif %}
 		  <li>
-                    <a href="">Профиль</a>
+                    <a href="{{ url_for(
+		        'profile', username=current_user['username']) }}">
+		      Профиль
+		    </a>
 		  </li>
 		  <li role="separator" class="divider"></li>
 		  <li>
