@@ -7,6 +7,34 @@ from validate_email import validate_email
 from .attri import permissions
 
 
+async def check_account(config, conn, account, address):
+    length = timedelta(
+        seconds=round(3600*config.get('TOKEN_LENGTH', cast=float)))
+    interval = timedelta(
+        seconds=round(3600*config.get('REQUEST_INTERVAL', cast=float)))
+    if datetime.utcnow() - account.get('requested') < interval:
+        return 'Сервис временно недоступен, попробуйте зайти позже.'
+    if account.get('address') == address:
+        return 'Задан Ваш текущий адрес, запрос не имеет смысла.'
+    if await check_swap(conn, address, length):
+        return 'Адрес в свопе, выберите другой или повторите попытку позже.'
+    requested = await conn.fetchrow(
+        'SELECT requested, user_id FROM accounts WHERE address = $1', address)
+    if requested and requested.get('user_id'):
+        return 'Этот адрес уже зарегистрирован, запрос отклонён.'
+    if requested and datetime.utcnow() - requested.get('requested') < length:
+        return 'Адрес регистрируется, выберите другой или попробуйте позже.'
+    return None
+
+
+async def filter_acc(conn, username):
+    return await conn.fetchrow(
+        '''SELECT users.username, accounts.id, accounts.address,
+                  accounts.swap, accounts.requested
+             FROM users, accounts WHERE users.id = accounts.user_id
+               AND users.username = $1''', username)
+
+
 async def check_pwd(conn, username, password):
     if pbkdf2_sha256.verify(
             password,

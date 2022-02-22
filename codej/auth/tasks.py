@@ -15,6 +15,56 @@ from .tokens import get_request_token
 from .tools import define_target_url
 
 
+async def request_email_change(request, account, address):
+    conn = await get_conn(request.app.config)
+    requested = await conn.fetchrow(
+        'SELECT address, user_id FROM accounts WHERE address = $1', address)
+    if requested and not requested.get('user_id'):
+        await conn.execute('DELETE FROM accounts WHERE address = $1', address)
+    await conn.execute(
+        'UPDATE accounts SET swap = $1, requested = $2 WHERE address = $3',
+        address, datetime.utcnow(), account.get('address'))
+    await conn.close()
+    url = request.url_for(
+        'auth:change-email',
+        token=await get_request_token(request, account.get('id')))
+    content = request.app.jinja.get_template(
+        'emails/change-email.html').render(
+            username=account.get('username'),
+            index=request.url_for('index'), target=url,
+            length=request.app.config.get('TOKEN_LENGTH', cast=float),
+            interval=request.app.config.get('REQUEST_INTERVAL', cast=float),
+            old=account.get('address'), new=address)
+    if request.app.config.get('DEBUG', cast=bool):
+        print(content)
+    else:
+        message = EmailMessage()
+        message["From"] = request.app.config.get('SENDER', cast=str)
+        message["To"] = address
+        message["Subject"] = request.app.config.get(
+            'SUBJECT_PREFIX', cast=str) + "Смена e-mail адреса"
+        message.set_content(content)
+        message.replace_header('Content-Type', 'text/html; charset="utf-8"')
+        await send(
+            message,
+            recipients=[address],
+            hostname=request.app.config.get('MAIL_SERVER', cast=str),
+            port=request.app.config.get('MAIL_PORT', cast=str),
+            username=request.app.config.get('MAIL_USERNAME', cast=str),
+            password=request.app.config.get('MAIL_PASSWORD', cast=str),
+            use_tls=request.app.config.get('MAIL_USE_SSL', cast=bool))
+
+
+async def remove_swap(request, account):
+    await asyncio.sleep(
+        3600*request.app.config.get('TOKEN_LENGTH', cast=float))
+    conn = await get_conn(request.app.config)
+    await conn.execute(
+        'UPDATE accounts SET swap = $1 WHERE id = $2',
+        None, account.get('id'))
+    await conn.close()
+
+
 async def create_user(request, username, password, address):
     conn = await get_conn(request.app.config)
     now = datetime.utcnow()

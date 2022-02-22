@@ -17,14 +17,14 @@ from webassets.ext.jinja2 import assets
 
 from .auth.attri import permissions
 from .auth.views import (
-        change_password, create_password, get_password,
-        login, logout, reset_password, update_captcha)
+    change_email, change_password, create_password, get_password,
+    login, logout, request_email, reset_password, update_captcha)
 from .captcha.views import show_captcha
 from .errors import (
-        handle_csrf_error, notify_not_found_page,
-        refuse_method, refuse_request)
+    handle_csrf_error, notify_not_found_page,
+    refuse_method, refuse_request)
 from .main.views import (
-        show_index, show_profile, show_robots, show_favicon)
+    show_index, show_profile, show_robots, show_favicon)
 
 base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
@@ -79,6 +79,10 @@ app = Starlette(
                       name='reset-password', methods=['GET', 'POST']),
                 Route('/change-password', change_password,
                       name='change-password', methods=['GET', 'POST']),
+                Route('/request-email', request_email,
+                      name='request-email', methods=['GET', 'POST']),
+                Route('/change-email/{token}', change_email,
+                      name='change-email', methods=['GET', 'POST']),
                 Route('/ajax/upd-captcha', update_captcha,
                       name='upd-captcha', methods=['POST'])]),
             Mount('/captcha', name='captcha', routes=[

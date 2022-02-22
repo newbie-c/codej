@@ -59,14 +59,21 @@ class GetPassword(Address, StarletteForm):
     submit = SubmitField('Получить пароль')
 
 
-class LoginForm(StarletteForm):
+class Password:
+    password = PasswordField(
+        'Пароль:',
+        validators=[DataRequired(message='необходимо ввести пароль')])
+
+
+class RequestEmail(Address, Password, StarletteForm):
+    submit = SubmitField('Отправить запрос')
+
+
+class LoginForm(Password, StarletteForm):
     login = StringField(
         'Логин:',
         validators=[DataRequired(
             message='Введите псевдоним или адрес эл.почты')])
-    password = PasswordField(
-        'Пароль:',
-        validators=[DataRequired(message='необходимо ввести пароль')])
     remember_me = BooleanField('Хранить сессию 30 дней')
     captcha = StringField(
         'Код с картинки:',

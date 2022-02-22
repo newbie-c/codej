@@ -67,7 +67,13 @@
 	</div>
 	<div class="block-body to-be-hidden text-center">
           <a href="{{ url_for('auth:change-password') }}"
-	     class="btn btn-info">Сменить пароль</a>
+	     class="btn btn-info">
+		  Сменить пароль
+	  </a>
+	  <a href="{{ url_for('auth:request-email') }}"
+	     class="btn btn-info">
+		  Сменить адрес
+	  </a>
 	</div>
       </div>
     {% endif %}

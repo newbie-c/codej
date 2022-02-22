@@ -2,22 +2,76 @@ import asyncio
 
 from passlib.hash import pbkdf2_sha256
 from starlette.exceptions import HTTPException
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import (
+        JSONResponse, PlainTextResponse, RedirectResponse)
 from starlette_wtf import csrf_protect
 
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from .common import get_current_user
 from .forms import (
-        ChangePassword, CreatePassword, GetPassword, LoginForm, ResetPassword)
-from .pg import change_pwd, check_address, check_pwd, filter_user
+    ChangePassword, CreatePassword, GetPassword, LoginForm,
+    RequestEmail, ResetPassword)
+from .pg import (
+    change_pwd, check_account, check_address, check_pwd,
+    filter_acc, filter_user)
 from .redi import assign_cache, assign_uid, extract_cache
 from .tasks import (
-    change_pattern, create_user, rem_old_session,
-    rem_user_session, request_password)
+    change_pattern, create_user, rem_old_session, rem_user_session,
+    remove_swap, request_email_change, request_password)
 from .tokens import check_token
 
 captchaq = 'SELECT val, suffix FROM captchas ORDER BY random() LIMIT 1'
+
+
+async def change_email(request):
+    return PlainTextResponse('Not implemented yet!')
+
+
+@csrf_protect
+async def request_email(request):
+    conn = await get_conn(request.app.config)
+    current_user = await get_current_user(request, conn)
+    if current_user is None:
+        await conn.close()
+        raise HTTException(
+            status_code=404, detail='Такой страницы у нас нет')
+    form = await RequestEmail.from_formdata(request)
+    if await form.validate_on_submit():
+        if pbkdf2_sha256.verify(
+                form.password.data,
+                await conn.fetchval(
+                    'SELECT password_hash FROM users WHERE id=$1',
+                    current_user.get('id'))):
+            account = await filter_acc(conn, current_user['username'])
+            message = await check_account(
+                request.app.config, conn, account, form.address.data)
+            if message:
+                await conn.close()
+                await set_flashed(request, message)
+                return RedirectResponse(
+                        request.url_for('auth:request-email'), 302)
+            asyncio.ensure_future(
+                request_email_change(request, account, form.address.data))
+            asyncio.ensure_future(
+                remove_swap(request, account))
+            await conn.close()
+            await set_flashed(
+                request, 'На Ваш новый адрес выслано письмо с инструкциями.')
+            return RedirectResponse(
+                request.url_for(
+                    'profile', username=current_user['username']), 302)
+        await conn.close()
+        await set_flashed(request, 'Пароль недействителен.')
+        return RedirectResponse(request.url_for('auth:request-email'), 302)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'auth/request-email.html',
+        {'request': request,
+         'current_user': current_user,
+         'form': form,
+         'interval': request.app.config.get('REQUEST_INTERVAL'),
+         'flashed': await get_flashed(request)})
 
 
 @csrf_protect
