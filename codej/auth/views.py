@@ -1,13 +1,15 @@
 import asyncio
 
+from hashlib import md5
+
 from passlib.hash import pbkdf2_sha256
 from starlette.exceptions import HTTPException
-from starlette.responses import (
-        JSONResponse, PlainTextResponse, RedirectResponse)
+from starlette.responses import JSONResponse, RedirectResponse
 from starlette_wtf import csrf_protect
 
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
+from ..common.urls import get_next
 from .common import get_current_user
 from .forms import (
     ChangePassword, CreatePassword, GetPassword, LoginForm,
@@ -25,7 +27,31 @@ captchaq = 'SELECT val, suffix FROM captchas ORDER BY random() LIMIT 1'
 
 
 async def change_email(request):
-    return PlainTextResponse('Not implemented yet!')
+    conn = await get_conn(request.app.config)
+    current_user = await get_current_user(request, conn)
+    if current_user is None:
+        await conn.close()
+        await set_flashed(request, 'Требуется авторизация.')
+        url = await get_next(
+            request, request.app.url_path_for(
+                'auth:change-email',
+                token=request.path_params['token']))
+        return RedirectResponse(url, 302)
+    acc = await check_token(request, conn, wide=True)
+    if acc is None or current_user['username'] != acc['username'] \
+            or acc['swap'] is None:
+        await conn.close()
+        raise HTTPException(
+                status_code=404, detail='Такой страницы у нас нет.')
+    ava = md5(acc['swap'].encode('utf-8')).hexdigest()
+    await conn.execute(
+        '''UPDATE accounts SET address = $1, swap = $2, ava_hash = $3
+             WHERE id = $4''', acc['swap'], None, ava, acc['id'])
+    await conn.close()
+    await set_flashed(
+        request, f'Уважаемый {current_user["username"]}, у Вас новый адрес.')
+    return RedirectResponse(
+        request.url_for('profile', username=current_user['username']), 302)
 
 
 @csrf_protect
