@@ -1,4 +1,5 @@
 import asyncio
+
 import functools
 
 from datetime import datetime
@@ -13,6 +14,41 @@ from ..captcha.picturize.picture import generate_image
 from .pg import define_a, get_acc
 from .tokens import get_request_token
 from .tools import define_target_url
+
+
+async def check_swapped(config):
+    conn = await get_conn(config)
+    swapped = await conn.fetch(
+            'SELECT id, requested FROM accounts WHERE swap IS NOT null')
+    length = 3600 * config.get('TOKEN_LENGTH', cast=float)
+    now = datetime.utcnow()
+    while swapped:
+        cur = swapped.pop()
+        req = (now - cur.get('requested')).seconds
+        if req > length:
+            await conn.execute(
+                'UPDATE accounts SET swap = null WHERE id = $1', cur['id'])
+        else:
+            asyncio.ensure_future(
+                remove_swap_on_startup(config, cur.get('id'), length - req))
+    await conn.close()
+
+
+async def remove_swap_on_startup(config, aid, interval):
+    await asyncio.sleep(interval)
+    conn = await get_conn(config)
+    await conn.execute(
+        'UPDATE accounts SET swap = null WHERE id = $1', aid)
+    await conn.close()
+
+
+async def remove_swap(request, account):
+    await asyncio.sleep(
+        3600*request.app.config.get('TOKEN_LENGTH', cast=float))
+    conn = await get_conn(request.app.config)
+    await conn.execute(
+        'UPDATE accounts SET swap = null WHERE id = $1', account.get('id'))
+    await conn.close()
 
 
 async def request_email_change(request, account, address):
@@ -53,16 +89,6 @@ async def request_email_change(request, account, address):
             username=request.app.config.get('MAIL_USERNAME', cast=str),
             password=request.app.config.get('MAIL_PASSWORD', cast=str),
             use_tls=request.app.config.get('MAIL_USE_SSL', cast=bool))
-
-
-async def remove_swap(request, account):
-    await asyncio.sleep(
-        3600*request.app.config.get('TOKEN_LENGTH', cast=float))
-    conn = await get_conn(request.app.config)
-    await conn.execute(
-        'UPDATE accounts SET swap = $1 WHERE id = $2',
-        None, account.get('id'))
-    await conn.close()
 
 
 async def create_user(request, username, password, address):

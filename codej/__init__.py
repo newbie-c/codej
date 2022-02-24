@@ -16,6 +16,7 @@ from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import assets
 
 from .auth.attri import permissions
+from .auth.tasks import check_swapped
 from .auth.views import (
     change_email, change_password, create_password, get_password,
     login, logout, request_email, reset_password, update_captcha)
@@ -49,6 +50,10 @@ class J2Templates(Jinja2Templates):
         env.globals["url_for"] = url_for
         env.globals["permissions"] = permissions
         return env
+
+
+async def run_before():
+    await check_swapped(settings)
 
 
 middleware = [
@@ -89,6 +94,7 @@ app = Starlette(
                 Route('/{suffix}', show_captcha, name='captcha')]),
             Mount('/static',
                   app=StaticFiles(directory=static), name='static')],
+    on_startup=[run_before],
     middleware=middleware,
     exception_handlers=errs)
 app.config = settings
