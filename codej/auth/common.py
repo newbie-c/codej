@@ -3,6 +3,7 @@ import asyncio
 from datetime import datetime
 
 from ..common.avatar import get_ava_url
+from ..main.pg import get_group
 from .attri import permissions
 from .tasks import ping_user
 
@@ -30,6 +31,7 @@ async def get_current_user(request, conn):
                 ping_user(request, datetime.utcnow(), uid))
             return {'id': query.get('id'),
                     'username': query.get('username'),
+                    'group': await get_group(query.get('permissions')),
                     'registered': query.get('registered'),
                     'permissions': query.get('permissions'),
                     'ava': await get_ava_url(

@@ -1,4 +1,29 @@
+from ..auth.attri import groups, permissions
 from ..common.avatar import get_ava_url
+
+
+async def get_group(perms):
+    if permissions.ADMINISTER_SERVICE in perms:
+        return groups.root
+    if permissions.CREATE_ENTITY in perms \
+            and permissions.UPLOAD_PICTURES in perms \
+            and permissions.MAKE_ANNOUNCEMENT in perms \
+            and permissions.CHANGE_USER_ROLE in perms:
+        return groups.keeper
+    if permissions.BLOCK_ENTITY in perms:
+        return groups.curator
+    if permissions.CREATE_ENTITY in perms \
+            or permissions.MAKE_ANNOUNCEMENT in perms \
+            or permissions.UPLOAD_PICTURES in perms:
+        return groups.blogger
+    if permissions.LIKE_DISLIKE in perms \
+            or permissions.WRITE_COMMENTARY in perms \
+            or permissions.SEND_PM in perms:
+        return groups.commentator
+    if permissions.READ_JOURNAL in perms:
+        return groups.taciturn
+    if permissions.CANNOT_LOG_IN in perms:
+        return groups.pariah
 
 
 async def filter_target_user(request, conn):
@@ -17,6 +42,7 @@ async def filter_target_user(request, conn):
     if query:
         return {'uid': query.get('uid'),
                 'username': query.get('username'),
+                'group': await get_group(query.get('permissions')),
                 'registered': query.get('registered').isoformat() + 'Z',
                 'last_visit': query.get('last_visit').isoformat() + 'Z',
                 'permissions': tuple(query.get('permissions')),

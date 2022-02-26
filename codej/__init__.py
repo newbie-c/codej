@@ -15,7 +15,7 @@ from starlette_wtf import CSRFProtectMiddleware, CSRFError
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import assets
 
-from .auth.attri import permissions
+from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
 from .auth.views import (
     change_email, change_password, create_password, get_password,
@@ -49,6 +49,7 @@ class J2Templates(Jinja2Templates):
         env.assets_environment = assets_env
         env.globals["url_for"] = url_for
         env.globals["permissions"] = permissions
+        env.globals["groups"] = groups
         return env
 
 

@@ -33,6 +33,22 @@ permissions = Perm(
         SPECIAL_CASE='размещать ссылки',
         ADMINISTER_SERVICE='без ограничений')
 
+Group = namedtuple('Group', ['pariah',
+                             'taciturn',
+                             'commentator',
+                             'blogger',
+                             'curator',
+                             'keeper',
+                             'root'])
+
+groups = Group(pariah='Изгои',
+               taciturn='Читатели',
+               commentator='Комментаторы',
+               blogger='Писатели',
+               curator='Модераторы',
+               keeper='Хранители',
+               root='Администраторы')
+
 initials = {permissions.READ_JOURNAL: True,
             permissions.FOLLOW_USERS: True,
             permissions.LIKE_DISLIKE: True,

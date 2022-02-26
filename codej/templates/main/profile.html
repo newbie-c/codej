@@ -39,12 +39,19 @@
               <tbody>
                 <tr>
                   <td>Группа:&nbsp;</td>
-		  <td>not implemented yet</td>
+		  <td>{{ target['group'] }}</td>
 		</tr>
+		{% if current_user['username'] == target['username'] or
+		(permissions.ADMINISTER_SERVICE in current_user['permissions']
+		 or current_user['group'] == groups.keeper or
+		 (permissions.CHANGE_USER_ROLE in current_user['permissions']
+		  and target['group'] != groups.keeper and
+		  target['group'] != groups.root)) %}
 		<tr class="address-row">
                   <td>Почта:&nbsp;</td>
 		  <td>{{ target['address'] }}</td>
 		</tr>
+		{% endif %}
 		<tr>
                   <td>Зарегистрирован:&nbsp;</td>
 		  <td class="date-field">{{ target['registered'] }}</td>
