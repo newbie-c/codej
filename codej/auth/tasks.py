@@ -15,6 +15,8 @@ from .pg import define_a, get_acc
 from .tokens import get_request_token
 from .tools import define_target_url
 
+remswap = 'UPDATE accounts SET swap = null WHERE id = $1'
+
 
 async def check_swapped(config):
     conn = await get_conn(config)
@@ -26,8 +28,7 @@ async def check_swapped(config):
         cur = swapped.pop()
         req = (now - cur.get('requested')).seconds
         if req > length:
-            await conn.execute(
-                'UPDATE accounts SET swap = null WHERE id = $1', cur['id'])
+            await conn.execute(remswap, cur['id'])
         else:
             asyncio.ensure_future(
                 remove_swap_on_startup(config, cur.get('id'), length - req))
@@ -37,8 +38,7 @@ async def check_swapped(config):
 async def remove_swap_on_startup(config, aid, interval):
     await asyncio.sleep(interval)
     conn = await get_conn(config)
-    await conn.execute(
-        'UPDATE accounts SET swap = null WHERE id = $1', aid)
+    await conn.execute(remswap, aid)
     await conn.close()
 
 
@@ -46,8 +46,7 @@ async def remove_swap(request, account):
     await asyncio.sleep(
         3600*request.app.config.get('TOKEN_LENGTH', cast=float))
     conn = await get_conn(request.app.config)
-    await conn.execute(
-        'UPDATE accounts SET swap = null WHERE id = $1', account.get('id'))
+    await conn.execute(remswap, account.get('id'))
     await conn.close()
 
 

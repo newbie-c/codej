@@ -5,4 +5,7 @@ $(function() {
   formatFooter(dtime);
   $('.close-top-flashed').on('click', closeTopFlashed);
   $('.reload-button').on('click', reloadCaptcha);
+  $('#submit').on('click', function() {
+    $(this).blur();
+  });
 });

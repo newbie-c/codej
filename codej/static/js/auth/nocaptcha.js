@@ -4,4 +4,7 @@ $(function() {
   renderTF('.today-field', dtime);
   formatFooter(dtime);
   $('.close-top-flashed').on('click', closeTopFlashed);
+  $('#submit').on('click', function() {
+    $(this).blur();
+  });
 });
