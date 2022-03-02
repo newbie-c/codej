@@ -1,0 +1,13 @@
+{% macro render_checkbox(permit_name, target, permission) %}
+  <div class="form-group text-left">
+    <div class="checkbox">
+      <label>
+        <input id="{{ permit_name }}"
+               name="{{ permit_name }}"
+               type="checkbox"
+               {% if permission in target['permissions'] %}checked{% endif %}>
+        <label for="{{ permit_name }}">{{ permission }}</label>
+      </label>
+    </div>
+  </div>
+{% endmacro %}

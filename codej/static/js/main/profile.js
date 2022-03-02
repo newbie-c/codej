@@ -6,4 +6,5 @@ $(function() {
   let $ls = $.trim($('.last-seen').text());
   $('.last-seen').text(luxon.DateTime.fromISO($ls)
                                      .setLocale('ru').toRelative());
+  $('.slidable .block-header').on('click', showHideBlock);
 });

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "macros/_common.html" import show_messages %}
+{% from "macros/_main.html" import render_checkbox %}
 
 {% block title %}Профиль {{ target['username'] }}{% endblock %}
 
@@ -12,6 +13,7 @@
 	    'css/next-block.css',
 	    'css/content-block.css',
 	    'css/avatar.css',
+	    'css/permissions.css',
 	    'css/main/profile.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
@@ -49,7 +51,16 @@
 		  target['group'] != groups.root)) %}
 		<tr class="address-row">
                   <td>Почта:&nbsp;</td>
-		  <td>{{ target['address'] }}</td>
+		  <td>
+		    {% if target['address']|length <= 30 %}
+		      {{ target['address'] }}
+		    {% else %}
+                      <a href="mailto:{{ target['address'] }}"
+			 title="{{ target['address'] }}">
+                        {{ parse_address(target['address']) }}
+		      </a>
+		    {% endif %}
+		  </td>
 		</tr>
 		{% endif %}
 		<tr>
@@ -67,6 +78,72 @@
 	<div class="footer-bottom"></div>
       </div>
     </div>
+    {% if current_user['username'] != target['username'] and
+          (permissions.ADMINISTER_SERVICE in current_user['permissions'] or
+	   (permissions.CHANGE_USER_ROLE in current_user['permissions'] and
+	    permissions.CHANGE_USER_ROLE not in target['permissions']) or
+	   (current_user['group'] == groups.keeper and
+	    target.group != groups.keeper and
+	    permissions.ADMINISTER_SERVICE not in target['permissions'])) %}
+      <div id="permissions-block"
+	   class="content-block slidable next-block">
+        <div class="block-header">
+          <h3 class="panel-title">Разрешения {{ target['username'] }}</h3>
+	</div>
+	<div class="block-body to-be-hidden">
+          <div class="form-form">
+            <form class="form" method="POST" role="form">
+              <input id="csrf_token"
+		     name="csrf_token"
+		     type="hidden"
+		     value="{{ csrf_token }}">
+	      {{ render_checkbox(
+	        'cannot-log-in', target, permissions.CANNOT_LOG_IN) }}
+	      {{ render_checkbox(
+	        'read-journal', target, permissions.READ_JOURNAL) }}
+	      {{ render_checkbox(
+	        'follow-users', target, permissions.FOLLOW_USERS) }}
+	      {{ render_checkbox(
+	        'like-dislike', target, permissions.LIKE_DISLIKE) }}
+	      {{ render_checkbox(
+	        'send-pm', target, permissions.SEND_PM) }}
+	      {{ render_checkbox(
+	        'write-commentary', target, permissions.WRITE_COMMENTARY) }}
+	      {{ render_checkbox(
+	        'create-link-alias', target, permissions.CREATE_LINK_ALIAS) }}
+	      {{ render_checkbox(
+	        'create-entity', target, permissions.CREATE_ENTITY) }}
+              {% if permissions.ADMINISTER_SERVICE in
+	              current_user['permissions'] or
+		    current_user['group'] == groups.keeper %}
+		{{ render_checkbox(
+		  'block-entity', target, permissions.BLOCK_ENTITY) }}
+		{{ render_checkbox(
+		  'change-user-role', target, permissions.CHANGE_USER_ROLE) }}
+	      {% endif %}
+	      {% if permissions.ADMINISTER_SERVICE in
+	              current_user['permissions'] %}
+		{{ render_checkbox(
+		  'upload-pictures', target, permissions.UPLOAD_PICTURES) }}
+		{{ render_checkbox(
+		  'make-announcement', target,
+		  permissions.MAKE_ANNOUNCEMENT) }}
+		{{ render_checkbox(
+		  'special-case', target, permissions.SPECIAL_CASE) }}
+		{{ render_checkbox(
+		  'administer-service', target,
+		  permissions.ADMINISTER_SERVICE) }}
+	      {% endif %}
+	      <div class="form-group">
+                <input class="btn btn-primary btn-block"
+		       id="submit" name="submit" type="submit"
+		       value="Утвердить">
+	      </div>
+	    </form>
+	  </div>
+	</div>
+      </div>
+    {% endif %}
     {% if current_user['username'] == target['username'] %}
       <div class="content-block slidable next-block">
         <div class="block-header">
@@ -94,6 +171,8 @@
 	    'js/footer.js',
 	    'js/top-flashed.js',
 	    'js/show-datetime.js',
+	    'js/scroll-panel.js',
+	    'js/show-hide.js',
 	    'js/main/profile.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

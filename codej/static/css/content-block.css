@@ -13,3 +13,11 @@
 .block-body {
   margin: 8px 12px 12px;
 }
+
+.slidable .block-header {
+  cursor: pointer;
+}
+
+.to-be-hidden {
+  display: none;
+}

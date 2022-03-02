@@ -3,9 +3,11 @@ import os
 from starlette.exceptions import HTTPException
 from starlette.responses import (
     FileResponse, PlainTextResponse, RedirectResponse)
+from starlette_wtf import csrf_protect, csrf_token
 
 from ..auth.common import get_current_user
 from ..common.flashed import get_flashed, set_flashed
+from ..common.parsers import parse_address
 from ..common.pg import get_conn
 from ..common.urls import get_next
 from .pg import filter_target_user
@@ -15,6 +17,7 @@ Disallow: /
 """
 
 
+@csrf_protect
 async def show_profile(request):
     conn = await get_conn(request.app.config)
     current_user = await get_current_user(request, conn)
@@ -35,6 +38,8 @@ async def show_profile(request):
         {'request': request,
          'current_user': current_user,
          'target': target,
+         'parse_address': parse_address,
+         'csrf_token': csrf_token(request),
          'flashed': await get_flashed(request)})
 
 
