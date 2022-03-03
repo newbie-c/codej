@@ -32,6 +32,7 @@ async def show_profile(request):
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
+    #here we are
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'main/profile.html',
