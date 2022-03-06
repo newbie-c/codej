@@ -19,7 +19,7 @@ async def refuse_request(request, exc):
     current_user = await get_current_user(request, conn)
     return request.app.jinja.TemplateResponse(
         'errors/error.html',
-        {'reason': 'Доступ ограничен.',
+        {'reason': exc.detail,
          'request': request,
          'current_user': current_user,
          'error': exc.status_code},

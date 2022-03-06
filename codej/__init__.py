@@ -72,7 +72,8 @@ app = Starlette(
     routes=[Route('/', show_index, name='index'),
             Route('/robots.txt', show_robots, name='robots'),
             Route('/favicon.ico', show_favicon, name='favicon'),
-            Route('/society/{username}', show_profile, name='profile'),
+            Route('/society/{username}', show_profile,
+                  name='profile', methods=['GET', 'POST']),
             Mount('/auth', name='auth', routes=[
                 Route('/login', login,
                       name='login', methods=['GET', 'POST']),

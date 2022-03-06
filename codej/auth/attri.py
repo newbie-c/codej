@@ -59,3 +59,29 @@ initials = {permissions.READ_JOURNAL: True,
 
 roots = [permission for permission in permissions
          if permission != permissions.CANNOT_LOG_IN]
+
+average = {name.lower().replace('_', '-'): permission
+        for name, permission in zip(permissions._fields, permissions)
+        if permission != permissions.CANNOT_LOG_IN and
+        permission != permissions.ADMINISTER_SERVICE}
+
+curators = (permissions.CANNOT_LOG_IN,
+            permissions.READ_JOURNAL,
+            permissions.FOLLOW_USERS,
+            permissions.LIKE_DISLIKE,
+            permissions.SEND_PM,
+            permissions.WRITE_COMMENTARY,
+            permissions.CREATE_LINK_ALIAS,
+            permissions.CREATE_ENTITY)
+
+keepers = curators + (permissions.BLOCK_ENTITY, permissions.CHANGE_USER_ROLE)
+
+
+async def fix_extra_permissions(user, current):
+    if user['group'] == groups.keeper:
+        return [permission for permission in current
+                if permission not in keepers]
+    if user['group'] == groups.curator:
+        return [permission for permission in current
+                if permission not in curators]
+    return []

@@ -5,6 +5,8 @@ from starlette.responses import (
     FileResponse, PlainTextResponse, RedirectResponse)
 from starlette_wtf import csrf_protect, csrf_token
 
+from ..auth.attri import (
+    average, fix_extra_permissions, groups, permissions, roots)
 from ..auth.common import get_current_user
 from ..common.flashed import get_flashed, set_flashed
 from ..common.parsers import parse_address
@@ -32,7 +34,47 @@ async def show_profile(request):
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
-    #here we are
+    if current_user['username'] != target['username'] and \
+            permissions.FOLLOW_USERS not in current_user['permissions']:
+        await conn.close()
+        raise HTTPException(
+            status_code=403, detail='Для вас доступ ограничен.')
+    if request.method == 'POST' and \
+            (current_user['username'] != target['username'] and
+             (permissions.ADMINISTER_SERVICE in current_user['permissions'] or
+              (permissions.CHANGE_USER_ROLE in current_user['permissions'] and
+               permissions.CHANGE_USER_ROLE not in target['permissions']) or
+            (current_user['group'] == groups.keeper and
+             target['group'] != groups.keeper and
+             permissions.ADMINISTER_SERVICE not in target['permissions']))):
+        form = await request.form()
+        chquery = 'UPDATE users SET permissions = $1 WHERE username = $2'
+        if form.get('cannot-log-in', None):
+            await conn.execute(
+                chquery, [permissions.CANNOT_LOG_IN], target['username'])
+        elif form.get('administer-service', None):
+            await conn.execute(
+                chquery, roots, target['username'])
+        else:
+            extra = await fix_extra_permissions(
+                current_user, target['permissions'])
+            assigned = list()
+            for each in average:
+                if form.get(each, None):
+                    assigned.append(average[each])
+            if (permissions.CHANGE_USER_ROLE in assigned or
+                permissions.BLOCK_ENTITY in assigned) \
+                    and permissions.FOLLOW_USERS not in assigned:
+                assigned.append(permissions.FOLLOW_USERS)
+            assigned = assigned + extra
+            await conn.execute(
+                chquery, assigned or [permissions.CANNOT_LOG_IN],
+                target['username'])
+        await conn.close()
+        await set_flashed(
+            request, f'Разрешения {target["username"]} успешно изменены.')
+        return RedirectResponse(
+            request.url_for('profile', username=target['username']), 302)
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'main/profile.html',
