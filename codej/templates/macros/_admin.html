@@ -1,0 +1,16 @@
+{% macro render_checkbox(permission) %}
+  <div class="form-group text-left">
+    <div class="checkbox">
+      <label>
+        <input id="{{ permission.get('name') }}"
+               name="{{ permission.get('name') }}"
+               class="perm-checkbox"
+               type="checkbox"
+               {% if permission.get('init') %}checked{% endif %}>
+        <label for="{{ permission.get('name') }}">
+          {{ permission.get('permission') }}</label>
+        </label>
+      </label>
+    </div>
+  </div>
+{% endmacro %}

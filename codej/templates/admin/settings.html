@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% from "macros/_admin.html" import render_checkbox %}
+{% from "macros/_common.html" import show_messages %}
+
+{% block title %}Настройки{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/admin/settings.css',
+            'css/base.css',
+            'css/mc780.css',
+            'css/top-flashed.css',
+            'css/content-block.css',
+            'css/next-block.css',
+            'css/admin/settings.css' %}
+    <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- admin/settings.html -->
+  <div id="main-container"
+       data-token="{{ token }}">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    <div id="permissions-block" class="content-block slidable">
+      <div class="block-header">
+        <h3 class="panel-title">
+          Разрешения вновь регистрируемых пользователей
+        </h3>
+      </div>
+      <div class="block-body to-be-hidden">
+        <div class="help-field">
+          <p>
+            В этой секции настроек задаётся набор разрешений вновь
+            регистрируемых пользователей, для этого достаточно расставить флажки
+            в желаемом порядке в форме ниже.
+          </p>
+        </div>
+        <div class="permissions-form">
+          {% for permission in perms %}
+            {{ render_checkbox(permission) }}
+          {% endfor %}
+          <div class="form-group submit-group">
+            <input class="btn btn-primary btn-block"
+                   id="perm-submit"
+                   name="perm-submit"
+                   type="submit"
+		   data-url="{{ url_for('admin:perms') }}"
+                   value="Утвердить">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/admin/settings.js',
+            'js/check-mc.js',
+            'js/footer.js',
+            'js/top-flashed.js',
+            'js/scroll-panel.js',
+            'js/show-hide.js',
+            'js/admin/settings.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}
+

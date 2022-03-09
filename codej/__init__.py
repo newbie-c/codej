@@ -15,6 +15,7 @@ from starlette_wtf import CSRFProtectMiddleware, CSRFError
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import assets
 
+from .admin.views import set_init_perms, set_service
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
 from .auth.views import (
@@ -74,6 +75,10 @@ app = Starlette(
             Route('/favicon.ico', show_favicon, name='favicon'),
             Route('/society/{username}', show_profile,
                   name='profile', methods=['GET', 'POST']),
+            Mount('/admin', name='admin', routes=[
+                Route('/settings', set_service, name='settings'),
+                Route('/ajax/admin-perms', set_init_perms,
+                      name='perms', methods=['POST'])]),
             Mount('/auth', name='auth', routes=[
                 Route('/login', login,
                       name='login', methods=['GET', 'POST']),

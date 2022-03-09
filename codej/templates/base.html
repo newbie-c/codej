@@ -41,6 +41,9 @@
                  width="28" height="28">
           </a>
         </div>
+	{% if current_user %}
+          {% set cuperms = current_user.get('permissions') %}
+	{% endif %}
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li class="dropdown">
@@ -53,6 +56,26 @@
                 </li>
               </ul>
             </li>
+	    {% if current_user and
+	          (permissions.FOLLOW_USERS in cuperms or
+		   permissions.BLOCK_ENTITY in cuperms or
+		   permissions.ADMINISTER_SERVICE in cuperms) %}
+	      <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  Сервис <b class="caret"></b>
+		</a>
+		<ul class="dropdown-menu">
+                  <li><a href="">Сообщество</a></li>
+		  {% if permissions.ADMINISTER_SERVICE in cuperms %}
+		    <li role="separator" class="divider"></li>
+		    <li>
+		      <a href="{{ url_for('admin:settings') }}">
+			Настройки</a>
+		    </li>
+		  {% endif %}
+		</ul>
+	      </li>
+	    {% endif %}
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
