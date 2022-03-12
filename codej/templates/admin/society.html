@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
+{% from "macros/_common.html" import paginate %}
+
+{% block title %}Сообщество{% endblock title %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/admin/society.css',
+            'css/base.css',
+            'css/mc780.css',
+            'css/top-flashed.css',
+	    'css/content-block.css',
+	    'css/pagination.css',
+	    'css/next-block.css',
+            'css/admin/society.css' %}
+    <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- admin/society.html -->
+  <div id="main-container">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    <div id="society-block" class="content-block slidable">
+      <div class="block-header">
+        <h3 class="panel-title">Список пользователей сервиса</h3>
+      </div>
+      <div class="block-body">
+        {% if pagination %}
+          <table class="society-table">
+            <tbody>
+            <tr>
+              <th>Псевдоним</th>
+	      <th>Группа</th>
+	      <th class="text-right">Был здесь</th>
+	    </tr>
+	    {% for user in pagination['users'] %}
+              <tr {% if not loop.last %}class="bordered"{% endif %}>
+                <td class="username-field">
+                  <a href="{{ url_for(
+			  'profile', username=user['username']) }}">
+		    {{ user['username'] }}
+		  </a>
+		</td>
+		<td>{{ user['group'] }}</td>
+		<td class="last-seen text-right">
+                  {{ user['last_visit'] }}
+		</td>
+	      </tr>
+	    {% endfor %}
+	    </tbody>
+	  </table>
+	{% else %}
+          <div class="alert alert-warning">
+            В сервисе нет активных аккаунтов.
+	  </div>
+	{% endif %}
+      </div>
+    </div>
+    {% if pagination['prev'] or pagination['next'] %}
+      <div class="next-block entity-pagination text-center">
+        {{ paginate(request, pagination, 'admin:users') }}
+      </div>
+    {% endif %}
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/admin/society.js',
+            'js/check-mc.js',
+            'js/footer.js',
+            'js/top-flashed.js',
+            'js/admin/society.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}

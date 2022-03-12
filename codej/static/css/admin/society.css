@@ -1,0 +1,25 @@
+.society-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.society-table th {
+  border-bottom: 2px solid #dddddd;
+  padding: 8px 4px;
+}
+
+.username-field {
+  text-shadow: 0 0 3px #d9dcec;
+}
+
+.society-table td {
+  padding: 8px 4px 4px;
+}
+
+.bordered {
+  border-bottom: 1px dashed #dddddd;
+}
+
+.last-seen {
+  font-style: italic;
+}

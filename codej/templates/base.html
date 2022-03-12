@@ -65,7 +65,10 @@
                   Сервис <b class="caret"></b>
 		</a>
 		<ul class="dropdown-menu">
-                  <li><a href="">Сообщество</a></li>
+                  <li>
+		    <a href="{{ url_for('admin:users') }}">
+		      Сообщество</a>
+		  </li>
 		  {% if permissions.ADMINISTER_SERVICE in cuperms %}
 		    <li role="separator" class="divider"></li>
 		    <li>

@@ -10,3 +10,33 @@
     </div>
   {% endfor %}
 {% endmacro %}
+
+{% macro paginate(request, pagination, endpoint) %}
+  <ul class="pagination pagination-sm">
+    <!-- {{ kwargs }} -->
+    <li {% if not pagination['prev'] %}class="disabled hidden"{% endif %}>
+      <a href="{%- if pagination['prev'] -%}
+                 {{- request.app.url_path_for(
+                      endpoint, **kwargs) + '?page=' -}}{{- (pagination['page'] - 1) -}}
+               {% else %}#{% endif %}">&laquo;</a>
+    </li>
+    {% for p in pagination['pages'] %}
+      {% if p %}
+        <li {% if p == pagination['page'] %}class="active"{% endif %}>
+          <a href="{{- request.app.url_path_for(
+              endpoint, **kwargs) + '?page=' -}}{{- p -}}">{{ p }}</a>
+        </li>
+      {% else %}
+        <li class="disabled">
+          <a href="#">&hellip;</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+    <li {% if not pagination['next'] %}class="disabled hidden"{% endif %}>
+      <a href="{%- if pagination['next'] -%}
+                 {{- request.app.url_path_for(
+                   endpoint, **kwargs) + '?page=' -}}{{- (pagination['page'] + 1) -}}
+               {% else %}#{% endif %}">&raquo;</a>
+    </li>
+  </ul>
+{% endmacro %}
