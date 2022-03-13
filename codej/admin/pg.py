@@ -29,10 +29,11 @@ async def select_users(conn, current, page, per_page, last, is_admin):
 
 
 async def check_last_users(conn, current, page, per_page, is_admin):
-    q = 'SELECT count(*) FROM users WHERE id != $1 AND permissions[1] != $2'
-    num = await conn.fetchval(q, current, permissions.CANNOT_LOG_IN)
     if is_admin:
         q = 'SELECT count(*) FROM users WHERE id != $1'
         num = await conn.fetchval(q, current)
-    last = await parse_last_page(page, per_page, num)
-    return last
+    else:
+        q = '''SELECT count(*) FROM users
+                 WHERE id != $1 AND permissions[1] != $2'''
+        num = await conn.fetchval(q, current, permissions.CANNOT_LOG_IN)
+    return await parse_last_page(page, per_page, num)
