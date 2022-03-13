@@ -35,7 +35,7 @@ class ResetPassword(Passwords, Address, StarletteForm):
     submit = SubmitField('Обновить пароль')
 
 
-class CreatePassword(Passwords, StarletteForm):
+class Username:
     username = StringField(
         'Псевдоним:',
         validators=[
@@ -46,6 +46,9 @@ class CreatePassword(Passwords, StarletteForm):
                             цифры, дефис, знак подчёркивания, точка, \
                             первый символ - латинская или русская буква, \
                             не более 16 символов')])
+
+
+class CreatePassword(Username, Passwords, StarletteForm):
     submit = SubmitField('Создать пароль')
 
 

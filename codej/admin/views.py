@@ -8,7 +8,8 @@ from ..common.aparsers import parse_page
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
-from .pg import check_last_users, select_users
+from .forms import CreateUser
+from .pg import check_last_users, create_user, select_users
 
 
 @csrf_protect
@@ -38,12 +39,46 @@ async def admin_users(request):
         page, request.app.config.get('USERS_PER_PAGE', cast=int, default=3),
         last, permissions.ADMINISTER_SERVICE in current_user['permissions'])
     print(pagination)
+    form = None
+    if permissions.ADMINISTER_SERVICE in current_user['permissions']:
+        form = await CreateUser.from_formdata(request)
+        if await form.validate_on_submit():
+            if await conn.fetchval(
+                    'SELECT username FROM users WHERE username = $1',
+                    form.username.data):
+                await conn.close()
+                await set_flashed(
+                    request,
+                    f'Псевдоним "{form.username.data}" уже занят, \
+                      нужно придумать другой.')
+                return RedirectResponse(request.url_for('admin:users'), 302)
+            acc = await conn.fetchval(
+                'SELECT user_id FROM accounts WHERE address = $1',
+                form.address.data)
+            swapped = await conn.fetchval(
+                'SELECT swap FROM accounts WHERE swap = $1',
+                form.address.data)
+            if acc or swapped:
+                await conn.close()
+                await set_flashed(
+                    request,
+                    f'Адрес "{form.address.data}" уже используется, \
+                      запрос отклонён.')
+                return RedirectResponse(request.url_for('admin:users'), 302)
+            await create_user(
+                conn, form.username.data,
+                form.password.data, form.address.data)
+            await conn.close()
+            await set_flashed(request, 'Аккаунт зарегистрирован.')
+            return RedirectResponse(
+                request.url_for('profile', username=form.username.data), 302)
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'admin/society.html',
         {'request': request,
          'current_user': current_user,
          'pagination': pagination,
+         'form': form,
          'flashed': await get_flashed(request)})
 
 

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/_auth.html" import render_form_group %}
 {% from "macros/_common.html" import show_messages %}
 {% from "macros/_common.html" import paginate %}
 
@@ -13,6 +14,7 @@
 	    'css/content-block.css',
 	    'css/pagination.css',
 	    'css/next-block.css',
+	    'css/labeled-form.css',
             'css/admin/society.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
@@ -25,6 +27,47 @@
       <div class="top-flashed-block">
         {{ show_messages(flashed) }}
       </div>
+    {% endif %}
+    {% if not pagination or (pagination and pagination['page'] == 1) %}
+      {% if form %}
+        <div class="content-block create-block slidable">
+          <div class="block-header">
+            <h3 class="panel-title">Создайте новый аккаунт пользователя</h3>
+	  </div>
+	  <div class="block-body to-be-hidden">
+            <div class="today-field"></div>
+	    <div class="form-help">
+              <p>
+              Здесь можно создать новый аккаунт пользователя, для этого
+	      заполните форму ниже. Имейте ввиду, псевдоним должен быть
+	      уникальным, может содержать от 3-х до 16-ти знаков, включая
+	      латинские буквы, буквы русского алфавита, цифры, дефис,
+	      знак подчёркивания, точку и должен начинаться с латинской или
+	      русской буквы. Адрес электронной почты нового пользователя
+	      должен умещаться в 128 знаков, адрес должен быть уникальным и
+	      незарегистрированным в сервисе.
+	      </p>
+	    </div>
+	    <div class="form-form">
+              <form class="form" method="POST" role="form">
+                {{ form.csrf_token() }}
+		{{ render_form_group(
+		  form, form.username, 'username', 'введите псевдоним') }}
+		{{ render_form_group(
+		  form, form.address, 'address', 'введите адрес эл.почты') }}
+		{{ render_form_group(
+                  form, form.password, 'password', 'введите пароль') }}
+		{{ render_form_group(
+		  form, form.confirmation,
+		  'confirmation', 'повторите пароль') }}
+		<div class="form-group">
+                  {{ form.submit(class="btn btn-primary btn-block") }}
+		</div>
+	      </form>
+	    </div>
+	  </div>
+	</div>
+      {% endif %}
     {% endif %}
     <div id="society-block" class="content-block slidable">
       <div class="block-header">
@@ -74,8 +117,13 @@
   {{ super() }}
   {% assets filters='rjsmin', output='generic/js/admin/society.js',
             'js/check-mc.js',
+	    'js/render-tf.js',
             'js/footer.js',
             'js/top-flashed.js',
+	    'js/check-next.js',
+	    'js/scroll-panel.js',
+	    'js/show-hide.js',
+	    'js/slide-error-form.js',
             'js/admin/society.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
