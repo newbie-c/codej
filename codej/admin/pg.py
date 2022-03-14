@@ -1,10 +1,9 @@
 from datetime import datetime
 from hashlib import md5
 
-from passlib.hash import pbkdf2_sha256
-
 from ..auth.attri import permissions
 from ..common.aparsers import iter_pages, parse_last_page
+from ..common.pg import create_user_record
 from ..main.pg import get_group
 
 
@@ -12,16 +11,9 @@ async def create_user(conn, username, password, address):
     now = datetime.utcnow()
     perms = [each.get('permission') for each in await conn.fetch(
         'SELECT permission FROM permissions WHERE init = true')]
-    await conn.execute(
-        '''INSERT INTO users
-             (username, registered, last_visit, password_hash, permissions)
-             VALUES ($1, $2, $3, $4, $5)''',
-        username, now, now,
-        pbkdf2_sha256.hash(password), perms)
+    user_id = await create_user_record(conn, username, password, perms, now)
     acc = await conn.fetchval(
         'SELECT id FROM accounts WHERE address = $1', address)
-    user_id = await conn.fetchval(
-        'SELECT id FROM users WHERE username = $1', username)
     if acc:
         await conn.execute(
             'UPDATE accounts SET user_id = $1, requested = $2 WHERE id = $3',

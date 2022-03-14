@@ -1,8 +1,7 @@
 from datetime import datetime
 from hashlib import md5
-from passlib.hash import pbkdf2_sha256
 
-from ..common.pg import get_conn
+from ..common.pg import create_user_record, get_conn
 from .attri import initials, permissions
 
 
@@ -50,16 +49,9 @@ async def check_address(conf, address):
 
 
 async def create_user(conf, username, address, password, perms):
-    password = pbkdf2_sha256.hash(password)
     now = datetime.utcnow()
     conn = await get_conn(conf)
-    await conn.execute(
-        '''INSERT INTO users
-           (username, registered, last_visit, password_hash, permissions)
-           VALUES ($1, $2, $3, $4, $5)''',
-        username, now, now, password, perms)
-    user_id = await conn.fetchval(
-        'SELECT id FROM users WHERE username = $1', username)
+    user_id = await create_user_record(conn, username, password, perms, now)
     account = await conn.fetchrow(
         'SELECT * FROM accounts WHERE address = $1', address)
     if account:

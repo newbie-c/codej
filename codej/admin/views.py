@@ -38,7 +38,6 @@ async def admin_users(request):
         conn, current_user['id'],
         page, request.app.config.get('USERS_PER_PAGE', cast=int, default=3),
         last, permissions.ADMINISTER_SERVICE in current_user['permissions'])
-    print(pagination)
     form = None
     if permissions.ADMINISTER_SERVICE in current_user['permissions']:
         form = await CreateUser.from_formdata(request)
