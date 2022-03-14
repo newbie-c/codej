@@ -1,7 +1,6 @@
 from datetime import datetime
-from hashlib import md5
 
-from ..common.pg import create_user_record, get_conn
+from ..common.pg import create_user_record, get_conn, update_account
 from .attri import initials, permissions
 
 
@@ -52,16 +51,5 @@ async def create_user(conf, username, address, password, perms):
     now = datetime.utcnow()
     conn = await get_conn(conf)
     user_id = await create_user_record(conn, username, password, perms, now)
-    account = await conn.fetchrow(
-        'SELECT * FROM accounts WHERE address = $1', address)
-    if account:
-        await conn.execute(
-            '''UPDATE accounts
-                 SET requested = $1, user_id = $2 WHERE address = $3''',
-            now, user_id, address)
-    else:
-        await conn.execute(
-            '''INSERT INTO accounts (address, ava_hash, requested, user_id)
-                 VALUES ($1, $2, $3, $4)''',
-            address, md5(address.encode('utf-8')).hexdigest(), now, user_id)
+    await update_account(conn, address, user_id, now)
     await conn.close()

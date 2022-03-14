@@ -3,6 +3,7 @@ import asyncio
 from datetime import datetime
 
 from ..common.avatar import get_ava_url
+from ..common.flashed import set_flashed
 from ..main.pg import get_group
 from .attri import permissions
 from .tasks import ping_user
@@ -22,7 +23,7 @@ async def get_current_user(request, conn):
                    FROM users, accounts WHERE users.id = accounts.user_id
                      AND users.id = $1''', int(uid))
             if permissions.CANNOT_LOG_IN in query.get('permissions'):
-                await request.app.rc.delete(_uid)
+                await request.app.rc.delete(uid_)
                 del request.session['_uid']
                 await set_flashed(
                         request, 'Ваше присутствие в сервисе нежелательно.')
