@@ -9,7 +9,25 @@ from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
 from .forms import CreateUser
-from .pg import check_last_users, create_user, select_users
+from .pg import check_last_users, create_user, select_found, select_users
+
+
+async def find_user(request):
+    res = {'empty': True}
+    d = await request.form()
+    conn = await get_conn(request.app.config)
+    current_user = await get_current_user(request, conn)
+    if current_user and \
+            permissions.FOLLOW_USERS in current_user['permissions']:
+        found = await select_found(
+            conn, current_user['id'], d.get('value'),
+            permissions.ADMINISTER_SERVICE in current_user['permissions'])
+        res = {'empty': False,
+               'html': request.app.jinja.get_template(
+                   'admin/found-users.html').render(
+                       found=found, request=request)}
+        await conn.close()
+    return JSONResponse(res)
 
 
 @csrf_protect

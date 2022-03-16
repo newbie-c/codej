@@ -3,9 +3,7 @@ $(function() {
   formatFooter(luxon.DateTime.now());
   $('.close-top-flashed').on('click', closeTopFlashed);
   $('.date-field').each(function() {formatDateTime($(this));});
-  let $ls = $.trim($('.last-seen').text());
-  $('.last-seen').text(luxon.DateTime.fromISO($ls)
-                                     .setLocale('ru').toRelative());
+  $('.last-seen').each(renderLastSeen);
   $('.slidable .block-header').on('click', showHideBlock);
   if ($('#permissions-block').length) {
     $('#submit').on('click', function() { $(this).blur(); });

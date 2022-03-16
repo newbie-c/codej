@@ -15,6 +15,7 @@
 	    'css/pagination.css',
 	    'css/next-block.css',
 	    'css/labeled-form.css',
+	    'css/find-block.css',
             'css/admin/society.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
@@ -65,6 +66,22 @@
 		</div>
 	      </form>
 	    </div>
+	  </div>
+	</div>
+      {% endif %}
+      {% if pagination['next'] %}
+	<div class="content-block find-block
+		    {% if form %}next-block{% endif %}">
+	  <div class="find-label text-right">
+            <label for="username-input">Найти псевдоним:</label>
+	  </div>
+	  <div class="find-input">
+            <input type="text"
+		   id="username-input"
+		   name="username-input"
+		   class="form-control"
+		   data-url="{{ url_for('admin:find-user') }}"
+		   placeholder="введите псевдоним пользователя">
 	  </div>
 	</div>
       {% endif %}
@@ -124,6 +141,7 @@
 	    'js/scroll-panel.js',
 	    'js/show-hide.js',
 	    'js/slide-error-form.js',
+	    'js/last-seen.js',
             'js/admin/society.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

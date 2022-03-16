@@ -13,6 +13,27 @@ async def create_user(conn, username, password, address):
     user_id = await create_user_record(conn, username, password, perms, now)
     await update_account(conn, address, user_id, now)
 
+async def select_found(conn, current, val, is_admin):
+    if is_admin:
+        query = await conn.fetch(
+            '''SELECT username, last_visit, permissions FROM users
+                 WHERE id != $1 AND username LIKE $2
+                   ORDER BY last_visit DESC''',
+            current, f'{val}%')
+    else:
+        query = await conn.fetch(
+            '''SELECT username, last_visit, permissions FROM users
+                 WHERE id != $1 AND username LIKE $2
+                 AND permissions[1] != $3
+                   ORDER BY last_visit DESC''',
+            current, f'{val}%', permissions.CANNOT_LOG_IN)
+    if query:
+        return {'users':[
+            {'username': record.get('username'),
+             'last_visit': record.get('last_visit').isoformat() + 'Z',
+             'group': await get_group(record.get('permissions'))}
+            for record in query]}
+
 
 async def select_users(conn, current, page, per_page, last, is_admin):
     if is_admin:

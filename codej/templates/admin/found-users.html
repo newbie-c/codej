@@ -1,0 +1,35 @@
+<div class="content-block found-block next-block slidable">
+  <div class="block-header">
+    <h3 class="panel-title">Найдено по запросу</h3>
+  </div>
+  <div class="block-body">
+    {% if found and found['users'] %}
+      <table class="society-table">
+        <tbody>
+        <tr>
+          <th>Псевдоним</th>
+          <th>Группа</th>
+          <th class="text-right">Был здесь</th>
+        </tr>
+        {% for user in found['users'] %}
+          <tr {% if not loop.last %}class="bordered"{% endif %}>
+            <td class="username-field">
+              <a href="{{ url_for('profile', username=user['username']) }}">
+                {{ user['username'] }}
+              </a>
+            </td>
+            <td>{{ user['group'] }}</td>
+            <td class="last-seen text-right">
+              {{ user['last_visit'] }}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="alert alert-warning">
+        По вашему запросу ничего не нашлось.
+      </div>
+    {% endif %}
+  </div>
+</div>
