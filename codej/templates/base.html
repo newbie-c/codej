@@ -75,6 +75,19 @@
 		      <a href="{{ url_for('admin:settings') }}">
 			Настройки</a>
 		    </li>
+		    <li role="separator" class="divider"></li>
+		    <li>
+                      <a href="{{ url_for(
+			       'admin:logs', filename='access.log') }}"
+			 rel="nofollow"
+			 target="_blank">Текущий лог</a>
+		    </li>
+		    <li>
+                      <a href="{{ url_for(
+			       'admin:logs', filename='previous.log') }}"
+			 rel="nofollow"
+			 target="_blank">Предыдущий лог</a>
+		    </li>
 		  {% endif %}
 		</ul>
 	      </li>

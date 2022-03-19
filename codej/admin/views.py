@@ -1,5 +1,8 @@
+import os
+
 from starlette.exceptions import HTTPException
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import (
+    JSONResponse, FileResponse, PlainTextResponse, RedirectResponse)
 from starlette_wtf import csrf_protect, csrf_token
 
 from ..auth.attri import initials, permissions
@@ -10,6 +13,30 @@ from ..common.pg import get_conn
 from ..common.urls import get_next
 from .forms import CreateUser
 from .pg import check_last_users, create_user, select_found, select_users
+
+
+async def show_log(request):
+    conn = await get_conn(request.app.config)
+    current_user = await get_current_user(request, conn)
+    fn = request.path_params['filename']
+    if current_user is None or fn not in ('access.log', 'previous.log'):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    if permissions.ADMINISTER_SERVICE not in current_user['permissions']:
+        await conn.close()
+        raise HTTPException(
+            status_code=403, detail='Для вас доступ ограничен.')
+    if fn == 'access.log':
+        fn = f'/var/log/nginx/{fn}'
+    else:
+        fn = '/var/log/nginx/access.log.1'
+    if os.path.exists(fn):
+        response = FileResponse(fn)
+    else:
+        response = PlainTextResponse('Файл не существует.')
+    await conn.close()
+    return response
 
 
 async def find_user(request):
