@@ -1,0 +1,12 @@
+#left-panel {
+  width: 60%;
+  float: left;
+  padding-right: 4px;
+  margin-bottom: 6px;
+}
+
+#right-panel {
+  margin-left: 60%;
+  margin-bottom: 6px;
+  padding-left: 4px;
+}

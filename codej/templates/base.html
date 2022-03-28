@@ -57,6 +57,31 @@
               </ul>
             </li>
 	    {% if current_user and
+	          (permissions.CREATE_LINK_ALIAS in cuperms or
+		   permissions.UPLOAD_PICTURES in cuperms or
+		   permissions.MAKE_ANNOUNCEMENT in cuperms or
+		   permissions.CREATE_ENTITY in cuperms) %}
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  Инструменты <b class="caret"></b>
+		</a>
+		<ul class="dropdown-menu">
+                  {% if permissions.CREATE_LINK_ALIAS in cuperms %}
+                    <li>
+                      <a href="">Ссылки</a>
+		    </li>
+		  {% endif %}
+		  {% if permissions.UPLOAD_PICTURES in cuperms %}
+                    <li>
+                      <a href="{{ url_for('pictures:show-albums') }}">
+                        Картинки
+		      </a>
+		    </li>
+		  {% endif %}
+		</ul>
+	      </li>
+	    {% endif %}
+	    {% if current_user and
 	          (permissions.FOLLOW_USERS in cuperms or
 		   permissions.BLOCK_ENTITY in cuperms or
 		   permissions.ADMINISTER_SERVICE in cuperms) %}

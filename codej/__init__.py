@@ -28,6 +28,7 @@ from .errors import (
     refuse_method, refuse_request)
 from .main.views import (
     show_index, show_profile, show_robots, show_favicon)
+from .pictures.views import show_albums
 
 base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
@@ -105,6 +106,9 @@ app = Starlette(
                       name='upd-captcha', methods=['POST'])]),
             Mount('/captcha', name='captcha', routes=[
                 Route('/{suffix}', show_captcha, name='captcha')]),
+            Mount('/pictures', name='pictures', routes=[
+                Route('/', show_albums,
+                      name='show-albums', methods=['GET', 'POST'])]),
             Mount('/static',
                   app=StaticFiles(directory=static), name='static')],
     on_startup=[run_before],

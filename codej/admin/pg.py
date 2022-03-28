@@ -13,6 +13,7 @@ async def create_user(conn, username, password, address):
     user_id = await create_user_record(conn, username, password, perms, now)
     await update_account(conn, address, user_id, now)
 
+
 async def select_found(conn, current, val, is_admin):
     if is_admin:
         query = await conn.fetch(

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
+
+{% block title %}Ваши альбомы{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/pictures/show-albums.css',
+            'css/base.css',
+            'css/mc1024.css',
+            'css/top-flashed.css',
+            'css/content-block.css',
+            'css/twopanels.css',
+            'css/aoptions.css',
+            'css/pictures/show-albums.css' %}
+    <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- pictures/show-albums.html -->
+  <div id="main-container">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    <div id="left-panel">
+      <div class="content-block">
+        <div class="block-header">
+          <h3 class="panel-title">Ваши альбомы</h3>
+        </div>
+        <div class="block-body">
+          <div class="albums-options text-center">
+            <button type="button"
+                    class="btn btn-info btn-sm user-home"
+                    title="показать статистику">
+              <span class="glyphicon glyphicon-home"
+                    aria-hidden="true"></span>
+            </button>
+            {% if not pagination or
+                  (pagination and pagination['page'] == 1) %}
+              <button type="button"
+                      class="btn btn-default btn-sm album-reload"
+                      title="обновить">
+                <span class="glyphicon glyphicon-refresh"
+                      aria-hidden="true"></span>
+              </button>
+              <button type="button"
+                      class="btn btn-info btn-sm search"
+                      title="поиск">
+                <span class="glyphicon glyphicon-search"
+                      aria-hidden="true"></span>
+              </button>
+              <button type="button"
+                      class="btn btn-primary btn-sm create-new"
+                      title="создать новый">
+                <span class="glyphicon glyphicon-folder-close"
+                      aria-hidden="true"></span>
+              </button>
+            {% else %}
+              <button type="button"
+                      class="btn btn-default btn-sm album-first-page"
+                      title="в начало">
+                <span class="glyphicon glyphicon-circle-arrow-left"
+                      aria-hidden="true"></span>
+              </button>
+            {% endif %}
+          </div>
+          {% if pagination %}
+            <!-- not implemented yet -->
+          {% else %}
+            <div id="no-albums" class="alert alert-warning">
+              Альбомы ещё не созданы.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div id="right-panel">
+      <div class="content-block">
+        <div class="block-header">
+          <h3 class="panel-title">Статистика</h3>
+        </div>
+        <div class="block-body">
+          <!-- empty yet -->
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/pictures/show-albums.js',
+            'js/check-mc.js',
+            'js/top-flashed.js',
+            'js/footer.js',
+            'js/pictures/show-albums.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}
