@@ -7,6 +7,7 @@ from ..common.aparsers import parse_page
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
+from .attri import status
 
 
 async def show_albums(request):
@@ -28,4 +29,5 @@ async def show_albums(request):
         {'request': request,
          'flashed': await get_flashed(request),
          'pagination': None,
+         'status': status,
          'current_user': current_user})

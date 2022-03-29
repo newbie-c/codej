@@ -7,11 +7,12 @@
   {{ super() }}
   {% assets filters='cssmin', output='generic/css/pictures/show-albums.css',
             'css/base.css',
-            'css/mc1024.css',
+            'css/mc1152.css',
             'css/top-flashed.css',
             'css/content-block.css',
             'css/twopanels.css',
             'css/aoptions.css',
+	    'css/labeled-form.css',
             'css/pictures/show-albums.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
@@ -47,13 +48,13 @@
                       aria-hidden="true"></span>
               </button>
               <button type="button"
-                      class="btn btn-info btn-sm search"
+                      class="btn btn-info btn-sm album-search"
                       title="поиск">
                 <span class="glyphicon glyphicon-search"
                       aria-hidden="true"></span>
               </button>
               <button type="button"
-                      class="btn btn-primary btn-sm create-new"
+                      class="btn btn-primary btn-sm create-new-button"
                       title="создать новый">
                 <span class="glyphicon glyphicon-folder-close"
                       aria-hidden="true"></span>
@@ -67,6 +68,79 @@
               </button>
             {% endif %}
           </div>
+	  {% if not pagination or (pagination and pagination['page'] == 1) %}
+            <div class="create-form-block to-be-hidden">
+              <div class="today-field"></div>
+	      <div class="form-help">
+                <p>
+                Для создания нового альбома достаточно ввести его название
+		(от 3-х до 100-а знаков), выбрать статус и нажать кнопку
+		"Создать". Изображения из публичного альбома видны всем
+		пользователям сети, из скрытого альбома - только в ленте
+		авторизованных пользователей, из альбома для друзей - только
+		авторизованным пользователяь из вашего списка друзей.
+		</p>
+	      </div>
+	      <div class="form-form">
+	        <div class="form-group">
+                  <div class="form-label text-right">
+                    <label for="title">Название:</label>
+		  </div>
+		  <div class="form-input">
+                    <input class="form-control"
+                           id="title"
+                           name="title"
+                           placeholder="введите название альбома" required
+                           type="text">
+		  </div>
+		  <div class="footer-bottom"></div>
+		</div>
+		<div class="form-group">
+                  <div class="form-input checkbox">
+                    <label>
+                      <input id="pub-f"
+                             name="pub-f"
+			     value="{{ status.pub }}"
+                             type="checkbox"
+                             checked>
+		      <label for="pub-f">{{ status.pub }}</label>
+		    </label>
+		  </div>
+		</div>
+		<div class="form-group">
+                  <div class="form-input checkbox">
+                    <label>
+                      <input id="priv-f"
+			     name="priv-f"
+			     value="{{ status.priv }}"
+                             type="checkbox">
+		      <label for="priv-f">{{ status.priv }}</label>
+                    </label>
+		  </div>
+		</div>
+		<div class="form-group">
+                  <div class="form-input checkbox">
+                    <label>
+                      <input id="ffo-f"
+			     name="ffo-f"
+			     value="{{ status.ffo }}"
+			     type="checkbox">
+		      <label for="ffo-f">{{ status.ffo }}</label>
+		    </label>
+		  </div>
+		</div>
+		<div class="form-group">
+                  <div class="form-input">
+                    <input class="btn btn-primary btn-block"
+			   id="create-new"
+                           name="create-new"
+			   type="button"
+			   value="Cоздать">
+		  </div>
+		</div>
+	      </div>
+	    </div>
+	  {% endif %}
           {% if pagination %}
             <!-- not implemented yet -->
           {% else %}
@@ -96,6 +170,9 @@
             'js/check-mc.js',
             'js/top-flashed.js',
             'js/footer.js',
+	    'js/render-tf.js',
+	    'js/checkbox.js',
+	    'js/scroll-panel.js',
             'js/pictures/show-albums.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
