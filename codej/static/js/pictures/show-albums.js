@@ -5,18 +5,29 @@ $(function() {
   formatFooter(now);
   $('.close-top-flashed').on('click', closeTopFlashed);
 
-  let $cform = $('.create-form-block');
+  let $cform = $('#create-form-block');
+  let $findblock = $('#find-pic-block');
   if ($cform.length) {
     $('.album-search').on('click', function() {
       $(this).blur();
-      if (!$cform.is(':hidden')) $cform.slideUp('slow');
+      if ($findblock.is(':hidden')) {
+        if (!$cform.is(':hidden')) $cform.slideUp('slow');
+        $findblock.slideDown('slow', function() {
+          scrollPanel($('.albums-options'));
+        });
+      } else {
+        $findblock.slideUp('slow');
+      }
     });
     $('.create-new-button').on('click', function() {
       $(this).blur();
       if ($cform.is(':hidden')) {
+        if (!$findblock.is(':hidden')) $findblock.slideUp('slow');
         $cform.slideDown('slow', function() {
-          scrollPanel($('.albums-options'));
+          if (!$findblock.is(':hidden')) $findblock.slideUp('slow');
+          $('#title').focus();
         });
+        scrollPanel($('.albums-options'));
       } else {
         $cform.slideUp('slow');
       }
@@ -50,8 +61,30 @@ $(function() {
     });
     $('#create-new').on('click', function() {
       $(this).blur();
-      console.log($('.create-form-block :checked').val());
+      if (!$('#title-group').hasClass('has-error')) {
+        $cform.slideUp('slow', function() {
+          $('#progress-block').slideDown('slow');
+        });
+        $.ajax({
+          method: 'POST',
+          url: $(this).data().url,
+          data: {
+            title: $('#title').val(),
+            state: $('#create-form-block :checked').val()
+          },
+          success: function(data) {
+            if (!data.empty) {
+              if (data.redirect) window.location.replace(data.redirect);
+            }
+          },
+          error: function(data) {},
+          dataType: 'json'
+        });
+      }
     });
+    $('#title')
+    .on('keyup blur',
+        {min: 3, max: 100, block: '.form-group'}, markInputError);
   }
 
   $('.user-home').on('click', function() {

@@ -1,6 +1,34 @@
 import math
 
 
+async def parse_units(volume):
+    if volume < 1024:
+        return f'{volume} B'
+    elif 1024 < volume < pow(1024, 2):
+        return f'{round(volume / 1024, 2)} KiB'
+    elif pow(1024, 2) < volume < pow(1024, 3):
+        return f'{round(volume / pow(1024, 2), 2)} MiB'
+    elif volume > pow(1024, 3):
+        return f'{round(volume / pow(1024, 3), 2)} GiB'
+
+
+async def shorten_line(line, length):
+    if ' ' not in line or len(line.split(' ')[0] + '~') >= length:
+        return line[:length - 1] + '~'
+    result = ''
+    for each in line.split(' '):
+        between = result + ' ' + each
+        if len(between.lstrip() + '~') > length:
+            return result.lstrip() + '~'
+        result = between
+
+
+async def parse_title(title, length):
+    if len(title) > length:
+        return await shorten_line(title, length)
+    return title
+
+
 async def iter_pages(page, last_page):
     if last_page <= 15:
         return list(range(1, last_page + 1))

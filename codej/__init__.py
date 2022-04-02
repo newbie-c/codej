@@ -28,7 +28,7 @@ from .errors import (
     refuse_method, refuse_request)
 from .main.views import (
     show_index, show_profile, show_robots, show_favicon)
-from .pictures.views import show_albums
+from .pictures.views import create_album, show_album, show_albums
 
 base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
@@ -108,7 +108,11 @@ app = Starlette(
                 Route('/{suffix}', show_captcha, name='captcha')]),
             Mount('/pictures', name='pictures', routes=[
                 Route('/', show_albums,
-                      name='show-albums', methods=['GET', 'POST'])]),
+                      name='show-albums', methods=['GET', 'POST']),
+                Route('/{suffix}', show_album,
+                      name='show-album', methods=['GET', 'POST']),
+                Route('/ajax/create-album', create_album,
+                      name='create-album', methods=['POST'])]),
             Mount('/static',
                   app=StaticFiles(directory=static), name='static')],
     on_startup=[run_before],

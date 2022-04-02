@@ -1,0 +1,33 @@
+{% macro show_user_statistic(user, stat) %}
+  <div class="content-block">
+    <div class="block-header">
+      <h3 class="panel-title">Ваша статистика</h3>
+    </div>
+    <div class="block-body album-statistic">
+      <table class="statistic-table">
+        <tbody>
+          <tr class="bordered">
+            <td>Здесь с:</td>
+            <td class="text-right date-field">{{ user['registered'] }}</td>
+          </tr>
+          <tr class="bordered">
+            <td>Группа</td>
+            <td class="text-right">{{ user['group'] }}</td>
+          </tr>
+          <tr class="bordered">
+            <td>Альбомов</td>
+            <td class="text-right">{{ stat['albums'] }}</td>
+          </tr>
+          <tr class="bordered">
+            <td>Файлов</td>
+            <td class="text-right">{{ stat['files'] }}</td>
+          </tr>
+          <tr>
+            <td>Итого</td>
+            <td class="text-right">{{ stat['volume'] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endmacro %}

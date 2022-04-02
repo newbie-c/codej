@@ -1,4 +1,4 @@
 from collections import namedtuple
 
 Status = namedtuple('Status', ['pub', 'priv', 'ffo'])
-status = Status(pub="публичный", priv="скрытый", ffo="для друзей")
+status = Status(pub="публичный", priv="сообществу", ffo="для друзей")

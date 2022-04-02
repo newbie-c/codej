@@ -4,7 +4,7 @@ CREATE TABLE albums (
     created   timestamp,
     changed   timestamp,
     suffix    varchar(8)    UNIQUE,
-    state     varchar(8),
+    state     varchar(10),
     volume    integer       DEFAULT 0,
     author_id integer       REFERENCES users(id),
     CONSTRAINT author_title_uni UNIQUE (author_id, title)

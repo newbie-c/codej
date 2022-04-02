@@ -1,9 +1,59 @@
-.create-form-block {
+#create-form-block, #find-pic-block {
   border-bottom: 2px solid #dddddd;
   margin: 0 0 2px 0;
   padding: 2px 0 6px 0;
 }
 
+.inline-form-table {
+  margin: 0;
+  width: 100%;
+}
+
+.input-field {
+  width: 90%;
+}
+
 #no-albums {
   margin-top: 4px;
+}
+
+.items-table-block {
+  margin: 0;
+}
+
+.items-table {
+  margin: 0;
+  width: 100%;
+  border-collapse: collapse;
+  text-shadow: 0 0 3px #d9dcec;
+}
+
+.album-header-panel {
+  padding: 6px 0 6px 6px;
+  width: 80%;
+  cursor: pointer;
+}
+
+.items-table td {
+  padding: 4px;
+}
+
+.clicked-item {
+  background: #e6ebff;
+}
+
+.bordered {
+  border-bottom: 1px dotted #dddddd;
+}
+
+.statistic-table {
+  margin: 0;
+  width: 100%;
+  border-collapse: collapse;
+  font-style: italic;
+  text-shadow: 0 0 3px #d9dcec;
+}
+
+.statistic-table td {
+  padding: 8px 2px 2px;
 }

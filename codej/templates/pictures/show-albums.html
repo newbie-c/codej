@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% from "macros/_common.html" import show_messages %}
+{% from "macros/_common.html" import paginate %}
+{% from "macros/_pictures.html" import show_user_statistic %}
 
 {% block title %}Ваши альбомы{% endblock %}
 
@@ -13,6 +15,8 @@
             'css/twopanels.css',
             'css/aoptions.css',
 	    'css/labeled-form.css',
+	    'css/progress-block.css',
+	    'css/pagination.css',
             'css/pictures/show-albums.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
@@ -69,20 +73,49 @@
             {% endif %}
           </div>
 	  {% if not pagination or (pagination and pagination['page'] == 1) %}
-            <div class="create-form-block to-be-hidden">
+            <div id="progress-block" class="text-center to-be-hidden">
+              <img alt="progress show"
+		   src="{{ url_for('static', path='images/upload.gif') }}">
+	    </div>
+	    <div id="find-pic-block" class="to-be-hidden">
+              <div class="form-form">
+                <table class="inline-form-table">
+                  <tbody>
+                    <tr>
+                      <td class="input-field">
+                        <input class="form-control"
+			       type="text"
+			       placeholder="введите суффикс изображения"
+			       id="find-input">
+		      </td>
+		      <td>&nbsp;</td>
+		      <td>
+                        <button id="find-submit"
+			        class="btn btn-default"
+				type="button">
+                          <span class="glyphicon glyphicon-search"
+				aria-hidden="true"></span>
+			</button>
+		      </td>
+		    </tr>
+		  </tbody>
+		</table>
+	      </div>
+	    </div>
+            <div id="create-form-block" class="to-be-hidden">
               <div class="today-field"></div>
 	      <div class="form-help">
                 <p>
                 Для создания нового альбома достаточно ввести его название
 		(от 3-х до 100-а знаков), выбрать статус и нажать кнопку
 		"Создать". Изображения из публичного альбома видны всем
-		пользователям сети, из скрытого альбома - только в ленте
-		авторизованных пользователей, из альбома для друзей - только
-		авторизованным пользователяь из вашего списка друзей.
+		пользователям сети, из скрытого альбома - только 
+		авторизованным пользователям, из альбома для друзей - только
+		авторизованным пользователям из вашего списка друзей.
 		</p>
 	      </div>
 	      <div class="form-form">
-	        <div class="form-group">
+	        <div id="title-group" class="form-group">
                   <div class="form-label text-right">
                     <label for="title">Название:</label>
 		  </div>
@@ -133,6 +166,7 @@
                   <div class="form-input">
                     <input class="btn btn-primary btn-block"
 			   id="create-new"
+			   data-url="{{ url_for('pictures:create-album') }}"
                            name="create-new"
 			   type="button"
 			   value="Cоздать">
@@ -142,7 +176,57 @@
 	    </div>
 	  {% endif %}
           {% if pagination %}
-            <!-- not implemented yet -->
+	    <div class="items-table-block">
+              <table class="items-table">
+                <tbody>
+                  {% for album in pagination['albums'] %}
+                    {% if loop.first and loop.last %}
+                      {% set last_item = 1 %}
+		    {% else %}
+                      {% set last_item = 0 %}
+		    {% endif %}
+		    <tr {% if not loop.last %}class="bordered"{% endif %}>
+                      <td class="album-header-panel"
+			  {% if album['title']|length > 40 %}
+			  title="{{ album['title'] }}"
+			  {% endif %}
+			  data-suffix="{{ album['suffix'] }}"
+			  data-url="">
+			{{ album['parsed'] }}
+		      </td>
+		      <td class="text-right album-tools-panel">
+                        <button type="button"
+				class="btn btn-sm btn-default trash-button"
+				title="удалить">
+                          <span class="glyphicon glyphicon-trash"
+				aria-hidden="true"></span>
+			</button>
+			<button type="button"
+				class="btn btn-sm btn-danger remove-button
+				       to-be-hidden"
+				data-suffix="{{ album['suffix'] }}"
+				data-page="{{ pagination['page'] }}"
+				data-last="{{ last_item }}"
+				data-url=""
+				title="удалить безвозвратно">
+                          <span class="glyphicon glyphicon-remove-circle"
+				aria-hidden="true"></span>
+			</button>
+			<button type="button"
+				class="btn btn-sm btn-primary show-album"
+				title="войти в альбом"
+				data-dest="{{ url_for(
+				  'pictures:show-album',
+				  suffix=album['suffix']) }}">
+                          <span class="glyphicon glyphicon-folder-open"
+				aria-hidden="true"></span>
+			</button>
+		      </td>
+		    </tr>
+		  {% endfor %}
+		</tbody>
+	      </table>
+	    </div>
           {% else %}
             <div id="no-albums" class="alert alert-warning">
               Альбомы ещё не созданы.
@@ -152,15 +236,13 @@
       </div>
     </div>
     <div id="right-panel">
-      <div class="content-block">
-        <div class="block-header">
-          <h3 class="panel-title">Статистика</h3>
-        </div>
-        <div class="block-body">
-          <!-- empty yet -->
-        </div>
-      </div>
+      {{ show_user_statistic(current_user, stat) }}
     </div>
+    {% if pagination and (pagination['next'] or pagination['prev']) %}
+      <div class="entity-pagination next-block footer-bottom text-center">
+        {{ paginate(request, pagination, 'pictures:show-albums') }}
+      </div>
+    {% endif %}
   </div>
 {% endblock page_body %}
 
@@ -173,6 +255,7 @@
 	    'js/render-tf.js',
 	    'js/checkbox.js',
 	    'js/scroll-panel.js',
+	    'js/mark-input-error.js',
             'js/pictures/show-albums.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

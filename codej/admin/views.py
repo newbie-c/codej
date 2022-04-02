@@ -73,9 +73,9 @@ async def admin_users(request):
             status_code=403, detail='Для вас доступ ограничен.')
     if not (page:= await parse_page(request)) or \
        not (last := await check_last_users(
-            conn, current_user['id'], page,
-            request.app.config.get('USERS_PER_PAGE', cast=int, default=3),
-            permissions.ADMINISTER_SERVICE in current_user['permissions'])):
+           conn, current_user['id'], page,
+           request.app.config.get('USERS_PER_PAGE', cast=int, default=3),
+           permissions.ADMINISTER_SERVICE in current_user['permissions'])):
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
