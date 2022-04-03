@@ -6,17 +6,12 @@ from ..common.random import get_unique_s
 
 
 async def get_user_stat(conn, uid):
-    albums = await conn.fetch(
-        'SELECT id, volume FROM albums WHERE author_id = $1', uid)
-    volume = sum(album.get('volume') for album in albums)
-    files = 0
-    for album in albums:
-        files += await conn.fetchval(
-            'SELECT count(*) FROM pictures WHERE album_id = $1',
-            album.get('id'))
-    return {'albums': len(albums),
-            'files': files,
-            'volume': await parse_units(volume)}
+    return {'albums': await conn.fetchval(
+        'SELECT count(*) FROM albums WHERE author_id = $1', uid),
+            'files': await conn.fetchval(
+        'SELECT sum(volume) FROM albums WHERE author_id = $1', uid),
+            'volume': await parse_units(await conn.fetchval(
+        'SELECT sum(volume) FROM albums WHERE author_id = $1', uid))}
 
 
 async def select_albums(conn, current, page, per_page, last):
