@@ -1,0 +1,17 @@
+[Unit]
+Description=hypercorn instance to serve codej.ru
+After=network.target
+
+[Service]
+User=avm
+Group=avm
+WorkingDirectory=/home/avm/workspace/codej.ru/codej
+ExecStart=/home/avm/workspace/codej.ru/venv/bin/hypercorn \
+          -w 3 -k uvloop -m 000 \
+          -p /run/codej.ru/hypercorn.pid \
+          --access-logfile /var/log/hypercorn/access.log \
+          --error-logfile /var/log/hypercorn/error.log \
+          --bind unix:/run/codej.ru/codej.ru.socket codej:app
+
+[Install]
+WantedBy=multi-user.target

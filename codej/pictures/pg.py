@@ -9,9 +9,11 @@ async def get_user_stat(conn, uid):
     return {'albums': await conn.fetchval(
         'SELECT count(*) FROM albums WHERE author_id = $1', uid),
             'files': await conn.fetchval(
-        'SELECT sum(volume) FROM albums WHERE author_id = $1', uid),
+        '''SELECT count(*) FROM albums, pictures
+             WHERE author_id = $1
+             AND pictures.album_id = albums.id''', uid),
             'volume': await parse_units(await conn.fetchval(
-        'SELECT sum(volume) FROM albums WHERE author_id = $1', uid))}
+        'SELECT sum(volume) FROM albums WHERE author_id = $1', uid) or 0)}
 
 
 async def select_albums(conn, current, page, per_page, last):
