@@ -7,12 +7,13 @@ from starlette_wtf import csrf_protect, csrf_token
 
 from ..auth.attri import (
     average, fix_extra_permissions, groups, permissions, roots)
-from ..auth.common import get_current_user
+from ..auth.common import checkcu
 from ..common.flashed import get_flashed, set_flashed
 from ..common.parsers import parse_address
 from ..common.pg import get_conn
 from ..common.urls import get_next
 from .pg import filter_target_user
+from .redi import change_udata
 
 robots = """User-agent: *
 Disallow: /
@@ -21,14 +22,13 @@ Disallow: /
 
 @csrf_protect
 async def show_profile(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     if current_user is None:
         await set_flashed(request, 'Требуется авторизация.')
-        await conn.close()
         return RedirectResponse(
             await get_next(request, request.app.url_path_for(
                 'profile', username=request.path_params['username'])), 302)
+    conn = await get_conn(request.app.config)
     target = await filter_target_user(request, conn)
     if target is None:
         await conn.close()
@@ -49,12 +49,17 @@ async def show_profile(request):
              permissions.ADMINISTER_SERVICE not in target['permissions']))):
         form = await request.form()
         chquery = 'UPDATE users SET permissions = $1 WHERE username = $2'
+        data = f'data:{target.get("uid")}'
         if form.get('cannot-log-in', None):
             await conn.execute(
                 chquery, [permissions.CANNOT_LOG_IN], target['username'])
+            await change_udata(
+                request.app.rc, data, [permissions.CANNOT_LOG_IN])
         elif form.get('administer-service', None):
             await conn.execute(
                 chquery, roots, target['username'])
+            await change_udata(
+                request.app.rc, data, roots)
         else:
             extra = await fix_extra_permissions(
                 current_user, target['permissions'])
@@ -70,6 +75,8 @@ async def show_profile(request):
             await conn.execute(
                 chquery, assigned or [permissions.CANNOT_LOG_IN],
                 target['username'])
+            await change_udata(
+                request.app.rc, data, assigned or [permissions.CANNOT_LOG])
         await conn.close()
         await set_flashed(
             request, f'Разрешения {target["username"]} успешно изменены.')
@@ -87,9 +94,8 @@ async def show_profile(request):
 
 
 async def show_index(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
-    await conn.close()
+    current_user = await checkcu(request)
+    print(current_user)
     return request.app.jinja.TemplateResponse(
         'main/index.html',
         {'request': request,

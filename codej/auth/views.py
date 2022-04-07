@@ -10,7 +10,7 @@ from starlette_wtf import csrf_protect
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
-from .common import get_current_user
+from .common import checkcu, get_current_user
 from .forms import (
     ChangePassword, CreatePassword, GetPassword, LoginForm,
     RequestEmail, ResetPassword)
@@ -27,16 +27,15 @@ captchaq = 'SELECT val, suffix FROM captchas ORDER BY random() LIMIT 1'
 
 
 async def change_email(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     if current_user is None:
-        await conn.close()
         await set_flashed(request, 'Требуется авторизация.')
         url = await get_next(
             request, request.app.url_path_for(
                 'auth:change-email',
                 token=request.path_params['token']))
         return RedirectResponse(url, 302)
+    conn = await get_conn(request.app.config)
     acc = await check_token(request, conn, wide=True)
     if acc is None or current_user['username'] != acc['username'] \
             or acc['swap'] is None:
@@ -48,6 +47,8 @@ async def change_email(request):
         '''UPDATE accounts SET address = $1, swap = $2, ava_hash = $3
              WHERE id = $4''', acc['swap'], None, ava, acc['id'])
     await conn.close()
+    await request.app.rc.hset(
+        f'data:{current_user.get("id")}', key='ava', value=ava)
     await set_flashed(
         request, f'Уважаемый {current_user["username"]}, у Вас новый адрес.')
     return RedirectResponse(
@@ -56,14 +57,13 @@ async def change_email(request):
 
 @csrf_protect
 async def request_email(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     if current_user is None:
-        await conn.close()
         raise HTTException(
             status_code=404, detail='Такой страницы у нас нет')
     form = await RequestEmail.from_formdata(request)
     if await form.validate_on_submit():
+        conn = await get_conn(request.app.config)
         if pbkdf2_sha256.verify(
                 form.password.data,
                 await conn.fetchval(
@@ -90,7 +90,6 @@ async def request_email(request):
         await conn.close()
         await set_flashed(request, 'Пароль недействителен.')
         return RedirectResponse(request.url_for('auth:request-email'), 302)
-    await conn.close()
     return request.app.jinja.TemplateResponse(
         'auth/request-email.html',
         {'request': request,
@@ -102,14 +101,13 @@ async def request_email(request):
 
 @csrf_protect
 async def change_password(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     if current_user is None:
-        await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
     form = await ChangePassword.from_formdata(request)
     if await form.validate_on_submit():
+        conn = await get_conn(request.app.config)
         if await check_pwd(conn, current_user['username'], form.current.data):
             await change_pwd(
                 conn, current_user['username'], form.password.data)
@@ -123,7 +121,6 @@ async def change_password(request):
         await set_flashed(request, 'Текущий пароль недействителен.')
         await conn.close()
         return RedirectResponse(request.url_for('auth:change-password'), 302)
-    await conn.close()
     return request.app.jinja.TemplateResponse(
         'auth/change-password.html',
         {'request': request,
@@ -134,11 +131,10 @@ async def change_password(request):
 
 @csrf_protect
 async def reset_password(request):
-    conn = await get_conn(request.app.config)
-    if await get_current_user(request, conn):
-        await conn.close()
+    if await checkcu(request):
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
+    conn = await get_conn(request.app.config)
     source = await check_token(request, conn, wide=True)
     if source is None or source.get('user_id') is None \
             or source.get('last_visit') > source.get('requested') \
@@ -174,8 +170,8 @@ async def reset_password(request):
 
 @csrf_protect
 async def create_password(request):
+    current_user = await checkcu(request)
     conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
     acc = await check_token(request, conn)
     if acc is None or current_user or acc.get('user_id'):
         await conn.close()
@@ -210,11 +206,10 @@ async def create_password(request):
 
 @csrf_protect
 async def get_password(request):
-    conn = await get_conn(request.app.config)
-    if await get_current_user(request, conn):
+    if await checkcu(request):
         await set_flashed(request, 'У Вас уже есть пароль.')
-        await conn.close()
         return RedirectResponse(request.url_for('index'), 302)
+    conn = await get_conn(request.app.config)
     captcha = await conn.fetchrow(captchaq)
     form = await GetPassword.from_formdata(request)
     if await form.validate_on_submit():
@@ -248,6 +243,7 @@ async def get_password(request):
     form.suffix.data = await assign_cache(
         request.app.rc, 'captcha:',
         captcha.get('suffix'), captcha.get('val'), 180)
+    await conn.close()
     return request.app.jinja.TemplateResponse(
         'auth/get-password.html',
         {'request': request,
@@ -258,10 +254,8 @@ async def get_password(request):
 
 @csrf_protect
 async def login(request):
-    conn = await get_conn(request.app.config)
-    if await get_current_user(request, conn):
+    if await checkcu(request):
         await set_flashed(request, 'Вы уже авторизованы!')
-        await conn.close()
         return RedirectResponse(request.url_for('index'), 302)
     next_ = request.query_params.get('next')
     if next_:
@@ -269,6 +263,7 @@ async def login(request):
     else:
         redirect = request.url_for('auth:login')
     form = await LoginForm.from_formdata(request)
+    conn = await get_conn(request.app.config)
     captcha = await conn.fetchrow(captchaq)
     if await form.validate_on_submit():
         suffix, val = await extract_cache(
@@ -311,7 +306,7 @@ async def login(request):
          'form': form,
          'captcha': captcha})
 
-
+#here we are
 async def logout(request):
     conn = await get_conn(request.app.config)
     current_user = await get_current_user(request, conn)

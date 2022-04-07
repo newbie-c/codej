@@ -1,10 +1,9 @@
-from ..auth.common import get_current_user
+from ..auth.common import checkcu
 from ..common.pg import get_conn
 
 
 async def notify_not_found_page(request, exc):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     return request.app.jinja.TemplateResponse(
         'errors/error.html',
         {'reason': exc.detail,
@@ -15,8 +14,7 @@ async def notify_not_found_page(request, exc):
 
 
 async def refuse_request(request, exc):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     return request.app.jinja.TemplateResponse(
         'errors/error.html',
         {'reason': exc.detail,
@@ -27,8 +25,7 @@ async def refuse_request(request, exc):
 
 
 async def refuse_method(request, exc):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     return request.app.jinja.TemplateResponse(
         'errors/error.html',
         {'reason': 'Метод не позволен.',
@@ -39,8 +36,7 @@ async def refuse_method(request, exc):
 
 
 async def handle_csrf_error(request, exc):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     return request.app.jinja.TemplateResponse(
         'errors/error.html',
         {'reason': 'CSRF-брелок устарел или подделан.',

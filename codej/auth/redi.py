@@ -29,4 +29,24 @@ async def assign_uid(rc, prefix, remember_me, user):
     cache = await get_unique(rc, prefix, 9)
     await rc.set(cache, user.get('id'))
     await rc.expire(cache, expiration)
+    data = f'data:{user.get("id")}'
+    existed = await rc.exists(data)
+    await rc.hmset(
+        data, {'id': user.get('id'),
+               'username': user.get('username'),
+               'registered': f"{user.get('registered').isoformat()}Z",
+               'permissions': ','.join(user.get('permissions')),
+               'ava': user.get('ava'),
+               'many': 0})
+    if existed:
+        await rc.hset(data, key='many', value=1)
+        if remember_me:
+            await rc.persist(data)
+            await rc.expire(data, expiration)
+        else:
+            if await rc.ttl(data) < expiration:
+                await rc.persist(data)
+                await rc.expire(data, expiration)
+    else:
+        await rc.expire(data, expiration)
     return cache

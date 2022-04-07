@@ -113,7 +113,9 @@ async def filter_user(conn, login):
     squery = '''SELECT users.id AS id,
                        users.username AS username,
                        users.password_hash AS password_hash,
-                       users.permissions AS permissions
+                       users.permissions AS permissions,
+                       users.registered AS registered,
+                       accounts.ava_hash AS ava
                   FROM users, accounts WHERE users.id = accounts.user_id'''
     if validate_email(login):
         squery += ' AND accounts.address = $1'
@@ -123,4 +125,7 @@ async def filter_user(conn, login):
     if query and permissions.CANNOT_LOG_IN not in query.get('permissions'):
         return {'id': query.get('id'),
                 'username': query.get('username'),
-                'password_hash': query.get('password_hash')}
+                'password_hash': query.get('password_hash'),
+                'registered': query.get('registered'),
+                'permissions': query.get('permissions'),
+                'ava': query.get('ava')}
