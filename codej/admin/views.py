@@ -6,7 +6,7 @@ from starlette.responses import (
 from starlette_wtf import csrf_protect, csrf_token
 
 from ..auth.attri import initials, permissions
-from ..auth.common import get_current_user
+from ..auth.common import checkcu
 from ..common.aparsers import parse_page
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
@@ -16,15 +16,12 @@ from .pg import check_last_users, create_user, select_found, select_users
 
 
 async def show_log(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     fn = request.path_params['filename']
     if current_user is None or fn not in ('access.log', 'previous.log'):
-        await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
     if permissions.ADMINISTER_SERVICE not in current_user['permissions']:
-        await conn.close()
         raise HTTPException(
             status_code=403, detail='Для вас доступ ограничен.')
     if fn == 'access.log':
@@ -35,17 +32,16 @@ async def show_log(request):
         response = FileResponse(fn)
     else:
         response = PlainTextResponse('Файл не существует.')
-    await conn.close()
     return response
 
 
 async def find_user(request):
     res = {'empty': True}
     d = await request.form()
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     if current_user and \
             permissions.FOLLOW_USERS in current_user['permissions']:
+        conn = await get_conn(request.app.config)
         found = await select_found(
             conn, current_user['id'], d.get('value'),
             permissions.ADMINISTER_SERVICE in current_user['permissions'])
@@ -59,18 +55,16 @@ async def find_user(request):
 
 @csrf_protect
 async def admin_users(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     if current_user is None:
-        await conn.close()
         await set_flashed(request, 'Требуется авторизация.')
         return RedirectResponse(
             await get_next(request, request.app.url_path_for('admin:users')),
             302)
     if permissions.FOLLOW_USERS not in current_user['permissions']:
-        await conn.close()
         raise HTTPException(
             status_code=403, detail='Для вас доступ ограничен.')
+    conn = await get_conn(request.app.config)
     if not (page:= await parse_page(request)) or \
        not (last := await check_last_users(
            conn, current_user['id'], page,
@@ -130,26 +124,24 @@ async def admin_users(request):
 async def set_init_perms(request):
     res = {'empty': True}
     d = await request.form()
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     if current_user and \
             permissions.ADMINISTER_SERVICE in current_user['permissions']:
+        conn = await get_conn(request.app.config)
         for each in d:
             if each != 'csrf_token':
                 await conn.execute(
                     'UPDATE permissions SET init = $1 WHERE name = $2',
                     bool(int(d.get(each))), each)
         res = {'empty': False}
+        await conn.close()
         await set_flashed(request, 'Done!')
-    await conn.close()
     return JSONResponse(res)
 
 
 async def set_service(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     if current_user is None:
-        await conn.close()
         await set_flashed(request, 'Требуется авторизация.')
         url = await get_next(
             request, request.app.url_path_for('admin:settings'))
@@ -157,6 +149,7 @@ async def set_service(request):
     if permissions.ADMINISTER_SERVICE not in current_user['permissions']:
         raise HTTPException(
             status_code=403, detail="Для вас доступ ограничен.")
+    conn = await get_conn(request.app.config)
     perms = await conn.fetch(
         'SELECT * FROM permissions WHERE permission = any($1::varchar[])',
         [permission for permission in initials])

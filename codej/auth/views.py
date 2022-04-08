@@ -10,7 +10,7 @@ from starlette_wtf import csrf_protect
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
-from .common import checkcu, get_current_user
+from .common import checkcu
 from .forms import (
     ChangePassword, CreatePassword, GetPassword, LoginForm,
     RequestEmail, ResetPassword)
@@ -306,22 +306,22 @@ async def login(request):
          'form': form,
          'captcha': captcha})
 
-#here we are
+
 async def logout(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     response = RedirectResponse(request.url_for('index'), 302)
     if current_user is None:
-        await conn.close()
         return response
     uid = request.session['_uid']
     if uid:
         await request.app.rc.delete(uid)
         del request.session['_uid']
+        data = f'data:{current_user["id"]}'
+        if await request.app.rc.hget(data, key='many') == '0':
+            await request.app.rc.delete(data)
         asyncio.ensure_future(
             rem_user_session(request, uid, current_user['username']))
     await set_flashed(request, f'Пока, {current_user.get("username")}')
-    await conn.close()
     return response
 
 

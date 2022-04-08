@@ -2,7 +2,7 @@ from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse, RedirectResponse
 
 from ..auth.attri import permissions
-from ..auth.common import get_current_user
+from ..auth.common import checkcu
 from ..common.aparsers import parse_page
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
@@ -20,9 +20,9 @@ async def create_album(request):
     res = {'empty': True}
     d = await request.form()
     if d.get('title') and d.get('state'):
-        conn = await get_conn(request.app.config)
-        current_user = await get_current_user(request, conn)
+        current_user = await checkcu(request)
         if permissions.UPLOAD_PICTURES in current_user['permissions']:
+            conn = await get_conn(request.app.config)
             rep = await conn.fetchval(
                 '''SELECT suffix FROM albums
                      WHERE title = $1 AND author_id = $2''',
@@ -38,23 +38,21 @@ async def create_album(request):
                 res = {'empty': False,
                        'redirect': request.url_for(
                            'pictures:show-album', suffix=new)}
-        await conn.close()
+            await conn.close()
     return JSONResponse(res)
 
 
 async def show_albums(request):
-    conn = await get_conn(request.app.config)
-    current_user = await get_current_user(request, conn)
+    current_user = await checkcu(request)
     if current_user is None:
-        await conn.close()
         await set_flashed(request, 'Требуется авторизация.')
         return RedirectResponse(
             await get_next(
                 request, request.app.url_path_for('pictures:show-albums')),
             302)
     if permissions.UPLOAD_PICTURES not in current_user['permissions']:
-        await conn.close()
         raise HTTPException(status_code=403, detail='Доступ ограничен.')
+    conn = await get_conn(request.app.config)
     if not (page := await parse_page(request)) or \
        not (last := await check_last_albums(
            conn, current_user['id'], page,
