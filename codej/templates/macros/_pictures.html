@@ -1,3 +1,45 @@
+{% macro show_album_statistic(request, album) %}
+  <div class="content-block">
+    <div class="block-header">
+      <h3 class="panel-title">Статистика альбома</h3>
+    </div>
+    <div class="block-body album-statistic">
+      <table class="statistic-table">
+        <tbody>
+          <tr class="bordered">
+            <td>Название</td>
+            <td class="text-right"
+                {% if album['title']|length > 22 %}
+                title="{{ album['title'] }}"{% endif %}>
+              {{ album['parsed22'] }}
+            </td>
+          </tr>
+          <tr class="bordered">
+            <td>Создан</td>
+            <td class="text-right date-field">
+              {{ album['created'] }}
+            </td>
+          </tr>
+          <tr class="bordered">
+            <td>Файлов</td>
+            <td class="text-right">{{ album['files'] }}</td>
+          </tr>
+          <tr class="bordered">
+            <td>Размер</td>
+            <td class="text-right">{{ album['volume'] }}</td>
+          </tr>
+          <tr>
+            <td>Статус</td>
+            <td class="text-right">
+              {{ album['state'] }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endmacro %}
+
 {% macro show_user_statistic(user, stat) %}
   <div class="content-block">
     <div class="block-header">

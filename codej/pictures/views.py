@@ -9,11 +9,41 @@ from ..common.pg import get_conn
 from ..common.urls import get_next
 from .attri import status
 from .pg import (
-    check_last_albums, create_new_album, get_user_stat, select_albums)
+    check_last_albums, check_last_pictures, create_new_album, get_album,
+    get_user_stat, select_albums)
 
 
 async def show_album(request):
-    return JSONResponse({'empty': 'yes'})
+    s = request.path_params.get('suffix')
+    current_user = await checkcu(request)
+    if current_user is None:
+        await set_flashed(request, 'Требуется авторизация.')
+        return RedirectResponse(
+            await get_next(
+                request,
+                request.app.url_path_for('pictures:show-album', suffix=s)),
+            302)
+    if permissions.UPLOAD_PICTURES not in current_user['permissions']:
+        raise HTTPException(status_code=403, detail='Доступ ограничен.')
+    conn = await get_conn(request.app.config)
+    target = await get_album(conn, current_user['id'], s)
+    print(target)
+    if target is None or \
+       not (page := await parse_page(request)) or \
+       not (last := await check_last_pictures(
+           conn, target['id'], page,
+           request.app.config.get('PICTURES_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'pictures/show-album.html',
+        {'request': request,
+         'current_user': current_user,
+         'target': target,
+         'pagination': None,
+         'flashed': await get_flashed(request)})
 
 
 async def create_album(request):
@@ -31,6 +61,7 @@ async def create_album(request):
                 res = {'empty': False,
                        'redirect': request.url_for(
                            'pictures:show-album', suffix=rep)}
+                message = 'Альбом уже существует.'
             else:
                 new = await create_new_album(
                     conn, current_user['id'],
@@ -38,7 +69,9 @@ async def create_album(request):
                 res = {'empty': False,
                        'redirect': request.url_for(
                            'pictures:show-album', suffix=new)}
+                message = 'Новый альбом успешно создан.'
             await conn.close()
+            await set_flashed(request, message)
     return JSONResponse(res)
 
 

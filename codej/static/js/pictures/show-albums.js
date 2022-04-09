@@ -4,7 +4,7 @@ $(function() {
   renderTF('.today-field', now);
   formatFooter(now);
   $('.close-top-flashed').on('click', closeTopFlashed);
-
+  $('.date-field').each(function() {formatDateTime($(this));});
   let $cform = $('#create-form-block');
   let $findblock = $('#find-pic-block');
   if ($cform.length) {
@@ -87,6 +87,11 @@ $(function() {
         {min: 3, max: 100, block: '.form-group'}, markInputError);
   }
 
+  let $show_album = $('.show-album');
+  if ($show_album.length) $show_album.on('click', function() {
+    $(this).blur();
+    window.location.assign($(this).data().dest);
+  });
   $('.user-home').on('click', function() {
     $(this).blur();
   });

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
+{% from "macros/_pictures.html" import show_album_statistic %}
+
+{% block title %}{{ target['parsed36'] }}{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/pictures/show-album.css',
+            'css/base.css',
+            'css/mc1152.css',
+            'css/top-flashed.css',
+            'css/content-block.css',
+            'css/twopanels.css',
+	    'css/aoptions.css',
+            'css/pagination.css',
+            'css/pictures/show-albums.css' %}
+    <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- pictures/show-album.html -->
+  <div id="main-container">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    <div id="left-panel">
+      <div class="content-block">
+        <div class="block-header">
+          <h3 class="panel-title"
+              {% if target['title']|length > 50 %}
+              title="{{ target['title'] }}"
+              {% endif %}>{{ target['parsed50']}}
+          </h3>
+        </div>
+        <div class="block-body">
+	  <div class="albums-options text-center">
+            <button type="button"
+		    class="btn btn-info btn-sm go-home"
+		    data-dest="{{ url_for('pictures:show-albums') }}"
+		    title="вернуться к списку альбомов">
+              <span class="glyphicon glyphicon-home"
+		    aria-hidden="true"></span>
+	    </button>
+            <button type="button"
+		    data-suffix="{{ target['suffix'] }}"
+		    data-url=""
+		    class="btn btn-info btn-sm show-statictic"
+		    title="показать статистику альбома">
+              <span class="glyphicon glyphicon-repeat"
+		    aria-hidden="true"></span>
+	    </button>
+	    {% if not pagination or
+	          (pagination and pagination['page'] == 1) %}
+              <button type="button"
+		      class="btn btn-default btn-sm album-reload"
+		      data-dest="{{ url_for(
+			'pictures:show-album', suffix=target['suffix']) }}"
+		      title="обновить">
+                <span class="glyphicon glyphicon-refresh"
+		      aria-hidden="true"></span>
+	      </button>
+	      <button type="button"
+		      class="btn btn-primary btn-sm upload-new"
+		      title="добавить картинку">
+                <span class="glyphicon glyphicon-upload"
+		      aria-hidden="true"></span>
+	      </button>
+            {% else %}
+              <button type="button"
+		      class="btn btn-default btn-sm album-reload"
+		      data-dest="{{ url_for(
+			'pictures:show-album', suffix=target['suffix']) }}"
+		      title="в начало альбома">
+                <span class="glyphicon glyphicon-circle-arrow-left"
+		      aria-hidden="true"></span>
+	      </button>
+	    {% endif %}
+	  </div>
+	  {% if pagination %}
+            <!-- not implemented yet -->
+	  {% else %}
+            <div id="no-albums" class="alert alert-warning">
+              В альбоме пока нет изображений.
+	    </div>
+	  {% endif %}
+        </div>
+      </div>
+    </div>
+    <div id="right-panel">
+      {{ show_album_statistic(request, target) }}
+    </div>
+    {% if pagination and (pagination['next'] or pagination['prev']) %}
+      <div class="entity-pagination next-block footer-bottom text-center">
+        {{ paginate(
+	  request, pagination,
+	  'pictures:show-album', suffix=target['suffix']) }}
+      </div>
+    {% endif %}
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/pictures/show-album.js',
+            'js/check-mc.js',
+            'js/top-flashed.js',
+            'js/footer.js',
+	    'js/show-datetime.js',
+            'js/pictures/show-album.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}
