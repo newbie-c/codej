@@ -8,9 +8,10 @@ from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
 from .attri import status
+from .forms import UploadFile
 from .pg import (
     check_last_albums, check_last_pictures, create_new_album, get_album,
-    get_user_stat, select_albums)
+    get_user_stat, select_albums, select_pictures)
 
 
 async def show_album(request):
@@ -27,7 +28,6 @@ async def show_album(request):
         raise HTTPException(status_code=403, detail='Доступ ограничен.')
     conn = await get_conn(request.app.config)
     target = await get_album(conn, current_user['id'], s)
-    print(target)
     if target is None or \
        not (page := await parse_page(request)) or \
        not (last := await check_last_pictures(
@@ -36,13 +36,32 @@ async def show_album(request):
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
+    pagination = await select_pictures(
+        conn, target['id'], page,
+        request.app.config.get('PICTURES_PER_PAGE', cast=int, default=3),
+        last)
+    form = await UploadFile.from_formdata(request)
+    if request.method == 'POST':
+        print(await form.image.data.read())
+        print(form.image.data.filename)
+        await set_flashed(request, 'Верифицирую изображение...')
+        await conn.close()
+        return request.app.jinja.TemplateResponse(
+            'pictures/show-album.html',
+            {'request': request,
+             'current_user': current_user,
+             'target': target,
+             'form': None,
+             'pagination': pagination,
+             'flashed': await get_flashed(request)})
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'pictures/show-album.html',
         {'request': request,
          'current_user': current_user,
          'target': target,
-         'pagination': None,
+         'pagination': pagination,
+         'form': form,
          'flashed': await get_flashed(request)})
 
 

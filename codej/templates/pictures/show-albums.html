@@ -242,6 +242,8 @@
       <div class="entity-pagination next-block footer-bottom text-center">
         {{ paginate(request, pagination, 'pictures:show-albums') }}
       </div>
+    {% else %}
+      <div class="footer-bottom"></div>
     {% endif %}
   </div>
 {% endblock page_body %}
@@ -250,6 +252,7 @@
   {{ super() }}
   {% assets filters='rjsmin', output='generic/js/pictures/show-albums.js',
             'js/check-mc.js',
+	    'js/hide-hidden.js',
             'js/top-flashed.js',
             'js/footer.js',
 	    'js/render-tf.js',

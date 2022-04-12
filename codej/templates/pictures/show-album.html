@@ -13,8 +13,9 @@
             'css/content-block.css',
             'css/twopanels.css',
 	    'css/aoptions.css',
+	    'css/labeled-form.css',
             'css/pagination.css',
-            'css/pictures/show-albums.css' %}
+            'css/pictures/show-album.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
 {% endblock styles %}
@@ -48,7 +49,7 @@
             <button type="button"
 		    data-suffix="{{ target['suffix'] }}"
 		    data-url=""
-		    class="btn btn-info btn-sm show-statictic"
+		    class="btn btn-info btn-sm show-statistic"
 		    title="показать статистику альбома">
               <span class="glyphicon glyphicon-repeat"
 		    aria-hidden="true"></span>
@@ -80,6 +81,48 @@
 	      </button>
 	    {% endif %}
 	  </div>
+	  {% if not pagination or (pagination and pagination['page'] == 1) %}
+	  <div {% if form %}
+               id="progress-block"{% else %}
+	       id="data-panel"{% endif %}
+	       class="text-center {% if form %}to-be-hidden{% endif %}"
+	       {% if not form %}
+                 data-url=""
+		 data-cache=""
+		 data-redirect=""
+	       {% endif %}>
+              <img alt="progress show"
+		   width="48"
+		   height="48"
+		   src="{{ url_for('static', path='images/upload.gif') }}">
+	    </div>
+	    {% if form %}
+            <div id="upload-form-block" class="to-be-hidden">
+              <div class="today-field"></div>
+	      <div class="form-help">
+                <p>
+                Выберите файл изображения, процесс выгрузки начнётся
+		автоматически. Поддерживаются файлы JPEG, PNG и GIF форматов.
+		Максимальный размер файла ограничен - 5МиБ. Длина имени
+		файла не может превышать 128 символов. После загрузки файл
+		будет верифицирован и доступен в списке ниже.
+		</p>
+	      </div>
+	      <div class="form-form">
+                <form class="form" method="POST" role="form"
+                      novalidate
+                      enctype="multipart/form-data">
+                  <div class="form-group">
+                    {{ form.image(accept="image/jpeg,image/png,image/gif") }}
+                  </div>
+		  <div class="form-group hidden">
+                    {{ form.submit(class="btn btn-default") }}
+		  </div>
+		</form>
+	      </div>
+	    </div>
+	    {% endif %}
+	  {% endif %}
 	  {% if pagination %}
             <!-- not implemented yet -->
 	  {% else %}
@@ -99,6 +142,8 @@
 	  request, pagination,
 	  'pictures:show-album', suffix=target['suffix']) }}
       </div>
+    {% else %}
+      <div class="footer-bottom"></div>
     {% endif %}
   </div>
 {% endblock page_body %}
@@ -107,9 +152,12 @@
   {{ super() }}
   {% assets filters='rjsmin', output='generic/js/pictures/show-album.js',
             'js/check-mc.js',
+	    'js/hide-hidden.js',
             'js/top-flashed.js',
             'js/footer.js',
+	    'js/render-tf.js',
 	    'js/show-datetime.js',
+	    'js/scroll-panel.js',
             'js/pictures/show-album.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
