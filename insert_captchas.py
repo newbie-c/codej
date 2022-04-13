@@ -31,7 +31,8 @@ async def gen_row():
         'INSERT INTO captchas (picture, val, suffix) VALUES ($1, $2, $3)',
         pic.read(), val, suffix)
     await conn.close()
-    pic.close()
+    await loop.run_in_executor(
+        None, functools.partial(pic.close))
     print(val, suffix)
 
 

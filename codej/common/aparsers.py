@@ -1,5 +1,14 @@
 import math
 import os
+import re
+
+
+async def parse_filename(filename, length):
+    if len(filename) > length:
+        name, ext = os.path.splitext(filename)
+        filename = name[:length-(len(ext)+3)] + '~' + ext
+    e = r'[\\/|?<>*:]'
+    return re.sub(e, '~', filename)
 
 
 async def parse_pic_filename(filename, length):

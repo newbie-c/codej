@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% from "macros/_common.html" import show_messages %}
 {% from "macros/_pictures.html" import show_album_statistic %}
+{% from "macros/_common.html" import paginate %}
 
 {% block title %}{{ target['parsed36'] }}{% endblock %}
 
@@ -87,9 +88,10 @@
 	       id="data-panel"{% endif %}
 	       class="text-center {% if form %}to-be-hidden{% endif %}"
 	       {% if not form %}
-                 data-url=""
-		 data-cache=""
-		 data-redirect=""
+	       data-url="{{ url_for('pictures:check-pic') }}"
+	       data-cache="{{ cache }}"
+	       data-redirect="{{ url_for(
+                 'pictures:show-album', suffix=target['suffix']) }}"
 	       {% endif %}>
               <img alt="progress show"
 		   width="48"
@@ -124,7 +126,46 @@
 	    {% endif %}
 	  {% endif %}
 	  {% if pagination %}
-            <!-- not implemented yet -->
+	    <div class="items-table-block">
+              <table class="items-table">
+                <tbody>
+                {% for pic in pagination['pictures'] %}
+                  {% if loop.first and loop.last %}
+                    {% set last_item = 1 %}
+		  {% else %}
+                    {% set last_item = 0 %}
+		  {% endif %}
+		  <tr {% if not loop.last %}class="bordered"{% endif %}>
+                    <td class="album-header-panel"
+			data-url=""
+			data-suffix=""
+			{% if pic['filename']|length > 40 %}
+			title="{{ pic['filename'] }}"
+			{% endif %}>
+                      <span class="glyphicon glyphicon-picture"
+			    aria-hidden="true"></span>
+		      {{ pic['parsed40'] }}
+		    </td>
+		    <td class="text-right album-tools-panel">
+                      <button type="button"
+			      class="btn btn-sm btn-danger remove-button
+				     to-be-hidden"
+			      title="удалить безвозвратно">
+                        <span class="glyphicon glyphicon-remove-circle"
+			      aria-hidden="true"></span>
+		      </button>
+		      <button type="button"
+			      class="btn btn-sm btn-default trash-button"
+			      title="удалить">
+                        <span class="glyphicon glyphicon-trash"
+			      aria-hidden="true"></span>
+		      </button>
+		    </td>
+		  </tr>
+		{% endfor %}
+		</tbody>
+	      </table>
+	    </div>
 	  {% else %}
             <div id="no-albums" class="alert alert-warning">
               В альбоме пока нет изображений.

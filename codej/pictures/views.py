@@ -1,3 +1,5 @@
+import asyncio
+
 from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse, RedirectResponse
 
@@ -12,6 +14,33 @@ from .forms import UploadFile
 from .pg import (
     check_last_albums, check_last_pictures, create_new_album, get_album,
     get_user_stat, select_albums, select_pictures)
+from .redi import assign_pic_cache
+from .tasks import verify_data
+
+
+async def check_pic(request):
+    res = {'empty': True}
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.UPLOAD_PICTURES in current_user['permissions']:
+        d = await request.form()
+        cache = await request.app.rc.hgetall(d.get('cache'))
+        if cache['res'] and int(cache['uid']) == current_user['id']:
+            message = None
+            if cache['res'] == 'ready':
+                message = 'Изображение успешно загружено.'
+            elif cache['res'] == 'size':
+                message = 'Запрос отклонён, размер файла больше 5МиБ.'
+            elif cache['res'] == 'type':
+                message = 'Запрос отклонён, формат не поддерживается.'
+            elif cache['res'] == 'repeat':
+                url = request.url_for(
+                    'pictures:show-album', suffix=cache['suf'])
+                message = f'Файл загружен ранее в <a href="{url}">альбом</a>.'
+            await set_flashed(request, message)
+            await request.app.rc.delete(d.get('cache'))
+            res = {'empty': False}
+    return JSONResponse(res)
 
 
 async def show_album(request):
@@ -42,8 +71,10 @@ async def show_album(request):
         last)
     form = await UploadFile.from_formdata(request)
     if request.method == 'POST':
-        print(await form.image.data.read())
-        print(form.image.data.filename)
+        cache = await assign_pic_cache(
+            request.app.rc, {'res': 0, 'suf': 0, 'uid': current_user['id']})
+        asyncio.ensure_future(
+            verify_data(request, current_user['id'], target, cache, form))
         await set_flashed(request, 'Верифицирую изображение...')
         await conn.close()
         return request.app.jinja.TemplateResponse(
@@ -52,6 +83,7 @@ async def show_album(request):
              'current_user': current_user,
              'target': target,
              'form': None,
+             'cache': cache,
              'pagination': pagination,
              'flashed': await get_flashed(request)})
     await conn.close()
@@ -116,7 +148,6 @@ async def show_albums(request):
         conn, current_user['id'], page,
         request.app.config.get('ALBUMS_PER_PAGE', cast=int, default=3), last)
     stat = await get_user_stat(conn, current_user['id'])
-    print(stat)
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'pictures/show-albums.html',

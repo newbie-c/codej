@@ -20,6 +20,38 @@ $(function() {
   $('.upload-new').on('click', function() {
     $(this).blur();
   });
+  let $data_panel = $('#data-panel');
+  if ($data_panel.length) {
+    let timer = setInterval(function(elem) {
+      $.ajax({
+        method: 'POST',
+        url: elem.data().url,
+        data: {
+          cache: elem.data().cache
+        },
+        success: function(data) {
+          if (!data.empty) {
+            clearInterval(timer);
+            window.location.replace(elem.data().redirect);
+          }
+        },
+        error: function(data) {
+          clearInterval(timer);
+          let html = '<div class="top-flashed-block">' +
+                     '  <div class="flashed-message">' +
+                     '    <div class="alert alert-warning">' +
+                     '      <button class="close close-top-flashed"' +
+                     '              type="button">' +
+                     '        &times;</button>' +
+                     'Произошёл непредвиденный сбой, обновите страницу.' +
+                     '    </div>' +
+                     '  </div>' +
+                     '</div>';
+        },
+        dataType: 'json'
+      });
+    }, 600, $data_panel);
+  }
   let $upblock = $('#upload-form-block');
   if ($upblock.length) {
     $('.upload-new').on('click', function() {
