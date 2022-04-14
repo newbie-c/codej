@@ -21,3 +21,9 @@ CREATE TABLE pictures (
     suffix   varchar(14)   UNIQUE,
     album_id integer       REFERENCES albums(id)
 );
+
+CREATE TABLE friends (
+    author_id integer REFERENCES users(id),
+    friend_id integer REFERENCES users(id),
+    CONSTRAINT author_friend_uni UNIQUE (author_id, friend_id)
+);

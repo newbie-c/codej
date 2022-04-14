@@ -2,6 +2,14 @@ from ..auth.attri import groups, permissions
 from ..common.avatar import get_ava_url
 
 
+async def check_friends(conn, author, friend):
+    if await conn.fetchrow(
+            '''SELECT author_id, friend_id FROM friends
+                 WHERE author_id = $1 AND friend_id = $2''', author, friend):
+        return True
+    return False
+
+
 async def get_group(perms):
     if permissions.ADMINISTER_SERVICE in perms:
         return groups.root

@@ -144,7 +144,7 @@
 	</div>
       </div>
     {% endif %}
-    {% if current_user['username'] == target['username'] %}
+    {% if current_user['id'] == target['uid'] %}
       <div class="content-block slidable next-block">
         <div class="block-header">
           <h3 class="panel-title">Действия</h3>
@@ -158,6 +158,23 @@
 	     class="btn btn-info">
 		  Сменить адрес
 	  </a>
+	</div>
+      </div>
+    {% endif %}
+    {% if current_user['id'] != target['uid'] and
+	  permissions.FOLLOW_USERS in target['permissions'] %}
+      <div class="content-block slidable next-block">
+        <div class="block-header">
+          <h3 class="panel-title">Действия</h3>
+	</div>
+	<div class="block-body to-be-hidden text-center action-block">
+          <button id="make-friend"
+		  type="button"
+		  data-friend="{{ target['uid'] }}"
+		  data-url="{{ url_for('make-friend') }}"
+		  class="btn btn-info">
+            {% if is_friend %}Не дружить{% else %}Дружить{% endif %}
+	  </button>
 	</div>
       </div>
     {% endif %}

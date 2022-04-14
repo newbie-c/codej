@@ -2,7 +2,7 @@ import os
 
 from starlette.exceptions import HTTPException
 from starlette.responses import (
-    FileResponse, PlainTextResponse, RedirectResponse)
+    FileResponse, JSONResponse, PlainTextResponse, RedirectResponse)
 from starlette_wtf import csrf_protect, csrf_token
 
 from ..auth.attri import (
@@ -12,12 +12,38 @@ from ..common.flashed import get_flashed, set_flashed
 from ..common.parsers import parse_address
 from ..common.pg import get_conn
 from ..common.urls import get_next
-from .pg import filter_target_user
+from .pg import check_friends, filter_target_user
 from .redi import change_udata
 
 robots = """User-agent: *
 Disallow: /
 """
+
+
+async def make_friend(request):
+    res = {'empty': True}
+    d = await request.form()
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.FOLLOW_USERS in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        friend = int(d.get('friend'))
+        fname = await conn.fetchval(
+            'SELECT username FROM users WHERE id = $1', friend)
+        if await check_friends(conn, current_user['id'], friend):
+            await conn.execute(
+                'DELETE FROM friends WHERE author_id = $1 AND friend_id = $2',
+                current_user['id'], friend)
+            message = f'{fname} удалён из списка ваших друзей.'
+        else:
+            await conn.execute(
+                '''INSERT INTO friends (author_id, friend_id)
+                     VALUES ($1, $2)''', current_user['id'], friend)
+            message = f'{fname} добавлен в список ваших друзей.'
+        await conn.close()
+        await set_flashed(request, message)
+        res = {'empty': False}
+    return JSONResponse(res)
 
 
 @csrf_protect
@@ -30,11 +56,12 @@ async def show_profile(request):
                 'profile', username=request.path_params['username'])), 302)
     conn = await get_conn(request.app.config)
     target = await filter_target_user(request, conn)
+    is_friend = await check_friends(conn, current_user['id'], target['uid'])
     if target is None:
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
-    if current_user['username'] != target['username'] and \
+    if current_user['id'] != target['uid'] and \
             permissions.FOLLOW_USERS not in current_user['permissions']:
         await conn.close()
         raise HTTPException(
@@ -88,6 +115,7 @@ async def show_profile(request):
         {'request': request,
          'current_user': current_user,
          'target': target,
+         'is_friend': is_friend,
          'parse_address': parse_address,
          'csrf_token': csrf_token(request),
          'flashed': await get_flashed(request)})

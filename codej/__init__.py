@@ -27,7 +27,7 @@ from .errors import (
     handle_csrf_error, notify_not_found_page,
     refuse_method, refuse_request)
 from .main.views import (
-    show_index, show_profile, show_robots, show_favicon)
+    make_friend, show_index, show_profile, show_robots, show_favicon)
 from .pictures.views import check_pic, create_album, show_album, show_albums
 
 base = os.path.dirname(__file__)
@@ -75,6 +75,8 @@ app = Starlette(
     routes=[Route('/', show_index, name='index'),
             Route('/robots.txt', show_robots, name='robots'),
             Route('/favicon.ico', show_favicon, name='favicon'),
+            Route('/ajax/make-friend', make_friend,
+                  name="make-friend", methods=['POST']),
             Route('/society/{username}', show_profile,
                   name='profile', methods=['GET', 'POST']),
             Mount('/admin', name='admin', routes=[

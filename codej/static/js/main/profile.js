@@ -83,4 +83,24 @@ $(function() {
     checkAverage('#make-announcement');
     checkAverage('#special-case');
   }
+  let $fr = $('#make-friend');
+  if ($fr.length) {
+    $fr.on('click', function() {
+      $(this).blur();
+      $.ajax({
+        method: 'POST',
+        url: $(this).data().url,
+        data: {
+          friend: $(this).data().friend
+        },
+        success: function(data) {
+          if (!data.empty) window.location.reload();
+        },
+        error: function(data) {
+          $('.action-block').slideUp('slow');
+        },
+        dataType: 'json'
+      });
+    });
+  }
 });
