@@ -1,4 +1,4 @@
-{% macro show_album_statistic(request, album) %}
+{% macro show_album_statistic(request, album, status) %}
   <div class="content-block">
     <div class="block-header">
       <h3 class="panel-title">Статистика альбома</h3>
@@ -36,6 +36,55 @@
           </tr>
         </tbody>
       </table>
+      <div class="album-options">
+        <button id="show-rename-form"
+                type="button"
+                class="btn btn-sm btn-default btn-block">
+          Переименовать
+        </button>
+      </div>
+      <div id="rename-form" class="album-form to-be-hidden">
+        <div class="form-group">
+          <input type="text"
+                 class="form-control"
+                 id="title-change"
+                 value="{{ album['title'] }}">
+        </div>
+        <div class="form-group">
+          <button id="rename-album"
+                  class="btn btn-primary btn-block btn-sm">
+            Переименовать
+          </button>
+        </div>
+      </div>
+      <div class="album-options">
+        <button id="show-state-form"
+                type="button"
+                class="btn btn-sm btn-default btn-block">
+          Изменить статус
+        </button>
+      </div>
+      <div id="change-status-form" class="album-form to-be-hidden">
+        <div class="form-group">
+          <select id="select-status"
+                  class="form-control"
+                  data-url="{{ request.url_for('pictures:change-state') }}"
+                  data-aid="{{ album['id'] }}">
+            <option value="{{ status.pub }}"
+                    {% if album['state'] == status.pub %}selected{% endif %}>
+              {{ status.pub }}
+            </option>
+            <option value="{{ status.priv }}"
+                    {% if album['state'] == status.priv %}selected{% endif %}>
+              {{ status.priv }}
+            </option>
+            <option value="{{ status.ffo }}"
+                    {% if album['state'] == status.ffo %}selected{% endif %}>
+              {{status.ffo }}
+            </option>
+          </select>
+        </div>
+      </div>
     </div>
   </div>
 {% endmacro %}

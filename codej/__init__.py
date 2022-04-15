@@ -28,7 +28,8 @@ from .errors import (
     refuse_method, refuse_request)
 from .main.views import (
     make_friend, show_index, show_profile, show_robots, show_favicon)
-from .pictures.views import check_pic, create_album, show_album, show_albums
+from .pictures.views import (
+    change_state, check_pic, create_album, show_album, show_albums)
 
 base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
@@ -116,7 +117,9 @@ app = Starlette(
                 Route('/ajax/create-album', create_album,
                       name='create-album', methods=['POST']),
                 Route('/ajax/check-pic', check_pic,
-                      name='check-pic', methods=['POST'])]),
+                      name='check-pic', methods=['POST']),
+                Route('/ajax/change-state', change_state,
+                      name='change-state', methods=['POST'])]),
             Mount('/static',
                   app=StaticFiles(directory=static), name='static')],
     on_startup=[run_before],

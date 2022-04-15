@@ -18,6 +18,29 @@ from .redi import assign_pic_cache
 from .tasks import verify_data
 
 
+async def change_state(request):
+    res = {'empty': True}
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.UPLOAD_PICTURES in current_user['permissions']:
+        d = await request.form()
+        conn = await get_conn(request.app.config)
+        target = await get_album(
+            conn, current_user['id'], aid=int(d.get('album')))
+        if target:
+            await conn.execute(
+                'UPDATE albums SET state = $1 WHERE id = $2',
+                d.get('state'), target['id'])
+            target = await get_album(
+                conn, current_user['id'], aid=target['id'])
+            res = {'empty': False,
+                   'html': request.app.jinja.get_template(
+                       'pictures/album-statistic.html').render(
+                           request=request, target=target, status=status)}
+        await conn.close()
+    return JSONResponse(res)
+
+
 async def check_pic(request):
     res = {'empty': True}
     current_user = await checkcu(request)
@@ -56,7 +79,7 @@ async def show_album(request):
     if permissions.UPLOAD_PICTURES not in current_user['permissions']:
         raise HTTPException(status_code=403, detail='Доступ ограничен.')
     conn = await get_conn(request.app.config)
-    target = await get_album(conn, current_user['id'], s)
+    target = await get_album(conn, current_user['id'], suffix=s)
     if target is None or \
        not (page := await parse_page(request)) or \
        not (last := await check_last_pictures(
@@ -85,6 +108,7 @@ async def show_album(request):
              'form': None,
              'cache': cache,
              'pagination': pagination,
+             'status': status,
              'flashed': await get_flashed(request)})
     await conn.close()
     return request.app.jinja.TemplateResponse(
@@ -94,6 +118,7 @@ async def show_album(request):
          'target': target,
          'pagination': pagination,
          'form': form,
+         'status': status,
          'flashed': await get_flashed(request)})
 
 

@@ -6,11 +6,17 @@ from ..common.aparsers import (
 from ..common.random import get_unique_s
 
 
-async def get_album(conn, uid, suffix):
-    query = await conn.fetchrow(
-        '''SELECT id, title, created, suffix, state, volume FROM albums
-             WHERE suffix = $1 AND author_id = $2''',
-        suffix, uid)
+async def get_album(conn, uid, suffix=None, aid=None):
+    if suffix:
+        query = await conn.fetchrow(
+            '''SELECT id, title, created, suffix, state, volume FROM albums
+                 WHERE suffix = $1 AND author_id = $2''',
+            suffix, uid)
+    if aid:
+        query = await conn.fetchrow(
+            '''SELECT id, title, created, suffix, state, volume FROM albums
+                 WHERE id = $1 AND author_id = $2''',
+            aid, uid)
     if query:
         num = await conn.fetchval(
             'SELECT count(*) FROM pictures WHERE album_id = $1',

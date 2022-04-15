@@ -175,7 +175,7 @@
       </div>
     </div>
     <div id="right-panel">
-      {{ show_album_statistic(request, target) }}
+      {{ show_album_statistic(request, target, status) }}
     </div>
     {% if pagination and (pagination['next'] or pagination['prev']) %}
       <div class="entity-pagination next-block footer-bottom text-center">
