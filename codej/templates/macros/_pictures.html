@@ -52,6 +52,8 @@
         </div>
         <div class="form-group">
           <button id="rename-album"
+                  data-url="{{ request.url_for('pictures:rename-album') }}"
+                  data-aid="{{ album['id'] }}"
                   class="btn btn-primary btn-block btn-sm">
             Переименовать
           </button>

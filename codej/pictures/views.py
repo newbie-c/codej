@@ -18,6 +18,25 @@ from .redi import assign_pic_cache
 from .tasks import verify_data
 
 
+async def rename_album(request):
+    res = {'empty': True}
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.UPLOAD_PICTURES in current_user['permissions']:
+        d = await request.form()
+        conn = await get_conn(request.app.config)
+        target = await get_album(
+            conn, current_user['id'], aid=int(d.get('album')))
+        if target and len(d.get('title')) <= 100  and \
+                d.get('title') != target['title']:
+            await conn.execute(
+                'UPDATE albums SET title = $1 WHERE id = $2',
+                d.get('title'), target['id'])
+            res = {'empty': False}
+        await conn.close()
+    return JSONResponse(res)
+
+
 async def change_state(request):
     res = {'empty': True}
     current_user = await checkcu(request)

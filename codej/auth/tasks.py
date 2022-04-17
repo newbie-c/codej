@@ -179,6 +179,7 @@ async def change_pattern(conf, suffix):
     await conn.execute(
         'UPDATE captchas SET val = $1, picture = $2 WHERE suffix = $3',
         val, pic.read(), suffix)
-    pic.close()
+    await loop.run_in_executor(
+        None, functools.partial(pic.close))
     await conn.close()
     return None
