@@ -18,6 +18,40 @@ from .redi import assign_pic_cache
 from .tasks import verify_data
 
 
+async def show_user_stat(request):
+    res = {'empty': True}
+    current_user = await checkcu(request)
+    d = await request.form()
+    uid = int(d.get('uid', '0'))
+    if uid == current_user['id'] and \
+            permissions.UPLOAD_PICTURES in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        stat = await get_user_stat(conn, current_user['id'])
+        res = {'empty': False,
+               'html': request.app.jinja.get_template(
+                   'pictures/user-statistic.html').render(
+                   user=current_user, stat=stat)}
+        await conn.close()
+    return JSONResponse(res)
+
+
+async def show_album_stat(request):
+    res = {'empty': True}
+    current_user = await checkcu(request)
+    if permissions.UPLOAD_PICTURES in current_user['permissions']:
+        d = await request.form()
+        conn = await get_conn(request.app.config)
+        target = await get_album(
+            conn, current_user['id'], suffix=d.get('suffix'))
+        if target:
+            res = {'empty': False,
+                   'html': request.app.jinja.get_template(
+                       'pictures/album-statistic.html').render(
+                           request=request, target=target, status=status)}
+        await conn.close()
+    return JSONResponse(res)
+
+
 async def rename_album(request):
     res = {'empty': True}
     current_user = await checkcu(request)

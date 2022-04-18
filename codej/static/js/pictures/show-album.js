@@ -89,74 +89,10 @@ $(function() {
       }
     });
   }
-  $('#main-container').on('click', '#show-rename-form', function() {
-    $(this).blur();
-    let $ren = $('#rename-form');
-    let $stch = $('#change-status-form');
-    if ($ren.is(':hidden')) {
-      $ren.slideDown('slow');
-      $stch.slideUp('slow');
-    } else {
-      $ren.slideUp('slow');
-    }
-  });
-  $('#main-container').on('click', '#show-state-form', function() {
-    $(this).blur();
-    let $ren = $('#rename-form');
-    let $stch = $('#change-status-form');
-    if ($stch.is(':hidden')) {
-      $stch.slideDown('slow');
-      $ren.slideUp('slow');
-    } else {
-      $stch.slideUp('slow');
-    }
-  });
-  $('#main-container').on('change', '#select-status', function() {
-    $.ajax({
-      method: 'POST',
-      url: $(this).data().url,
-      data: {
-        album: $(this).data().aid,
-        state: $(this).val()
-      },
-      success: function(data) {
-        if (!data.empty) {
-          $('#right-panel').empty().append(data.html);
-          $('#right-panel .date-field').each(function() {
-            formatDateTime($(this));
-          });
-        }
-      },
-      error: function(data) {
-        $('#change-status-form').slideUp('slow');
-      },
-      dataType: 'json'
-    });
-  });
-  $('#main-container').on('click', '#rename-album', function() {
-    $(this).blur();
-    if (!$('#rename-form').hasClass('has-error')) {
-      $.ajax({
-        method: 'POST',
-        url: $(this).data().url,
-        data: {
-          album: $(this).data().aid,
-          title: $('#title-change').val()
-        },
-        success: function(data) {
-          if (data.empty) {
-            $('#rename-form').slideUp('slow');
-          } else {
-            window.location.reload();
-          }
-        },
-        error: function(data) {
-          $('#rename-form').slideUp('slow');
-        },
-        dataType: 'json'
-      });
-    }
-  });
+  $('#main-container').on('click', '#show-rename-form', showRenameForm);
+  $('#main-container').on('click', '#show-state-form', showStateForm);
+  $('#main-container').on('change', '#select-status', changeStatus);
+  $('#main-container').on('click', '#rename-album', renameAlbum);
   $('#main-container')
   .on('keyup blur', '#title-change',
       {min: 3, max: 100, block: '#rename-form'}, markInputError);

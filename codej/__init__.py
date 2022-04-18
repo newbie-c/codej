@@ -30,7 +30,7 @@ from .main.views import (
     make_friend, show_index, show_profile, show_robots, show_favicon)
 from .pictures.views import (
     change_state, check_pic, create_album, rename_album,
-    show_album, show_albums)
+    show_album, show_album_stat, show_albums, show_user_stat)
 
 base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
@@ -122,7 +122,11 @@ app = Starlette(
                 Route('/ajax/change-state', change_state,
                       name='change-state', methods=['POST']),
                 Route('/ajax/rename-album', rename_album,
-                      name='rename-album', methods=['POST'])]),
+                      name='rename-album', methods=['POST']),
+                Route('/ajax/show-album-stat', show_album_stat,
+                      name='show-album-stat', methods=['POST']),
+                Route('/ajax/show-user-stat', show_user_stat,
+                      name='show-user-stat', methods=['POST'])]),
             Mount('/static',
                   app=StaticFiles(directory=static), name='static')],
     on_startup=[run_before],

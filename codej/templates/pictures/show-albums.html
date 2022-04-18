@@ -39,6 +39,8 @@
           <div class="albums-options text-center">
             <button type="button"
                     class="btn btn-info btn-sm user-home"
+		    data-uid="{{ current_user['id'] }}"
+		    data-url="{{ url_for('pictures:show-user-stat') }}"
                     title="показать статистику">
               <span class="glyphicon glyphicon-home"
                     aria-hidden="true"></span>
@@ -191,7 +193,8 @@
 			  title="{{ album['title'] }}"
 			  {% endif %}
 			  data-suffix="{{ album['suffix'] }}"
-			  data-url="">
+			  data-url="{{ url_for(
+                              'pictures:show-album-stat') }}">
 			{{ album['parsed'] }}
 		      </td>
 		      <td class="text-right album-tools-panel">
@@ -260,6 +263,12 @@
 	    'js/scroll-panel.js',
 	    'js/mark-input-error.js',
 	    'js/show-datetime.js',
+	    'js/show-album-stat.js',
+	    'js/show-rename-form.js',
+	    'js/show-state-form.js',
+	    'js/change-status.js',
+	    'js/rename-album.js',
+	    'js/show-user-stat.js',
             'js/pictures/show-albums.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

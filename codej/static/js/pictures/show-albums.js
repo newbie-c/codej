@@ -16,6 +16,7 @@ $(function() {
         $findblock.slideDown('slow', function() {
           scrollPanel($('.albums-options'));
         });
+        showUserStat($('.user-home').data().url, $('.user-home').data().uid);
       } else {
         $findblock.slideUp('slow');
       }
@@ -23,6 +24,7 @@ $(function() {
     $('.create-new-button').on('click', function() {
       $(this).blur();
       if ($cform.is(':hidden')) {
+        showUserStat($('.user-home').data().url, $('.user-home').data().uid);
         if (!$findblock.is(':hidden')) $findblock.slideUp('slow');
         $cform.slideDown('slow', function() {
           if (!$findblock.is(':hidden')) $findblock.slideUp('slow');
@@ -95,10 +97,35 @@ $(function() {
   });
   $('.user-home').on('click', function() {
     $(this).blur();
+    let $createform = $('#create-form-block');
+    let $findform = $('#find-pic-block');
+    if (!$createform.is(':hidden')) $createform.slideUp('slow');
+    if (!$findform.is(':hidden')) $findform.slideUp('slow');
+    showUserStat($(this).data().url, $(this).data().uid);
   });
   $('.album-reload').on('click', function() {
     $(this).blur();
     window.location.reload();
   });
-
+  let $header = $('.album-header-panel');
+  if ($header.length) {
+    $header.on('click', function() {
+      if (!$(this).hasClass('clicked-item')) {
+        let $createform = $('#create-form-block');
+        let $findform = $('#find-pic-block');
+        if (!$createform.is(':hidden')) $createform.slideUp('slow');
+        if (!$findform.is(':hidden')) $findform.slideUp('slow');
+        $('.clicked-item').removeClass('clicked-item');
+        $(this).addClass('clicked-item');
+        showStatistic($(this).data().url, $(this).data().suffix);
+      }
+    });
+  }
+  $('#main-container').on('click', '#show-rename-form', showRenameForm);
+  $('#main-container').on('click', '#show-state-form', showStateForm);
+  $('#main-container').on('change', '#select-status', changeStatus);
+  $('#main-container').on('click', '#rename-album', renameAlbum);
+  $('#main-container')
+  .on('keyup blur', '#title-change',
+      {min: 3, max: 100, block: '#rename-form'}, markInputError);
 });
