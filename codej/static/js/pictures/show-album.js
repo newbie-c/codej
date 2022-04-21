@@ -12,13 +12,20 @@ $(function() {
   });
   $('.show-statistic').on('click', function() {
     $(this).blur();
+    let $form = $('#upload-form-block');
+    if (!$form.is(':hidden')) $form.slideUp('slow');
+    if ($('.clicked-item').length) {
+      $('.clicked-item').removeClass('clicked-item');
+      showStatistic($(this).data().url, $(this).data().suffix);
+    }
   });
   $('.album-reload').on('click', function() {
     $(this).blur();
     window.location.reload();
   });
-  $('.upload-new').on('click', function() {
+  $('.album-first-page').on('click', function() {
     $(this).blur();
+    window.location.replace($(this).data().dest);
   });
   let $data_panel = $('#data-panel');
   if ($data_panel.length) {
@@ -59,6 +66,12 @@ $(function() {
       if (!$upblock.is(':hidden')) {
         $upblock.slideUp('slow');
       } else {
+        if ($('.clicked-item').length) {
+          $('.clicked-item').removeClass('clicked-item');
+          showStatistic(
+            $('.show-statistic').data().url,
+            $('.show-statistic').data().suffix);
+        }
         $upblock.slideDown('slow');
         scrollPanel($('.albums-options'));
       }
@@ -96,4 +109,69 @@ $(function() {
   $('#main-container')
   .on('keyup blur', '#title-change',
       {min: 3, max: 100, block: '#rename-form'}, markInputError);
+  let $header = $('.album-header-panel');
+  if ($header.length) {
+    $header.on('click', function() {
+      if (!$(this).hasClass('clicked-item')) {
+        let $form = $('#upload-form-block');
+        if (!$form.is(':hidden')) $form.slideUp('slow');
+        $('.clicked-item').removeClass('clicked-item');
+        $(this).addClass('clicked-item');
+        $.ajax({
+          method: 'POST',
+          url: $(this).data().url,
+          data: {
+            suffix: $(this).data().suffix
+          },
+          success: function(data) {
+            if (!data.empty) {
+              $('#right-panel').empty().append(data.html);
+              formatDateTime($('#right-panel .date-field'));
+              let $block_width = parseInt($('.album-statistic').width());
+              let $pic_width = parseInt($('.picture-body img').attr('width'));
+              if ($pic_width >= $block_width) {
+                let $pic_height = parseInt($('.picture-body img')
+                                           .attr('height'));
+                let width = $block_width - 4;
+                let height = Math.round($pic_height / ($pic_width / width));
+                $('.picture-body img').attr({
+                  "width": width, "height": height
+                });
+              }
+            }
+          },
+          error: function(data) {
+            $('.clicked-item').removeClass('clicked-item');
+          },
+          dataType: 'json'
+        });
+      }
+    });
+  }
+  $('#right-panel').on('click', '.copy-link', function() {
+    $(this).blur();
+    let $ff = $('.album-form');
+    let $sf = $('.album-form-b');
+    if ($ff.is(':hidden')) {
+      $ff.slideDown('slow');
+      $sf.slideUp('slow');
+    } else {
+      $ff.slideUp('slow');
+    }
+  });
+  $('#right-panel').on('click', '.copy-md-code', function() {
+    $(this).blur();
+    let $sf = $('.album-form-b');
+    let $ff = $('.album-form');
+    if ($sf.is(':hidden')) {
+      $sf.slideDown('slow');
+      $ff.slideUp('slow');
+    } else {
+      $sf.slideUp('slow');
+    }
+  });
+  $('#right-panel')
+  .on('click', '#copy-button', {cls: '.album-form'}, copyThis);
+  $('#right-panel')
+  .on('click', '#copy-button-b', {cls: '.album-form-b'}, copyThis);
 });

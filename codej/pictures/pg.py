@@ -6,6 +6,28 @@ from ..common.aparsers import (
 from ..common.random import get_unique_s
 
 
+async def get_pic_stat(conn, uid, suffix):
+    query = await conn.fetchrow(
+        '''SELECT pictures.uploaded, pictures.filename, pictures.width,
+                  pictures.height, pictures.format, pictures.volume,
+                  pictures.suffix, albums.author_id FROM pictures, albums
+             WHERE pictures.album_id = albums.id
+               AND albums.author_id = $1 AND pictures.suffix = $2''',
+        uid, suffix)
+    if query:
+        return {'uploaded': f'{query.get("uploaded").isoformat()}Z',
+                'filename': query.get('filename'),
+                'width': query.get('width'),
+                'height': query.get('height'),
+                'format': query.get('format'),
+                'volume': await parse_units(query.get('volume')),
+                'suffix': query.get('suffix'),
+                'parsed15': await parse_pic_filename(
+                    query.get('filename'), 15),
+                'parsed25': await parse_pic_filename(
+                    query.get('filename'), 25)}
+
+
 async def get_album(conn, uid, suffix=None, aid=None):
     if suffix:
         query = await conn.fetchrow(

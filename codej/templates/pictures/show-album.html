@@ -49,7 +49,8 @@
 	    </button>
             <button type="button"
 		    data-suffix="{{ target['suffix'] }}"
-		    data-url=""
+		    data-url="{{ url_for(
+		    	'pictures:show-album-stat') }}"
 		    class="btn btn-info btn-sm show-statistic"
 		    title="показать статистику альбома">
               <span class="glyphicon glyphicon-repeat"
@@ -73,7 +74,7 @@
 	      </button>
             {% else %}
               <button type="button"
-		      class="btn btn-default btn-sm album-reload"
+		      class="btn btn-default btn-sm album-first-page"
 		      data-dest="{{ url_for(
 			'pictures:show-album', suffix=target['suffix']) }}"
 		      title="в начало альбома">
@@ -137,8 +138,8 @@
 		  {% endif %}
 		  <tr {% if not loop.last %}class="bordered"{% endif %}>
                     <td class="album-header-panel"
-			data-url=""
-			data-suffix=""
+			data-url="{{ url_for('pictures:show-pic-stat') }}"
+			data-suffix="{{ pic['suffix'] }}"
 			{% if pic['filename']|length > 40 %}
 			title="{{ pic['filename'] }}"
 			{% endif %}>
@@ -191,6 +192,10 @@
 
 {% block scripts %}
   {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/vendor-clipboard.js',
+            'vendor/clipboard.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
   {% assets filters='rjsmin', output='generic/js/pictures/show-album.js',
             'js/check-mc.js',
 	    'js/hide-hidden.js',
@@ -204,6 +209,8 @@
 	    'js/show-state-form.js',
 	    'js/change-status.js',
 	    'js/rename-album.js',
+	    'js/copy-this.js',
+	    'js/show-album-stat.js',
             'js/pictures/show-album.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

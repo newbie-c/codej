@@ -45,14 +45,14 @@
               <span class="glyphicon glyphicon-home"
                     aria-hidden="true"></span>
             </button>
+	    <button type="button"
+                    class="btn btn-default btn-sm album-reload"
+                    title="обновить">
+              <span class="glyphicon glyphicon-refresh"
+                    aria-hidden="true"></span>
+            </button>
             {% if not pagination or
                   (pagination and pagination['page'] == 1) %}
-              <button type="button"
-                      class="btn btn-default btn-sm album-reload"
-                      title="обновить">
-                <span class="glyphicon glyphicon-refresh"
-                      aria-hidden="true"></span>
-              </button>
               <button type="button"
                       class="btn btn-info btn-sm album-search"
                       title="поиск">
@@ -68,6 +68,7 @@
             {% else %}
               <button type="button"
                       class="btn btn-default btn-sm album-first-page"
+		      data-url="{{ url_for('pictures:show-albums') }}"
                       title="в начало">
                 <span class="glyphicon glyphicon-circle-arrow-left"
                       aria-hidden="true"></span>

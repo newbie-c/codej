@@ -13,9 +13,25 @@ from .attri import status
 from .forms import UploadFile
 from .pg import (
     check_last_albums, check_last_pictures, create_new_album, get_album,
-    get_user_stat, select_albums, select_pictures)
+    get_pic_stat, get_user_stat, select_albums, select_pictures)
 from .redi import assign_pic_cache
 from .tasks import verify_data
+
+
+async def show_pic_stat(request):
+    res = {'empty': True}
+    d = await request.form()
+    current_user = await checkcu(request)
+    conn = await get_conn(request.app.config)
+    picture = await get_pic_stat(conn, current_user['id'], d.get('suffix'))
+    if current_user and picture and \
+            permissions.UPLOAD_PICTURES in current_user['permissions']:
+        res = {'empty': False,
+               'html': request.app.jinja.get_template(
+                   'pictures/pic-stat.html').render(
+                       request=request, picture=picture)}
+    await conn.close()
+    return JSONResponse(res)
 
 
 async def show_user_stat(request):

@@ -27,10 +27,12 @@ from .errors import (
     handle_csrf_error, notify_not_found_page,
     refuse_method, refuse_request)
 from .main.views import (
-    make_friend, show_index, show_profile, show_robots, show_favicon)
+    make_friend, show_index, show_picture, show_profile,
+    show_robots, show_favicon)
 from .pictures.views import (
     change_state, check_pic, create_album, rename_album,
-    show_album, show_album_stat, show_albums, show_user_stat)
+    show_album, show_album_stat, show_albums, show_pic_stat,
+    show_user_stat)
 
 base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
@@ -79,6 +81,7 @@ app = Starlette(
             Route('/favicon.ico', show_favicon, name='favicon'),
             Route('/ajax/make-friend', make_friend,
                   name="make-friend", methods=['POST']),
+            Route('/picture/{suffix}', show_picture, name='show-picture'),
             Route('/society/{username}', show_profile,
                   name='profile', methods=['GET', 'POST']),
             Mount('/admin', name='admin', routes=[
@@ -126,7 +129,9 @@ app = Starlette(
                 Route('/ajax/show-album-stat', show_album_stat,
                       name='show-album-stat', methods=['POST']),
                 Route('/ajax/show-user-stat', show_user_stat,
-                      name='show-user-stat', methods=['POST'])]),
+                      name='show-user-stat', methods=['POST']),
+                Route('/ajax/show-pic-stat', show_pic_stat,
+                      name='show-pic-stat', methods=['POST'])]),
             Mount('/static',
                   app=StaticFiles(directory=static), name='static')],
     on_startup=[run_before],

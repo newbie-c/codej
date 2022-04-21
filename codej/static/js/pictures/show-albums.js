@@ -121,6 +121,11 @@ $(function() {
       }
     });
   }
+  let $first = $('.album-first-page');
+  if ($first.length) $first.on('click', function() {
+    $(this).blur();
+    window.location.replace($(this).data().url);
+  });
   $('#main-container').on('click', '#show-rename-form', showRenameForm);
   $('#main-container').on('click', '#show-state-form', showStateForm);
   $('#main-container').on('change', '#select-status', changeStatus);

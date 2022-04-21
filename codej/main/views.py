@@ -2,7 +2,7 @@ import os
 
 from starlette.exceptions import HTTPException
 from starlette.responses import (
-    FileResponse, JSONResponse, PlainTextResponse, RedirectResponse)
+    FileResponse, JSONResponse, PlainTextResponse, Response, RedirectResponse)
 from starlette_wtf import csrf_protect, csrf_token
 
 from ..auth.attri import (
@@ -14,10 +14,47 @@ from ..common.pg import get_conn
 from ..common.urls import get_next
 from .pg import check_friends, filter_target_user
 from .redi import change_udata
+from .tools import check_state
 
 robots = """User-agent: *
 Disallow: /
 """
+
+
+async def show_picture(request):
+    current_user = await checkcu(request)
+    conn = await get_conn(request.app.config)
+    target = await conn.fetchrow(
+        '''SELECT albums.state, albums.author_id, pictures.suffix,
+                  pictures.picture, pictures.format FROM albums, pictures
+             WHERE pictures.suffix = $1
+               AND albums.id = pictures.album_id''',
+        request.path_params.get('suffix'))
+    base = os.path.dirname(os.path.dirname(__file__))
+    if target is None:
+        response = FileResponse(
+            os.path.join(base, 'static', 'images', '404.jpg'))
+        response.headers.append(
+            'cache-control',
+            'max-age=0, no-store, no-cache, must-revalidate')
+    else:
+        if await check_state(conn, target, current_user):
+            response = Response(
+                target.get('picture'),
+                media_type=f'image/{target.get("format").lower()}')
+            response.headers.append(
+                'cache-control',
+                'public, max-age={0}'.format(
+                    request.app.config.get(
+                        'SEND_FILE_MAX_AGE', cast=int, default=0)))
+        else:
+            response = FileResponse(
+                os.path.join(base, 'static', 'images', '403.jpg'))
+            response.headers.append(
+                'cache-control',
+                'max-age=0, no-store, no-cache, must-revalidate')
+    await conn.close()
+    return response
 
 
 async def make_friend(request):
