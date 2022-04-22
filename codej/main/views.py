@@ -33,7 +33,7 @@ async def show_picture(request):
     base = os.path.dirname(os.path.dirname(__file__))
     if target is None:
         response = FileResponse(
-            os.path.join(base, 'static', 'images', '404.jpg'))
+            os.path.join(base, 'static', 'images', '404.png'))
         response.headers.append(
             'cache-control',
             'max-age=0, no-store, no-cache, must-revalidate')
@@ -49,7 +49,7 @@ async def show_picture(request):
                         'SEND_FILE_MAX_AGE', cast=int, default=0)))
         else:
             response = FileResponse(
-                os.path.join(base, 'static', 'images', '403.jpg'))
+                os.path.join(base, 'static', 'images', '403.png'))
             response.headers.append(
                 'cache-control',
                 'max-age=0, no-store, no-cache, must-revalidate')
