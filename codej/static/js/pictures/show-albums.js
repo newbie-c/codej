@@ -62,6 +62,33 @@ $(function() {
         checkBox('#pub-f');
       }
     });
+    $('#find-submit').on('click', function() {
+      $(this).blur();
+      let $suffix = $('#find-input').val();
+      if ($suffix) {
+        console.log('yes');
+        $.ajax({
+          method: 'POST',
+          url: $(this).data().url,
+          data: {
+            suffix: $suffix
+          },
+          success: function(data) {
+            if (!data.empty) {
+              window.location.assign(data.url);
+            } else {
+              $('#find-pic-block').slideUp('slow');
+              $('#find-input').val('');
+            }
+          },
+          error: function(data) {
+            $('#find-pic-block').slideUp('slow');
+            $('#find-input').val('');
+          },
+          dataType: 'json'
+        });
+      }
+    });
     $('#create-new').on('click', function() {
       $(this).blur();
       if (!$('#title-group').hasClass('has-error')) {

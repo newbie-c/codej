@@ -1,5 +1,4 @@
 function showUserStat(url, uid) {
-  console.log(url, uid);
   if ($('.clicked-item').length) {
     $('.clicked-item').removeClass('clicked-item');
     $.ajax({

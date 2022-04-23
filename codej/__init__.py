@@ -30,9 +30,9 @@ from .main.views import (
     make_friend, show_index, show_picture, show_profile,
     show_robots, show_favicon)
 from .pictures.views import (
-    change_state, check_pic, create_album, rename_album,
-    show_album, show_album_stat, show_albums, show_pic_stat,
-    show_user_stat)
+    change_state, check_pic, create_album, find_album,
+    rename_album, show_album, show_album_stat, show_albums,
+    show_pic_stat, show_user_stat)
 
 base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
@@ -131,7 +131,9 @@ app = Starlette(
                 Route('/ajax/show-user-stat', show_user_stat,
                       name='show-user-stat', methods=['POST']),
                 Route('/ajax/show-pic-stat', show_pic_stat,
-                      name='show-pic-stat', methods=['POST'])]),
+                      name='show-pic-stat', methods=['POST']),
+                Route('/ajax/find-album', find_album,
+                      name='find-album', methods=['POST'])]),
             Mount('/static',
                   app=StaticFiles(directory=static), name='static')],
     on_startup=[run_before],

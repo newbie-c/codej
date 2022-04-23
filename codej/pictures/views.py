@@ -18,6 +18,25 @@ from .redi import assign_pic_cache
 from .tasks import verify_data
 
 
+async def find_album(request):
+    res = {'empty': True}
+    current_user = await checkcu(request)
+    suffix = (await request.form()).get('suffix')
+    if suffix and current_user and \
+            permissions.UPLOAD_PICTURES in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        s = await conn.fetchval(
+            '''SELECT albums.suffix FROM albums, pictures
+                 WHERE albums.id = pictures.album_id
+                 AND pictures.suffix = $1 AND albums.author_id = $2''',
+            suffix, current_user['id'])
+        await conn.close()
+        if s:
+            res = {'empty': False,
+                   'url': request.url_for('pictures:show-album', suffix=s)}
+    return JSONResponse(res)
+
+
 async def show_pic_stat(request):
     res = {'empty': True}
     d = await request.form()
