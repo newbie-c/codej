@@ -16,6 +16,7 @@ $(function() {
     if (!$form.is(':hidden')) $form.slideUp('slow');
     if ($('.clicked-item').length) {
       $('.clicked-item').removeClass('clicked-item');
+      $('.remove-button').each(function() { $(this).fadeOut('slow'); });
       showStatistic($(this).data().url, $(this).data().suffix);
     }
   });
@@ -68,6 +69,7 @@ $(function() {
       } else {
         if ($('.clicked-item').length) {
           $('.clicked-item').removeClass('clicked-item');
+          $('.remove-button').each(function() { $(this).fadeOut('slow'); });
           showStatistic(
             $('.show-statistic').data().url,
             $('.show-statistic').data().suffix);
@@ -116,6 +118,7 @@ $(function() {
         let $form = $('#upload-form-block');
         if (!$form.is(':hidden')) $form.slideUp('slow');
         $('.clicked-item').removeClass('clicked-item');
+        $('.remove-button').each(function() { $(this).fadeOut('slow'); });
         $(this).addClass('clicked-item');
         $.ajax({
           method: 'POST',
@@ -146,6 +149,37 @@ $(function() {
           dataType: 'json'
         });
       }
+    });
+    $('.trash-button').on('click', function() {
+      $(this).blur();
+      let $album = $(this).parents('.album-tools-panel')
+                          .siblings('.album-header-panel');
+      if ($album.hasClass('clicked-item')) showHideButton(
+        $(this), '.remove-button');
+    });
+    $('.remove-button').on('click', function() {
+      $(this).blur();
+      let $this = $(this);
+      $.ajax({
+        method: 'POST',
+        url: $this.data().url,
+        data: {
+          suffix: $this.data().suffix,
+          page: $this.data().page,
+          last: $this.data().last
+        },
+        success: function(data) {
+          if (!data.empty) {
+            window.location.replace(data.url);
+          } else {
+            $this.fadeOut('slow');
+          }
+        },
+        error: function(data) {
+          $this.fadeOut('slow');
+        },
+        dataType: 'json'
+      });
     });
   }
   $('#right-panel').on('click', '.copy-link', function() {

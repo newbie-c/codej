@@ -151,6 +151,10 @@
                       <button type="button"
 			      class="btn btn-sm btn-danger remove-button
 				     to-be-hidden"
+			      data-suffix="{{ pic['suffix'] }}"
+			      data-page="{{ pagination['page'] }}"
+			      data-last="{{ last_item }}"
+			      data-url="{{ url_for('pictures:remove-pic') }}"
 			      title="удалить безвозвратно">
                         <span class="glyphicon glyphicon-remove-circle"
 			      aria-hidden="true"></span>
@@ -211,6 +215,7 @@
 	    'js/rename-album.js',
 	    'js/copy-this.js',
 	    'js/show-album-stat.js',
+	    'js/hidden-button.js',
             'js/pictures/show-album.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

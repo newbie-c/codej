@@ -3,6 +3,14 @@ import os
 import re
 
 
+async def parse_redirect(request, page, last, endpoint, **kwargs):
+    if last:
+        page = page - 1 or 1
+    if page == 1:
+        return request.url_for(endpoint, **kwargs)
+    return f'{request.url_for(endpoint, **kwargs)}?page={page}'
+
+
 async def parse_filename(filename, length):
     if len(filename) > length:
         name, ext = os.path.splitext(filename)

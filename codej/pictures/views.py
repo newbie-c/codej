@@ -1,11 +1,13 @@
 import asyncio
 
+from datetime import datetime
+
 from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse, RedirectResponse
 
 from ..auth.attri import permissions
 from ..auth.common import checkcu
-from ..common.aparsers import parse_page
+from ..common.aparsers import parse_page, parse_redirect
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
@@ -16,6 +18,42 @@ from .pg import (
     get_pic_stat, get_user_stat, select_albums, select_pictures)
 from .redi import assign_pic_cache
 from .tasks import verify_data
+
+
+async def remove_pic(request):
+    res = {'empty': True}
+    d = await request.form()
+    suffix, page, last = (
+        d.get('suffix', 'abc.png'),
+        int(d.get('page', '1')), int(d.get('last', '0')))
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.UPLOAD_PICTURES in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT albums.volume AS avol,
+                      albums.suffix AS asuffix,
+                      pictures.volume AS pvol,
+                      pictures.album_id AS aid FROM albums, pictures
+                 WHERE albums.id = pictures.album_id
+                   AND albums.author_id = $1
+                   AND pictures.suffix = $2''',
+            current_user['id'], suffix)
+        if target:
+            await conn.execute(
+                'UPDATE albums SET changed = $1, volume = $2 WHERE id = $3',
+                datetime.utcnow(),
+                target.get('avol') - target.get('pvol'),
+                target.get('aid'))
+            await conn.execute(
+                'DELETE FROM pictures WHERE suffix = $1', suffix)
+            res = {'empty': False,
+                   'url': await parse_redirect(
+                       request, page, last,
+                       'pictures:show-album', suffix=target['asuffix'])}
+            await set_flashed(request, 'Файл успешно удалён.')
+        await conn.close()
+    return JSONResponse(res)
 
 
 async def find_album(request):
