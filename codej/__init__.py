@@ -16,7 +16,8 @@ from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import assets
 
 from .admin.views import (
-    admin_users, find_user, set_init_perms, set_service, show_log)
+    admin_pictures, admin_users, find_user, set_init_perms,
+    set_service, show_log)
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
 from .auth.views import (
@@ -87,6 +88,7 @@ app = Starlette(
             Mount('/admin', name='admin', routes=[
                 Route('/society', admin_users,
                       name='users', methods=['GET', 'POST']),
+                Route('/pictures', admin_pictures, name='pictures'),
                 Route('/settings', set_service, name='settings'),
                 Route('/ajax/admin-perms', set_init_perms,
                       name='perms', methods=['POST']),

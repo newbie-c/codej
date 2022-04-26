@@ -12,7 +12,40 @@ from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
 from .forms import CreateUser
-from .pg import check_last_users, create_user, select_found, select_users
+from .pg import (
+    check_last_pictures, check_last_users, create_user, select_found,
+    select_pictures, select_users)
+
+
+async def admin_pictures(request):
+    current_user = await checkcu(request)
+    if current_user is None:
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    if permissions.ADMINISTER_SERVICE not in current_user['permissions']:
+        raise HTTPException(
+            status_code=403, detail='Для вас доступ ограничен.')
+    conn = await get_conn(request.app.config)
+    if not (page := await parse_page(request)) or \
+       not (last := await check_last_pictures(
+               conn, current_user['id'], page,
+               request.app.config.get(
+                   'PICTURES_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    pagination = await select_pictures(
+        conn, current_user['id'],
+        page, request.app.config.get(
+            'PICTURES_PER_PAGE', cast=int, default=3), last)
+    print(pagination)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'admin/pictures.html',
+        {'request': request,
+         'current_user': current_user,
+         'pagination': pagination,
+         'flashed': await get_flashed(request)})
 
 
 async def show_log(request):

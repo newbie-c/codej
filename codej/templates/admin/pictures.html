@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
+{% from "macros/_common.html" import paginate %}
+
+{% block title %}Админ:Картинки{% endblock title %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/admin/pictures.css',
+            'css/base.css',
+            'css/mc780.css',
+            'css/top-flashed.css',
+            'css/content-block.css',
+            'css/next-block.css',
+	    'css/find-block.css',
+	    'css/pagination.css',
+            'css/admin/pictures.css' %}
+    <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- admin/society.html -->
+  <div id="main-container">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    {% if pagination and pagination['page'] == 1 and pagination['next'] %}
+      <div class="content-block find-block">
+        <div class="find-label text-right">
+          <label for="suffix-input">Найти картинку:</label>
+        </div>
+        <div class="find-input">
+          <input type="text"
+                 id="suffix-input"
+                 name="suffix-input"
+                 data-url=""
+                 class="form-control"
+                 placeholder="вводите суффикс картинки">
+        </div>
+      </div>
+    {% endif %}
+    {% if pagination %}
+      {% for picture in pagination['pictures'] %}
+        {% if loop.first and loop.last %}
+          {% set last_item = 1 %}
+        {% else %}
+          {% set last_item = 0 %}
+        {% endif %}
+        <div class="content-block slidable">
+          <div class="block-header">
+            <h3 class="panel-title"
+                {% if picture['album']|length > 64 %}
+                title="{{ picture['album'] }}"
+                {% endif %}>
+              {{ picture['album_parsed64'] }}
+            </h3>
+          </div>
+          <div class="block-body">
+            <div class="picture-info to-be-hidden">
+              <div class="alias-info-block bordered-block">
+                <div class="item-label text-left">Загружено:</div>
+                <div class="item-content date-field">
+                  {{ picture['uploaded'] }}
+                </div>
+                <div class="footer-bottom"></div>
+              </div>
+              <div class="alias-info-block bordered-block">
+                <div class="item-label text-left">Загрузил:</div>
+                <div class="item-content username-field">
+                  <a href="{{ url_for(
+                    'profile', username=picture['author']) }}">
+                    {{ picture['author'] }}
+                  </a>
+                </div>
+                <div class="footer-bottom"></div>
+              </div>
+              <div class="alias-info-block bordered-block">
+                <div class="item-label text-left">Ссылка:</div>
+                <div class="item-content">
+                  <a href="{{ url_for(
+                    'show-picture', suffix=picture['suffix']) }}">
+                    {{ picture['suffix'] }}
+                  </a>
+                </div>
+                <div class="footer-bottom"></div>
+              </div>
+              <div class="alias-info-block bordered-block">
+                <div class="item-label text-left">Занимает:</div>
+                <div class="item-content">{{ picture['volume'] }}</div>
+                <div class="footer-bottom"></div>
+              </div>
+              <div class="alias-info-block bordered-block">
+                <div class="item-label text-left">Имя файла:</div>
+                <div class="item-content">
+                  {{ picture['filename_parsed45'] }}
+                </div>
+                <div class="footer-bottom"></div>
+              </div>
+              <div class="alias-info-block actions-block">
+                <div class="item-label actions-label text-left">
+                  Действия:
+                </div>
+                <div class="item-content">
+                  <!-- not implemented yet -->
+                </div>
+                <div class="footer-bottom"></div>
+              </div>
+            </div>
+            <div class="picture-block">
+              <div class="options-button-block">
+                <button type="button"
+                        title="показать детали"
+                        class="btn btn-sm btn-default details-button">
+                  <span class="glyphicon glyphicon-chevron-down"
+                        aria-hidden="true"></span>
+                </button>
+              </div>
+              <div class="picture-itself text-center">
+                <img alt="{{ picture.suffix }}"
+                     src="{{ url_for(
+                           'show-picture', suffix=picture['suffix']) }}"
+                     width="{{ picture['width'] }}"
+                     height="{{ picture['height'] }}">
+              </div>
+              <div class="footer-bottom"></div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      {% if pagination['prev'] or pagination['next'] %}
+        <div class="next-block entity-pagination text-center">
+          {{ paginate(request, pagination, 'admin:pictures') }}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="alert alert-warning">
+        В сервисе нет изображений.
+      </div>
+    {% endif %}
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/admin/pictures.js',
+            'js/check-mc.js',
+            'js/hide-hidden.js',
+            'js/footer.js',
+            'js/top-flashed.js',
+            'js/check-next.js',
+	    'js/adjust-pic.js',
+	    'js/show-hide.js',
+	    'js/scroll-panel.js',
+	    'js/show-datetime.js',
+            'js/admin/pictures.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}

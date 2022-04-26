@@ -33,6 +33,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand"
              href="{{ url_for('index') }}">
@@ -96,6 +97,9 @@
 		  </li>
 		  {% if permissions.ADMINISTER_SERVICE in cuperms %}
 		    <li role="separator" class="divider"></li>
+		    <li>
+                      <a href="{{ url_for('admin:pictures') }}">Картинки</a>
+		    </li>
 		    <li>
 		      <a href="{{ url_for('admin:settings') }}">
 			Настройки</a>

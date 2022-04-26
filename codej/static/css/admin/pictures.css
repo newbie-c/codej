@@ -1,0 +1,55 @@
+.block-body {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.picture-info {
+  margin: 6px;
+}
+
+.picture-block {
+  margin: 6px 0 8px;
+}
+
+.options-button-block {
+  width: 6%;
+  float: left;
+}
+
+.picture-itself {
+  margin-left: 7%;
+}
+
+.alias-info-block {
+  padding: 2px 0 4px 0;
+}
+
+.bordered-block {
+  border-bottom: 1px dashed #dddddd;
+}
+
+.item-label {
+  width: 25%;
+  float: left;
+}
+
+.item-content {
+  margin-left: 26%;
+}
+
+.actions-block {
+  padding: 6px 0 6px 0;
+}
+
+.actions-label {
+  padding: 4px 0 0;
+}
+
+.date-field {
+  font-style: italic;
+}
+
+.username-field {
+  text-shadow: 0 0 3px #d9dcec;
+  font-style: italic;
+}

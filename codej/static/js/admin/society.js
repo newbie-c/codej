@@ -1,5 +1,6 @@
 $(function() {
   checkMC(800);
+  hideHidden();
   let now = luxon.DateTime.now();
   renderTF('.today-field', now);
   formatFooter(now);

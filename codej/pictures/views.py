@@ -96,7 +96,8 @@ async def show_user_stat(request):
     current_user = await checkcu(request)
     d = await request.form()
     uid = int(d.get('uid', '0'))
-    if uid == current_user['id'] and \
+    if current_user and \
+            uid == current_user['id'] and \
             permissions.UPLOAD_PICTURES in current_user['permissions']:
         conn = await get_conn(request.app.config)
         stat = await get_user_stat(conn, current_user['id'])
@@ -111,7 +112,8 @@ async def show_user_stat(request):
 async def show_album_stat(request):
     res = {'empty': True}
     current_user = await checkcu(request)
-    if permissions.UPLOAD_PICTURES in current_user['permissions']:
+    if current_user and \
+            permissions.UPLOAD_PICTURES in current_user['permissions']:
         d = await request.form()
         conn = await get_conn(request.app.config)
         target = await get_album(
@@ -253,7 +255,8 @@ async def create_album(request):
     d = await request.form()
     if d.get('title') and d.get('state'):
         current_user = await checkcu(request)
-        if permissions.UPLOAD_PICTURES in current_user['permissions']:
+        if current_user and \
+                permissions.UPLOAD_PICTURES in current_user['permissions']:
             conn = await get_conn(request.app.config)
             rep = await conn.fetchval(
                 '''SELECT suffix FROM albums
