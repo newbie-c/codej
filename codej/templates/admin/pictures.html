@@ -104,7 +104,23 @@
                   Действия:
                 </div>
                 <div class="item-content">
-                  <!-- not implemented yet -->
+                  <button type="button"
+			  title="удалить"
+			  class="btn btn-sm btn-default trash-button">
+                    <span class="glyphicon glyphicon-trash"
+			  aria-hidden="true"></span>
+		  </button>
+                  <button type="button"
+			  title="удалить безвозвратно"
+			  data-suffix="{{ picture['suffix'] }}"
+			  data-page="{{ pagination['page'] }}"
+			  data-last="{{ last_item }}"
+			  data-url="{{ url_for('admin:rem-pic') }}"
+			  class="btn btn-sm btn-danger
+			         remove-button to-be-hidden">
+                    <span class="glyphicon glyphicon-remove-circle"
+			  aria-hidden="true"></span>
+		  </button>
                 </div>
                 <div class="footer-bottom"></div>
               </div>
@@ -155,6 +171,8 @@
 	    'js/show-hide.js',
 	    'js/scroll-panel.js',
 	    'js/show-datetime.js',
+	    'js/hidden-button.js',
+	    'js/remove-this.js',
             'js/admin/pictures.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

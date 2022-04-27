@@ -28,4 +28,9 @@ $(function() {
            .addClass('glyphicon-chevron-down');
     }
   });
+  $('#main-container').on('click', '.trash-button', function() {
+    $(this).blur();
+    showHideButton($(this), '.remove-button');
+  });
+  $('#main-container').on('click', '.remove-button', removeThis);
 });

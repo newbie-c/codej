@@ -157,30 +157,7 @@ $(function() {
       if ($album.hasClass('clicked-item')) showHideButton(
         $(this), '.remove-button');
     });
-    $('.remove-button').on('click', function() {
-      $(this).blur();
-      let $this = $(this);
-      $.ajax({
-        method: 'POST',
-        url: $this.data().url,
-        data: {
-          suffix: $this.data().suffix,
-          page: $this.data().page,
-          last: $this.data().last
-        },
-        success: function(data) {
-          if (!data.empty) {
-            window.location.replace(data.url);
-          } else {
-            $this.fadeOut('slow');
-          }
-        },
-        error: function(data) {
-          $this.fadeOut('slow');
-        },
-        dataType: 'json'
-      });
-    });
+    $('.remove-button').on('click', removeThis);
   }
   $('#right-panel').on('click', '.copy-link', function() {
     $(this).blur();

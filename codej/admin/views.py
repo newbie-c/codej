@@ -1,5 +1,7 @@
 import os
 
+from datetime import datetime
+
 from starlette.exceptions import HTTPException
 from starlette.responses import (
     JSONResponse, FileResponse, PlainTextResponse, RedirectResponse)
@@ -7,7 +9,7 @@ from starlette_wtf import csrf_protect, csrf_token
 
 from ..auth.attri import initials, permissions
 from ..auth.common import checkcu
-from ..common.aparsers import parse_page
+from ..common.aparsers import parse_page, parse_redirect
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
@@ -15,6 +17,39 @@ from .forms import CreateUser
 from .pg import (
     check_last_pictures, check_last_users, create_user, select_found,
     select_pictures, select_users)
+
+
+async def rem_pic(request):
+    res = {'empty': True}
+    d = await request.form()
+    suffix, page, last = (
+        d.get('suffix', 'abc.png'),
+        int(d.get('page', '1')), int(d.get('last', '0')))
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.ADMINISTER_SERVICE in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT albums.volume AS avol,
+                      albums.suffix AS asuffix,
+                      pictures.volume AS pvol,
+                      pictures.album_id AS aid FROM albums, pictures
+                 WHERE albums.id = pictures.album_id
+                   AND pictures.suffix = $1''', suffix)
+        if target:
+            await conn.execute(
+                'UPDATE albums SET changed = $1, volume = $2 WHERE id = $3',
+                datetime.utcnow(),
+                target.get('avol') - target.get('pvol'),
+                target.get('aid'))
+            await conn.execute(
+                'DELETE FROM pictures WHERE suffix = $1', suffix)
+            res = {'empty': False,
+                   'url': await parse_redirect(
+                       request, page, last, 'admin:pictures')}
+            await set_flashed(request, 'Файл успешно удалён.')
+        await conn.close()
+    return JSONResponse(res)
 
 
 async def admin_pictures(request):
