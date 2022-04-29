@@ -1,0 +1,107 @@
+<div class="found-aliases">
+  {% if found['pictures'] %}
+    {% for picture in found['pictures'] %}
+      <div class="content-block slidable next-block">
+        <div class="block-header">
+          <h3 class="panel-title"
+              {% if picture['album']|length > 64 %}
+              title="{{ picture['album'] }}"
+              {% endif %}>
+            {{ picture['album_parsed64'] }}
+          </h3>
+        </div>
+        <div class="block-body">
+          <div class="picture-info to-be-hidden">
+            <div class="alias-info-block bordered-block">
+              <div class="item-label text-left">Загружено:</div>
+              <div class="item-content date-field">
+                {{ picture['uploaded'] }}
+              </div>
+              <div class="footer-bottom"></div>
+            </div>
+            <div class="alias-info-block bordered-block">
+              <div class="item-label text-left">Загрузил:</div>
+              <div class="item-content username-field">
+                <a href="{{ url_for(
+                  'profile', username=picture['author']) }}">
+                  {{ picture['author'] }}
+                </a>
+              </div>
+              <div class="footer-bottom"></div>
+            </div>
+            <div class="alias-info-block bordered-block">
+              <div class="item-label text-left">Ссылка:</div>
+              <div class="item-content">
+                <a href="{{ url_for(
+                  'show-picture', suffix=picture['suffix']) }}">
+                  {{ picture['suffix'] }}
+                </a>
+              </div>
+              <div class="footer-bottom"></div>
+            </div>
+            <div class="alias-info-block bordered-block">
+              <div class="item-label text-left">Занимает:</div>
+              <div class="item-content">{{ picture['volume'] }}</div>
+              <div class="footer-bottom"></div>
+            </div>
+            <div class="alias-info-block bordered-block">
+              <div class="item-label text-left">Имя файла:</div>
+              <div class="item-content">
+                {{ picture['filename_parsed45'] }}
+              </div>
+              <div class="footer-bottom"></div>
+            </div>
+            <div class="alias-info-block actions-block">
+              <div class="item-label actions-label text-left">
+                Действия:
+              </div>
+              <div class="item-content">
+                <button type="button"
+      title="удалить"
+      class="btn btn-sm btn-default trash-button">
+                  <span class="glyphicon glyphicon-trash"
+      aria-hidden="true"></span>
+    </button>
+                <button type="button"
+      title="удалить безвозвратно"
+      data-suffix="{{ picture['suffix'] }}"
+      data-page="1"
+      data-last="0"
+      data-url="{{ url_for('admin:rem-pic') }}"
+      class="btn btn-sm btn-danger
+             remove-button to-be-hidden">
+                  <span class="glyphicon glyphicon-remove-circle"
+      aria-hidden="true"></span>
+    </button>
+              </div>
+              <div class="footer-bottom"></div>
+            </div>
+          </div>
+          <div class="picture-block">
+            <div class="options-button-block">
+              <button type="button"
+                      title="показать детали"
+                      class="btn btn-sm btn-default details-button">
+                <span class="glyphicon glyphicon-chevron-down"
+                      aria-hidden="true"></span>
+              </button>
+            </div>
+            <div class="picture-itself text-center">
+              <img alt="{{ picture.suffix }}"
+                   src="{{ url_for(
+                         'show-picture', suffix=picture['suffix']) }}"
+                   width="{{ picture['width'] }}"
+                   height="{{ picture['height'] }}">
+            </div>
+            <div class="footer-bottom"></div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+  {% else %}
+    <div class="alert alert-warning next-block">
+      По запросу ничего не найдено.
+    </div>
+  {% endif %}
+</div>

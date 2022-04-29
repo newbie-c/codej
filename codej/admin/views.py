@@ -9,7 +9,8 @@ from starlette_wtf import csrf_protect, csrf_token
 
 from ..auth.attri import initials, permissions
 from ..auth.common import checkcu
-from ..common.aparsers import parse_page, parse_redirect
+from ..common.aparsers import (
+    parse_page, parse_pic_filename, parse_redirect, parse_title, parse_units)
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
@@ -17,6 +18,44 @@ from .forms import CreateUser
 from .pg import (
     check_last_pictures, check_last_users, create_user, select_found,
     select_pictures, select_users)
+
+
+async def find_pic(request):
+    res = {'empty': True}
+    d = await request.form()
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.ADMINISTER_SERVICE in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        found = {'pictures': [
+            {'author': record.get('username'),
+             'uploaded': f'{record.get("uploaded").isoformat()}Z',
+             'album': record.get('title'),
+             'album_parsed64': await parse_title(record.get('title'), 64),
+             'filename': record.get('filename'),
+             'filename_parsed45': await parse_pic_filename(
+                 record.get('filename'), 45),
+             'album_state': record.get('state'),
+             'width': record.get('width'),
+             'height': record.get('height'),
+             'format': record.get('format'),
+             'volume': await parse_units(record.get('volume')),
+             'suffix': record.get('suffix')} for record in await conn.fetch(
+             '''SELECT users.username, albums.title,
+                       albums.state, pictures.uploaded,
+                       pictures.filename, pictures.width,
+                       pictures.height, pictures.format,
+                       pictures.volume, pictures.suffix
+                  FROM users, albums, pictures
+                    WHERE users.id = albums.author_id
+                      AND albums.id = pictures.album_id
+                      AND pictures.suffix LIKE $1''', f"{d.get('value')}%")]}
+        res = {'empty': False,
+               'html': request.app.jinja.get_template(
+                   'admin/found-pics.html').render(
+                   found=found, request=request)}
+        await conn.close()
+    return JSONResponse(res)
 
 
 async def rem_pic(request):
