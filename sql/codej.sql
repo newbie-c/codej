@@ -30,3 +30,33 @@ CREATE TABLE accounts (
     requested timestamp,
     user_id   integer       REFERENCES users(id) UNIQUE
 );
+
+CREATE TABLE albums (
+    id        serial        PRIMARY KEY,
+    title     varchar(100),
+    created   timestamp,
+    changed   timestamp,
+    suffix    varchar(8)    UNIQUE,
+    state     varchar(10),
+    volume    integer       DEFAULT 0,
+    author_id integer       REFERENCES users(id),
+    CONSTRAINT author_title_uni UNIQUE (author_id, title)
+);
+
+CREATE TABLE pictures (
+    uploaded timestamp,
+    picture  bytea,
+    filename varchar(128),
+    width    integer,
+    height   integer,
+    format   varchar(6),
+    volume   integer,
+    suffix   varchar(14)   UNIQUE,
+    album_id integer       REFERENCES albums(id)
+);
+
+CREATE TABLE friends (
+    author_id integer REFERENCES users(id),
+    friend_id integer REFERENCES users(id),
+    CONSTRAINT author_friend_uni UNIQUE (author_id, friend_id)
+);
