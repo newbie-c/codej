@@ -24,6 +24,7 @@ from .auth.views import (
     change_email, change_password, create_password, get_password,
     login, logout, request_email, reset_password, update_captcha)
 from .captcha.views import show_captcha
+from .drafts.views import show_drafts
 from .errors import (
     handle_csrf_error, notify_not_found_page,
     refuse_method, refuse_request)
@@ -119,6 +120,9 @@ app = Starlette(
                       name='upd-captcha', methods=['POST'])]),
             Mount('/captcha', name='captcha', routes=[
                 Route('/{suffix}', show_captcha, name='captcha')]),
+            Mount('/drafts', name='drafts', routes=[
+                Route('/', show_drafts,
+                      name='show-drafts', methods=['GET'])]),
             Mount('/pictures', name='pictures', routes=[
                 Route('/', show_albums,
                       name='show-albums', methods=['GET', 'POST']),

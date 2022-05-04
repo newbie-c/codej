@@ -112,7 +112,6 @@ async def admin_pictures(request):
         conn, current_user['id'],
         page, request.app.config.get(
             'PICTURES_PER_PAGE', cast=int, default=3), last)
-    print(pagination)
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'admin/pictures.html',

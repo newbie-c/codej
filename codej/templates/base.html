@@ -79,6 +79,12 @@
 		      </a>
 		    </li>
 		  {% endif %}
+		  {% if permissions.CREATE_ENTITY in cuperms %}
+		    <li>
+                      <a href="{{ url_for('drafts:show-drafts') }}">
+			      Черновики</a>
+		    </li>
+		  {% endif %}
 		</ul>
 	      </li>
 	    {% endif %}

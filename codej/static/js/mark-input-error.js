@@ -1,5 +1,5 @@
 function markInputError(event) {
-  let $value = $(this).val();
+  let $value = $.trim($(this).val());
   let $block = $(this).parents(event.data.block);
   if ($value.length < event.data.min || $value.length > event.data.max) {
     $block.addClass('has-error');
