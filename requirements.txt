@@ -4,6 +4,7 @@ anyio==3.4.0
 asgiref==3.4.1
 async-timeout==4.0.2
 asyncpg==0.25.0
+awesome-slugify==1.6.5
 click==8.0.3
 cssmin==0.2.0
 dnspython==2.2.0
@@ -21,12 +22,14 @@ PyJWT==2.3.0
 python-dotenv==0.19.2
 python-multipart==0.0.5
 PyYAML==6.0
+regex==2022.4.24
 rjsmin==1.2.0
 six==1.16.0
 sniffio==1.2.0
 starlette==0.20.0
 Starlette-WTF==0.4.3
 typing_extensions==4.0.1
+Unidecode==0.4.21
 uvicorn==0.17.1
 uvloop==0.16.0
 validate-email==1.3

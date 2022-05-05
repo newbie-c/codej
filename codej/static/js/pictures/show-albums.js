@@ -66,7 +66,6 @@ $(function() {
       $(this).blur();
       let $suffix = $('#find-input').val();
       if ($suffix) {
-        console.log('yes');
         $.ajax({
           method: 'POST',
           url: $(this).data().url,

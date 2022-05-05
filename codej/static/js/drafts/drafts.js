@@ -13,5 +13,29 @@ $(function() {
   });
   $('#title-submit').on('click', function() {
     $(this).blur();
+    $('.form-form').slideUp('slow');
+    $('#progress-block').slideDown('slow');
+    let $title = $('#title');
+    $title.blur();
+    if (!$('.input-field').hasClass('has-error')) {
+      $.ajax({
+        method: 'POST',
+        url: $(this).data().url,
+        data: {
+          title: $.trim($title.val())
+        },
+        success: function(data) {
+          if (!data.empty) window.location.assign(data.url);
+        },
+        error: function(data) {
+          let html = '<div class="alert alert-danger">' +
+                     '  Произошёл непредвиденный сбой, ' +
+                     '  сообщите администратору сервиса.' +
+                     '</div>';
+          $('#progress-block').before(html).remove();
+        },
+        dataType: 'json'
+      });
+    }
   });
 });
