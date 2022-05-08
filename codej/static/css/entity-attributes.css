@@ -1,0 +1,27 @@
+.author-avatar {
+  width: 90px;
+  height: 90px;
+  float: left;
+}
+
+.entity-info {
+  margin-left: 98px;
+  padding: 8px;
+}
+
+.entity-info h4 {
+  margin: 0;
+}
+
+.author-profile-link {
+  color: #83858f;
+  font-style: italic;
+  text-shadow: 0 0 3px #d9dcec;
+}
+
+.info-line-block {
+  font-size: 0.9em;
+  font-style: italic;
+  text-shadow: 0 0 3px #d9dcec;
+  margin: 4px 0 0;
+}

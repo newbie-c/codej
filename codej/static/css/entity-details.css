@@ -1,0 +1,31 @@
+.labeled {
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin: 0 1px;
+  font-size: 0.8em;
+  font-style: italic;
+}
+
+.labeled-info {
+  background-color: #5bc0de;
+  color: white;
+}
+
+.labeled-success {
+  background-color: #5db85d;
+  color: white;
+}
+
+.labeled-danger {
+  background-color: #d9534f;
+  color: white;
+}
+
+.labeled-warning {
+  background-color: #f0ad4e;
+  color: white;
+}
+
+.labeled-text .glyphicon {
+  margin-right: 6px;
+}

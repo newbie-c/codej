@@ -1,0 +1,14 @@
+.common-details {
+  padding: 4px 0 4px;
+  font-style: italic;
+  text-align: center;
+  text-shadow: 0 0 3px #d9dcec;
+}
+
+.entity-blog-link {
+  padding: 0;
+}
+
+.entity-details {
+  margin: 3px 0 4px;
+}

@@ -25,7 +25,7 @@ $(function() {
           title: $.trim($title.val())
         },
         success: function(data) {
-          if (!data.empty) window.location.assign(data.url);
+          if (!data.empty) window.location.replace(data.url);
         },
         error: function(data) {
           let html = '<div class="alert alert-danger">' +

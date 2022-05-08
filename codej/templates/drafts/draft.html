@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
+
+{% block title %}{{ target.get('title') }}{% endblock title %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/drafts/draft.css',
+            'css/base.css',
+            'css/mc780.css',
+            'css/top-flashed.css',
+            'css/next-block.css',
+            'css/content-block.css',
+	    'css/avatar.css',
+	    'css/entity-attributes.css',
+	    'css/common-details.css',
+	    'css/entity-details.css',
+            'css/drafts/draft.css' %}
+    <link rel="stylesheet" type="text/css", href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- drafts/draft.html -->
+  <div id="main-container">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    <div id="entity-header-block"
+         class="content-block">
+      <div class="block-header">
+        <h3 class="panel-title"
+            {% if target['title']|length > 80 %}
+            title="{{ target['title'] }}"{% endif %}>
+          {{ target['title'] }}
+        </h3>
+      </div>
+      <div class="block-body">
+        <div class="entity-attributes">
+          <div class="author-avatar avatar"
+               style="background:url({{ target['ava'] }})"></div>
+          <div class="entity-info">
+            <h4>
+              <a class="author-profile-link"
+                 href="{{ url_for('profile', username=target['author']) }}">
+                {{ target['author'] }}
+              </a>
+            </h4>
+            <div class="info-line-block">
+              <table>
+                <tbody>
+                  {% if target['published'] %}
+                    <tr>
+                      <td>
+                        <span class="date-info">Опубликован:&nbsp;</span>
+		      </td>
+		      <td>
+                        <span class="date-info date-field">
+	                  {{ target['published'] }}
+			</span>
+		      </td>
+		    </tr>
+		  {% endif %}
+		  <tr>
+                    <td>
+		      <span class="date-info">Отредактирован:&nbsp;</span>
+		    </td>
+		    <td>
+                      <span class="date-info date-field">
+		        {{ target['edited'] }}</span>
+		    </td>
+		  </tr>
+		</tbody>
+	      </table>
+            </div>
+          </div>
+	  <div class="footer-bottom"></div>
+        </div>
+      </div>
+    </div>
+    <div class="next-block content-block common-details">
+      <div class="entity-blog-link">
+        <a href="">{{ target['author'] }}&nbsp;блог</a>
+      </div>
+      <div class="entity-details">
+        <table align="center" class="entity-details-table">
+          <tbody>
+          <tr>
+            <td>
+              <div class="labeled labeled-text labeled-info viewed-ind">
+                <span class="glyphicon glyphicon-eye-open"
+		      aria-hidden="true"></span><span
+		      class="value">{{ target['viewed'] }}</span>
+	      </div>
+	    </td>
+	    <td>
+              <div class="labeled labeled-text labeled-success like-block">
+                <span class="glyphicon glyphicon-thumbs-up"
+		      aria-hidden="true"></span><span
+		      class="value">{{ target['likes'] }}</span>
+	      </div>
+	    </td>
+	    <td>
+              <div class="labeled labeled-text labeled-danger dislike-block">
+                <span class="glyphicon glyphicon-thumbs-down"
+		      aria-hidden="true"></span><span
+		      class="value">{{ target['dislikes'] }}</span>
+	      </div>
+	    </td>
+	    <td>
+              <div class="labeled labeled-text
+			  {% if target['commented'] %}labeled-info
+			  {% else %}labeled-warning{% endif %}">
+                <span class="glyphicon glyphicon-comment"
+		      aria-hidden="true"></span><span
+		      class="value">{{ target['commentaries'] }}</span>
+	      </div>
+	    </td>
+	    <td>
+              {% if target['state'] == status.mod %}
+                <div class="labeled labeled-text labeled-danger">
+                  <span class="glyphicon glyphicon-lock"
+			aria-hidden="true"></span><span
+			class="value">mod</span>
+		</div>
+	      {% elif target['state'] == status.draft %}
+                <div class="labeled labeled-text labeled-success">
+                  <span class="glyphicon glyphicon-edit"
+			aria-hidden="true"></span><span
+			class="value">draft</span>
+		</div>
+              {% elif target['state'] == status.pub %}
+	        <div class="labeled labeled-text labeled-success">
+                  <span class="glyphicon glyphicon-globe"
+			aria-hidden="true"></span><span
+			class="value">public</span>
+		</div>
+              {% elif target['state'] == status.priv %}
+	        <div class="labeled labeled-text labeled-info">
+                  <span class="glyphicon glyphicon-share"
+			aria-hidden="true"></span><span
+			class="value">share</span>
+		</div>
+              {% elif target['state'] == status.hidden %}
+	        <div class="labeled labeled-text labeled-info">
+                  <span class="glyphicon glyphicon-sunglasses"
+			aria-hidden="true"></span><span
+			class="value">hidden</span>
+		</div>
+              {% endif %}
+	    </td>
+	  </tr>
+	  </tbody>
+	</table>
+      </div>
+    </div>
+    {% if target['html'] %}
+      <div class="content-block next-block entity-text-block">
+        <!-- here we are -->
+      </div>
+    {% else %}
+      <div class="alert alert-success next-block">
+        Черновик создан, самое время наполнить его текстом.
+      </div>
+    {% endif %}
+    <div class="editor-forms-block content-block next-block">
+      <div id="new-paragraph-editor" class="form-form">
+        <div class="form-group">
+          <textarea id="html-text-edit"
+		    placeholder="введите следующий абзац топика"
+		    class="form-control"
+		    rows="4"></textarea>
+	</div>
+	<div class="form-group last-group">
+          <button id="html-text-send"
+		  type="button"
+		  class="btn btn-primary">
+            Добавить
+	  </button>
+	</div>
+      </div>
+    </div>
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/drafts/draft.js',
+            'js/check-mc.js',
+            'js/hide-hidden.js',
+            'js/footer.js',
+            'js/top-flashed.js',
+	    'js/show-datetime.js',
+            'js/drafts/draft.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}
