@@ -1,22 +1,21 @@
 from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse, RedirectResponse
 
-from ..auth.common import checkcu
 from ..auth.attri import permissions
+from ..auth.common import checkcu
+from ..common.aparsers import parse_page
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
 from .attri import status
-from .pg import check_article, create_d
+from .pg import check_article, create_d, check_last_drafts, select_drafts
 
 
 async def show_draft(request):
     current_user = await checkcu(request)
-    print(current_user)
     slug = request.path_params.get('slug')
     conn = await get_conn(request.app.config)
     target = await check_article(request, conn, slug)
-    print(target)
     if target is None:
         await conn.close()
         raise HTTPException(
@@ -29,6 +28,7 @@ async def show_draft(request):
                 'drafts:show-draft', slug=slug)), 302)
     if target.get('author_id') != current_user['id'] or \
             permissions.CREATE_ENTITY not in current_user['permissions']:
+        await conn.close()
         raise HTTPException(
             status_code=403, detail='Для вас доступ ограничен.')
     await conn.close()
@@ -64,9 +64,23 @@ async def show_drafts(request):
         return RedirectResponse(
             await get_next(request, request.app.url_path_for(
                 'drafts:show-drafts')), 302)
+    conn = await get_conn(request.app.config)
+    if not (page := await parse_page(request)) or \
+       not (last := await check_last_drafts(
+           conn, current_user['id'], page,
+           request.app.config.get('ARTS_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    pagination = await select_drafts(
+        request, conn, current_user['id'], page,
+        request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
+    print(pagination)
+    await conn.close()
     return request.app.jinja.TemplateResponse(
         'drafts/drafts.html',
         {'request': request,
          'flashed': await get_flashed(request),
-         'pagination': None,
+         'pagination': pagination,
+         'status': status,
          'current_user': current_user})

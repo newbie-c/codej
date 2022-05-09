@@ -3,11 +3,59 @@ import functools
 
 from datetime import datetime
 
-from ..common.aparsers import parse_title
+from ..common.aparsers import (
+    iter_pages, parse_last_page, parse_title)
 from ..common.avatar import get_ava_url
 from ..common.random import get_unique_s
 from .attri import status
 from .slugs import check_max, parse_match, make
+
+
+async def select_drafts(request, conn, current, page, per_page, last):
+    query = await conn.fetch(
+        '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
+                  a.edited, a.state, a.commented, a.viewed,
+                  accounts.ava_hash, users.username
+             FROM articles AS a, users, accounts
+             WHERE a.author_id = users.id
+               AND accounts.user_id = a.author_id
+               AND a.author_id = $1
+               AND (a.state = $2 OR a.state = $3)
+             ORDER BY a.edited DESC LIMIT $4 OFFSET $5''',
+        current, status.draft, status.mod, per_page, per_page*(page-1))
+    if query:
+        return {'page': page,
+                'next': page + 1 if page + 1 <= last else None,
+                'prev': page - 1 or None,
+                'pages': await iter_pages(page, last),
+                'articles': [
+                    {'id': record.get('id'),
+                     'title': record.get('title'),
+                     'title80': await parse_title(record.get('title'), 80),
+                     'slug': record.get('slug'),
+                     'suffix': record.get('suffix'),
+                     'summary': record.get('summary'),
+                     'published': f'{record.get("published").isoformat()}Z'
+                     if record.get('published') else None,
+                     'edited': f'{record.get("edited").isoformat()}Z',
+                     'state': record.get('state'),
+                     'commented': record.get('commented'),
+                     'viewed': record.get('viewed'),
+                     'author': record.get('username'),
+                     'ava': await get_ava_url(
+                         request, record.get('ava_hash'), size=88),
+                     'likes': 0,
+                     'dislikes': 0,
+                     'commentaries': 0} for record in query]}
+
+
+async def check_last_drafts(conn, current, page, per_page):
+    return await parse_last_page(
+        page, per_page, await conn.fetchval(
+            '''SELECT count(*) FROM articles
+                 WHERE author_id = $1
+                   AND (state = $2 OR state = $3)''',
+            current, status.draft, status.mod))
 
 
 async def check_article(request, conn, slug):
