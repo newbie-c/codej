@@ -8,7 +8,38 @@ from ..common.aparsers import (
 from ..common.avatar import get_ava_url
 from ..common.random import get_unique_s
 from .attri import status
+from .md import check_text, parse_md
 from .slugs import check_max, parse_match, make
+
+
+async def save_par(conn, art, text, code):
+    loop = asyncio.get_running_loop()
+    text, spec = await loop.run_in_executor(
+        None, functools.partial(check_text, text, code))
+    if spec and text:
+        if await conn.fetchrow(
+                '''SELECT num FROM paragraphs
+                     WHERE mdtext = $1 AND article_id = $2''', text, art):
+            text = None
+    if text:
+        last = await conn.fetchval(
+            '''SELECT num FROM paragraphs
+                 WHERE article_id = $1 ORDER BY num DESC''', art)
+        if last is None:
+            last = -1
+        await conn.execute(
+            '''INSERT INTO paragraphs (num, mdtext, article_id)
+                 VALUES ($1, $2, $3)''', last+1, text, art)
+        pars = await conn.fetch(
+            '''SELECT mdtext FROM paragraphs
+                 WHERE article_id = $1 ORDER BY num ASC''', art)
+        html = await loop.run_in_executor(
+            None, functools.partial(parse_md, pars))
+        if html:
+            await conn.execute(
+                'UPDATE articles SET html = $1 WHERE id = $2',
+                html, art)
+        return html
 
 
 async def select_drafts(request, conn, current, page, per_page, last):

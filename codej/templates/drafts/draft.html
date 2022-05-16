@@ -15,6 +15,7 @@
 	    'css/entity-attributes.css',
 	    'css/common-details.css',
 	    'css/entity-details.css',
+	    'css/entity-text.css',
             'css/drafts/draft.css' %}
     <link rel="stylesheet" type="text/css", href="{{ ASSET_URL }}">
   {% endassets %}
@@ -29,6 +30,7 @@
       </div>
     {% endif %}
     <div id="entity-header-block"
+	 data-id="{{ target['id'] }}"
          class="content-block">
       <div class="block-header">
         <h3 class="panel-title"
@@ -158,28 +160,33 @@
     </div>
     {% if target['html'] %}
       <div class="content-block next-block entity-text-block">
-        <!-- here we are -->
+	{{ target['html']|safe }}
       </div>
     {% else %}
-      <div class="alert alert-success next-block">
+      <div class="content-block alert alert-success next-block">
         Черновик создан, самое время наполнить его текстом.
       </div>
     {% endif %}
     <div class="editor-forms-block content-block next-block">
+      <div id="progress-block" class="text-center to-be-hidden">
+        <img alt="progress show"
+	     src="{{ url_for('static', path='images/upload.gif') }}">
+      </div>
       <div id="new-paragraph-editor" class="form-form">
         <div class="form-group">
           <textarea id="html-text-edit"
 		    placeholder="введите следующий абзац топика"
+                    data-url="{{ url_for('drafts:create-par') }}"
 		    class="form-control"
 		    rows="4"></textarea>
 	</div>
-	<div class="form-group last-group">
+	{#<div class="form-group last-group">
           <button id="html-text-send"
 		  type="button"
 		  class="btn btn-primary">
             Добавить
 	  </button>
-	</div>
+	</div>#}
       </div>
     </div>
   </div>
@@ -193,6 +200,8 @@
             'js/footer.js',
             'js/top-flashed.js',
 	    'js/show-datetime.js',
+	    'js/send-par.js',
+	    'js/scroll-panel.js',
             'js/drafts/draft.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

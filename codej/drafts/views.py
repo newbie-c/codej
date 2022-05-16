@@ -8,7 +8,25 @@ from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
 from .attri import status
-from .pg import check_article, create_d, check_last_drafts, select_drafts
+from .pg import (
+    check_article, create_d, check_last_drafts, save_par, select_drafts)
+
+
+async def create_par(request):
+    res = {'empty': True}
+    d = await request.form()
+    art, text, code = (
+        int(d.get('art')), d.get('text'), bool(int(d.get('code'))))
+    conn = await get_conn(request.app.config)
+    target = await conn.fetchrow(
+        '''SELECT id, html, author_id FROM articles WHERE id = $1''',
+        art)
+    current_user = await checkcu(request)
+    if text and target and current_user['id'] == target['author_id'] and \
+            permissions.CREATE_ENTITY in current_user['permissions']:
+        html = await save_par(conn, art, text, code)
+        res = {'empty': False, 'html': html}
+    return JSONResponse(res)
 
 
 async def show_draft(request):
@@ -75,7 +93,6 @@ async def show_drafts(request):
     pagination = await select_drafts(
         request, conn, current_user['id'], page,
         request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
-    print(pagination)
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'drafts/drafts.html',
