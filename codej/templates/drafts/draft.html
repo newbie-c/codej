@@ -16,6 +16,7 @@
 	    'css/common-details.css',
 	    'css/entity-details.css',
 	    'css/entity-text.css',
+	    'css/paraiso-dark.css',
             'css/drafts/draft.css' %}
     <link rel="stylesheet" type="text/css", href="{{ ASSET_URL }}">
   {% endassets %}
@@ -31,7 +32,7 @@
     {% endif %}
     <div id="entity-header-block"
 	 data-id="{{ target['id'] }}"
-         class="content-block">
+         class="content-block slidable">
       <div class="block-header">
         <h3 class="panel-title"
             {% if target['title']|length > 80 %}
@@ -39,7 +40,7 @@
           {{ target['title'] }}
         </h3>
       </div>
-      <div class="block-body">
+      <div class="block-body to-be-hidden">
         <div class="entity-attributes">
           <div class="author-avatar avatar"
                style="background:url({{ target['ava'] }})"></div>
@@ -200,8 +201,12 @@
             'js/footer.js',
             'js/top-flashed.js',
 	    'js/show-datetime.js',
+	    'js/show-hide.js',
 	    'js/send-par.js',
 	    'js/scroll-panel.js',
+	    'js/adjust-frame.js',
+	    'js/adjust-image.js',
+	    'js/set-margin.js',
             'js/drafts/draft.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

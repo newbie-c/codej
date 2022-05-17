@@ -6,6 +6,10 @@ $(function() {
   $('.close-top-flashed').on('click', closeTopFlashed);
   $('.date-field').each(function() { formatDateTime($(this)); });
   scrollPanel($('.editor-forms-block'));
+  $('.slidable .block-header').on('click', showHideBlock);
+  $('.entity-text-block iframe').each(adjustFrame);
+  $('.entity-text-block').children().each(setMargin);
+  $('.entity-text-block img').each(adjustImage);
   $('#html-text-edit').on('keyup', function(event) {
     if (event.which == 13) {
       let val = $(this).val().trim();

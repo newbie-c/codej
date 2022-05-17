@@ -9,3 +9,11 @@
 .last-group {
   margin-top: 6px;
 }
+
+#progress-block {
+  padding: 12px 0;
+}
+
+#html-text-edit {
+  text-align: justify;
+}

@@ -1,0 +1,77 @@
+.entity-text-block {
+  padding: 12px 10px 12px 10px;
+  text-align: justify;
+}
+
+.entity-text-block h2 {
+  text-align: left;
+  font-size: 1.24em;
+  font-weight: 500;
+  margin: 4px 0 8px 0;
+}
+
+.entity-text-block ul, .entity-text-block ol {
+  margin: 2px 0 6px;
+  padding: 0 0 0 20px;
+}
+
+.entity-text-block li {
+  text-align: justify;
+  padding-right: 8px;
+}
+
+.entity-text-block hr {
+  margin: 4px 25px 10px 25px;
+  border-color: #d3ddd3;
+}
+
+.entity-text-block blockquote {
+  font-style: italic;
+  font-size: 1.1em;
+  font-color: #d9dcec;
+  text-align: justify;
+  border-left: 6px solid #d9dcec;
+  padding: 6px 12px 6px 6px;
+  margin: 2px 0 8px;
+}
+
+.entity-text-block blockquote p {
+  margin: 6px;
+}
+
+.entity-text-block .codehilite pre {
+  margin: 0;
+}
+
+.entity-text-block .codehilite {
+  margin: 2px 0 8px;
+}
+
+.codehilite code {
+  white-space: pre;
+}
+
+.entity-text-block pre {
+  border: 1px solid #d9dcec;
+  border-radius: 3px;
+}
+
+.entity-text-block iframe {
+  border: 0;
+}
+
+.embedded-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%;
+  margin: 8px 0; /* 6px;*/
+}
+
+.video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
