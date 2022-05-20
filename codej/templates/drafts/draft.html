@@ -160,7 +160,8 @@
       </div>
     </div>
     {% if target['html'] %}
-      <div class="content-block next-block entity-text-block">
+      <div class="content-block next-block entity-text-block"
+           data-len="{{ length }}">
 	{{ target['html']|safe }}
       </div>
     {% else %}

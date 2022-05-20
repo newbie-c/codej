@@ -49,12 +49,15 @@ async def show_draft(request):
         await conn.close()
         raise HTTPException(
             status_code=403, detail='Для вас доступ ограничен.')
+    length = await conn.fetchval(
+        'SELECT count(*) FROM paragraphs WHERE article_id = $1', target['id'])
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'drafts/draft.html',
         {'request': request,
          'current_user': current_user,
          'status': status,
+         'length': length,
          'flashed': await get_flashed(request),
          'target': target})
 

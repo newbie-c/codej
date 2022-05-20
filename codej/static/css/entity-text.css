@@ -25,6 +25,10 @@
   border-color: #d3ddd3;
 }
 
+.entity-text-block .image-par {
+  text-align: center;
+}
+
 .entity-text-block blockquote {
   font-style: italic;
   font-size: 1.1em;

@@ -17,5 +17,6 @@ CREATE TABLE articles (
 CREATE TABLE paragraphs (
     num        integer DEFAULT 0,
     mdtext     text,
-    article_id integer REFERENCES articles(id)
+    article_id integer REFERENCES articles(id),
+    CONSTRAINT article_num_uni UNIQUE (article_id, num)
 );

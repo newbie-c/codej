@@ -8,7 +8,8 @@ from markdown import markdown
 from markdown.extensions.codehilite import CodeHiliteExtension
 from mdx_del_ins import DelInsExtension
 from pyembed.core.error import PyEmbedError
-from pyembed.markdown import PyEmbedMarkdown
+
+from .embed import PyEmbedMarkdown
 
 
 def prevent_py(attrs, new=False):
