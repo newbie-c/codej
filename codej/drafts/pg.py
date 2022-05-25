@@ -12,6 +12,38 @@ from .md import check_text, parse_md
 from .slugs import check_max, parse_match, make
 
 
+async def change_par(conn, target, text, code):
+    if target.get('mdtext') == text:
+        return None
+    loop = asyncio.get_running_loop()
+    text, spec = await loop.run_in_executor(
+        None, functools.partial(check_text, text, code))
+    if spec and text:
+        if await conn.fetchrow(
+                '''SELECT num FROM paragraphs
+                     WHERE mdtext = $1 AND article_id = $2''',
+                text, target.get('article_id')):
+            text = None
+    if text:
+        await conn.execute(
+            '''UPDATE paragraphs SET mdtext = $1
+                 WHERE article_id = $2 AND num = $3''',
+            text, target.get('article_id'), target.get('num'))
+        pars = await conn.fetch(
+            '''SELECT mdtext FROM paragraphs
+                 WHERE article_id = $1 ORDER BY num ASC''',
+            target.get('article_id'))
+        html = await loop.run_in_executor(
+            None, functools.partial(parse_md, pars))
+        if html:
+            await conn.execute(
+                'UPDATE articles SET html = $1, edited = $2 WHERE id = $3',
+                html, datetime.utcnow(), target.get('article_id'))
+        return html
+
+
+
+
 async def save_par(conn, art, text, code):
     loop = asyncio.get_running_loop()
     text, spec = await loop.run_in_executor(
@@ -37,8 +69,8 @@ async def save_par(conn, art, text, code):
             None, functools.partial(parse_md, pars))
         if html:
             await conn.execute(
-                'UPDATE articles SET html = $1 WHERE id = $2',
-                html, art)
+                'UPDATE articles SET html = $1, edited = $2 WHERE id = $3',
+                html, datetime.utcnow(), art)
         return html
 
 

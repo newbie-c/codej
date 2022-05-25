@@ -41,4 +41,7 @@ $(function() {
       });
     }
   });
+  $('.entity-link').on('click', function(event) {
+    event.stopPropagation();
+  });
 });

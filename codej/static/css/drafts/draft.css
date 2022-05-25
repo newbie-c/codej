@@ -17,3 +17,9 @@
 #html-text-edit {
   text-align: justify;
 }
+
+#options-block {
+  text-align: center;
+  padding: 4px 0;
+  background: linear-gradient(to bottom, #fffef2, #f3f2e7);
+}

@@ -161,7 +161,9 @@
     </div>
     {% if target['html'] %}
       <div class="content-block next-block entity-text-block"
-           data-len="{{ length }}">
+           data-len="{{ length }}"
+	   data-art="{{ target['id'] }}"
+	   data-check="{{ url_for('drafts:check-par') }}">
 	{{ target['html']|safe }}
       </div>
     {% else %}
@@ -180,7 +182,7 @@
 		    placeholder="введите следующий абзац топика"
                     data-url="{{ url_for('drafts:create-par') }}"
 		    class="form-control"
-		    rows="4"></textarea>
+		    rows="5"></textarea>
 	</div>
 	{#<div class="form-group last-group">
           <button id="html-text-send"
@@ -190,6 +192,21 @@
 	  </button>
 	</div>#}
       </div>
+    </div>
+    <div id="options-block" class="content-block next-block">
+      <button id="sp-case"
+	      type="button"
+	      class="btn btn-default btn-sm to-be-hidden">
+        <span class="glyphicon glyphicon-wrench"
+	      aria-hidden="true"></span>
+      </button>
+      <button id="labels-button"
+	      type="button"
+	      title="редактировать метки"
+	      class="btn btn-sm btn-primary">
+        <span class="glyphicon glyphicon-tags"
+	      aria-hidden="true"></span>
+      </button>
     </div>
   </div>
 {% endblock page_body %}
@@ -204,6 +221,7 @@
 	    'js/show-datetime.js',
 	    'js/show-hide.js',
 	    'js/send-par.js',
+	    'js/send-edited.js',
 	    'js/scroll-panel.js',
 	    'js/adjust-frame.js',
 	    'js/adjust-image.js',

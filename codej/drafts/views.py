@@ -9,7 +9,57 @@ from ..common.pg import get_conn
 from ..common.urls import get_next
 from .attri import status
 from .pg import (
-    check_article, create_d, check_last_drafts, save_par, select_drafts)
+    change_par, check_article, create_d, check_last_drafts,
+    save_par, select_drafts)
+
+
+async def edit_par(request):
+    res = {'empty': True}
+    d = await request.form()
+    art, num, text, code = (
+        int(d.get('art')), int(d.get('num')),
+        d.get('text'), bool(int(d.get('code'))))
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.CREATE_ENTITY in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT par.num, par.article_id, par.mdtext
+                 FROM paragraphs AS par, articles AS arts
+                   WHERE par.num = $1
+                     AND par.article_id = $2
+                     AND arts.author_id = $3
+                     AND par.article_id = arts.id''',
+            num, art, current_user['id'])
+        if target:
+            res = {'empty': False,
+                   'html': await change_par(conn, target, text, code)}
+    return JSONResponse(res)
+
+
+async def check_par(request):
+    res = {'empty': True}
+    d = await request.form()
+    art, num = int(d.get('art')), int(d.get('num'))
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.CREATE_ENTITY in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT par.num, par.article_id, par.mdtext, arts.author_id
+                 FROM paragraphs AS par, articles AS arts
+                   WHERE par.num = $1
+                     AND par.article_id = $2
+                     AND arts.author_id = $3
+                     AND par.article_id = arts.id''',
+            num, art, current_user['id'])
+        if target:
+            res = {'empty': False,
+                   'html': request.app.jinja.get_template(
+                       'drafts/check-par.html').render(
+                       request=request, mdtext=target.get('mdtext'),
+                       num=num, art=art)}
+    return JSONResponse(res)
 
 
 async def create_par(request):
