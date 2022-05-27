@@ -67,8 +67,39 @@ $(function() {
       $('.editor-forms-block').slideDown('slow');
       $('#options-block').slideDown('slow');
     });
-    $('.editable').on('mouseenter', function() {
+    $('#main-container').on('click', '.remove-par', function() {
+      $(this).blur();
+      let par = $(this).parent().next();
+      let url = $('.entity-text-block').data().rem;
+      let html = '<div id="p-block" class="text-center hidden">' +
+                 '  <img alt="progress show"' +
+                 '       src="/static/images/upload.gif">' +
+                 '</div>';
+      par.after(html);
+      $('#p-block').hide().removeClass('hidden').slideDown('slow');
+      par.slideUp('slow');
+      $('#sp-case').trigger('click');
+      $.ajax({
+        method: 'POST',
+        url: url,
+        data: {
+          num: $(this).data().num,
+          art: $(this).data().art
+        },
+        success: function(data) {
+          if (!data.empty) window.location.reload();
+        },
+        error: function(data) {},
+        dataType: 'json'
+      });
+    });
+    $('.entity-text-block').on('mouseleave', function() {
       if (!$('#paragraph-editor').length) {
+        $('#editor-opts').remove();
+      }
+    });
+    $('.editable').on('mouseenter', function() {
+      if (!$('#paragraph-editor').length && !$('#p-block').length) {
         $('#editor-opts').remove();
         let $this = $(this);
         let html = '<div id="editor-opts">' +
@@ -103,7 +134,11 @@ $(function() {
                    '  </button>' +
                    '</div>';
         if ($this[0].nodeName === 'LI') {
-          $this.find('p').before(html);
+          if ($this.find('p').length) {
+            $this.find('p').before(html);
+          } else {
+            $this.before(html);
+          }
         } else {
           $this.before(html);
         }

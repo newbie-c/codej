@@ -163,6 +163,7 @@
       <div class="content-block next-block entity-text-block"
            data-len="{{ length }}"
 	   data-art="{{ target['id'] }}"
+	   data-rem="{{ url_for('drafts:rem-par') }}"
 	   data-check="{{ url_for('drafts:check-par') }}">
 	{{ target['html']|safe }}
       </div>

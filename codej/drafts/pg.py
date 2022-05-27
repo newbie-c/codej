@@ -12,6 +12,38 @@ from .md import check_text, parse_md
 from .slugs import check_max, parse_match, make
 
 
+async def remove_this(conn, art, num):
+    after = await conn.fetch(
+        '''SELECT num FROM paragraphs
+             WHERE article_id = $1 AND num > $2
+             ORDER BY num DESC''', art, num)
+    if after:
+        last = after[0].get('num')
+    else:
+        last = num
+    if last:
+        await conn.execute(
+            'DELETE FROM paragraphs WHERE num = $1 AND article_id = $2',
+            num, art)
+        if last > num:
+            i = num + 1
+            while i <= last:
+                await conn.execute(
+                    '''UPDATE paragraphs SET num = num - 1
+                         WHERE num = $1 AND article_id = $2''', i, art)
+                i += 1
+        pars = await conn.fetch(
+            '''SELECT mdtext FROM paragraphs
+                 WHERE article_id = $1 ORDER BY num ASC''', art)
+        loop = asyncio.get_running_loop()
+        html = await loop.run_in_executor(
+            None, functools.partial(parse_md, pars))
+        await conn.execute(
+            'UPDATE articles SET html = $1, edited = $2 WHERE id = $3',
+            html, datetime.utcnow(), art)
+    return last
+
+
 async def change_par(conn, target, text, code):
     if target.get('mdtext') == text:
         return None
@@ -40,8 +72,6 @@ async def change_par(conn, target, text, code):
                 'UPDATE articles SET html = $1, edited = $2 WHERE id = $3',
                 html, datetime.utcnow(), target.get('article_id'))
         return html
-
-
 
 
 async def save_par(conn, art, text, code):
