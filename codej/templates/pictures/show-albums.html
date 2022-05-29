@@ -14,9 +14,9 @@
             'css/content-block.css',
             'css/twopanels.css',
             'css/aoptions.css',
-	    'css/labeled-form.css',
-	    'css/progress-block.css',
-	    'css/pagination.css',
+            'css/labeled-form.css',
+            'css/progress-block.css',
+            'css/pagination.css',
             'css/pictures/show-albums.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
@@ -39,13 +39,13 @@
           <div class="albums-options text-center">
             <button type="button"
                     class="btn btn-info btn-sm user-home"
-		    data-uid="{{ current_user['id'] }}"
-		    data-url="{{ url_for('pictures:show-user-stat') }}"
+                    data-uid="{{ current_user['id'] }}"
+                    data-url="{{ url_for('pictures:show-user-stat') }}"
                     title="показать статистику">
               <span class="glyphicon glyphicon-home"
                     aria-hidden="true"></span>
             </button>
-	    <button type="button"
+            <button type="button"
                     class="btn btn-default btn-sm album-reload"
                     title="обновить">
               <span class="glyphicon glyphicon-refresh"
@@ -68,171 +68,171 @@
             {% else %}
               <button type="button"
                       class="btn btn-default btn-sm album-first-page"
-		      data-url="{{ url_for('pictures:show-albums') }}"
+                      data-url="{{ url_for('pictures:show-albums') }}"
                       title="в начало">
                 <span class="glyphicon glyphicon-circle-arrow-left"
                       aria-hidden="true"></span>
               </button>
             {% endif %}
           </div>
-	  {% if not pagination or (pagination and pagination['page'] == 1) %}
+          {% if not pagination or (pagination and pagination['page'] == 1) %}
             <div id="progress-block" class="text-center to-be-hidden">
               <img alt="progress show"
-		   src="{{ url_for('static', path='images/upload.gif') }}">
-	    </div>
-	    <div id="find-pic-block" class="to-be-hidden">
+                   src="{{ url_for('static', path='images/upload.gif') }}">
+            </div>
+            <div id="find-pic-block" class="to-be-hidden">
               <div class="form-form">
                 <table class="inline-form-table">
                   <tbody>
                     <tr>
                       <td class="input-field">
                         <input class="form-control"
-			       type="text"
-			       placeholder="введите суффикс изображения"
-			       id="find-input">
-		      </td>
-		      <td>&nbsp;</td>
-		      <td>
+                               type="text"
+                               placeholder="введите суффикс изображения"
+                               id="find-input">
+                      </td>
+                      <td>&nbsp;</td>
+                      <td>
                         <button id="find-submit"
-			        class="btn btn-default"
-				data-url="{{ url_for(
-					  'pictures:find-album') }}"
-				type="button">
+                                class="btn btn-default"
+                                data-url="{{ url_for(
+                                          'pictures:find-album') }}"
+                                type="button">
                           <span class="glyphicon glyphicon-search"
-				aria-hidden="true"></span>
-			</button>
-		      </td>
-		    </tr>
-		  </tbody>
-		</table>
-	      </div>
-	    </div>
+                                aria-hidden="true"></span>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
             <div id="create-form-block" class="to-be-hidden">
               <div class="today-field"></div>
-	      <div class="form-help">
+              <div class="form-help">
                 <p>
                 Для создания нового альбома достаточно ввести его название
-		(от 3-х до 100-а знаков), выбрать статус и нажать кнопку
-		"Создать". Изображения из публичного альбома видны всем
-		пользователям сети, из скрытого альбома - только 
-		авторизованным пользователям, из альбома для друзей - только
-		авторизованным пользователям из вашего списка друзей.
-		</p>
-	      </div>
-	      <div class="form-form">
-	        <div id="title-group" class="form-group">
+                (от 3-х до 100-а знаков), выбрать статус и нажать кнопку
+                "Создать". Изображения из публичного альбома видны всем
+                пользователям сети, из скрытого альбома - только 
+                авторизованным пользователям, из альбома для друзей - только
+                авторизованным пользователям из вашего списка друзей.
+                </p>
+              </div>
+              <div class="form-form">
+                <div id="title-group" class="form-group">
                   <div class="form-label text-right">
                     <label for="title">Название:</label>
-		  </div>
-		  <div class="form-input">
+                  </div>
+                  <div class="form-input">
                     <input class="form-control"
                            id="title"
                            name="title"
                            placeholder="введите название альбома" required
                            type="text">
-		  </div>
-		  <div class="footer-bottom"></div>
-		</div>
-		<div class="form-group">
+                  </div>
+                  <div class="footer-bottom"></div>
+                </div>
+                <div class="form-group">
                   <div class="form-input checkbox">
                     <label>
                       <input id="pub-f"
                              name="pub-f"
-			     value="{{ status.pub }}"
+                             value="{{ status.pub }}"
                              type="checkbox"
                              checked>
-		      <label for="pub-f">{{ status.pub }}</label>
-		    </label>
-		  </div>
-		</div>
-		<div class="form-group">
+                      <label for="pub-f">{{ status.pub }}</label>
+                    </label>
+                  </div>
+                </div>
+                <div class="form-group">
                   <div class="form-input checkbox">
                     <label>
                       <input id="priv-f"
-			     name="priv-f"
-			     value="{{ status.priv }}"
+                             name="priv-f"
+                             value="{{ status.priv }}"
                              type="checkbox">
-		      <label for="priv-f">{{ status.priv }}</label>
+                      <label for="priv-f">{{ status.priv }}</label>
                     </label>
-		  </div>
-		</div>
-		<div class="form-group">
+                  </div>
+                </div>
+                <div class="form-group">
                   <div class="form-input checkbox">
                     <label>
                       <input id="ffo-f"
-			     name="ffo-f"
-			     value="{{ status.ffo }}"
-			     type="checkbox">
-		      <label for="ffo-f">{{ status.ffo }}</label>
-		    </label>
-		  </div>
-		</div>
-		<div class="form-group">
+                             name="ffo-f"
+                             value="{{ status.ffo }}"
+                             type="checkbox">
+                      <label for="ffo-f">{{ status.ffo }}</label>
+                    </label>
+                  </div>
+                </div>
+                <div class="form-group">
                   <div class="form-input">
                     <input class="btn btn-primary btn-block"
-			   id="create-new"
-			   data-url="{{ url_for('pictures:create-album') }}"
+                           id="create-new"
+                           data-url="{{ url_for('pictures:create-album') }}"
                            name="create-new"
-			   type="button"
-			   value="Cоздать">
-		  </div>
-		</div>
-	      </div>
-	    </div>
-	  {% endif %}
+                           type="button"
+                           value="Cоздать">
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
           {% if pagination %}
-	    <div class="items-table-block">
+            <div class="items-table-block">
               <table class="items-table">
                 <tbody>
                   {% for album in pagination['albums'] %}
                     {% if loop.first and loop.last %}
                       {% set last_item = 1 %}
-		    {% else %}
+                    {% else %}
                       {% set last_item = 0 %}
-		    {% endif %}
-		    <tr {% if not loop.last %}class="bordered"{% endif %}>
+                    {% endif %}
+                    <tr {% if not loop.last %}class="bordered"{% endif %}>
                       <td class="album-header-panel"
-			  {% if album['title']|length > 40 %}
-			  title="{{ album['title'] }}"
-			  {% endif %}
-			  data-suffix="{{ album['suffix'] }}"
-			  data-url="{{ url_for(
+                          {% if album['title']|length > 40 %}
+                          title="{{ album['title'] }}"
+                          {% endif %}
+                          data-suffix="{{ album['suffix'] }}"
+                          data-url="{{ url_for(
                               'pictures:show-album-stat') }}">
-			{{ album['parsed'] }}
-		      </td>
-		      <td class="text-right album-tools-panel">
+                        {{ album['parsed'] }}
+                      </td>
+                      <td class="text-right album-tools-panel">
 {#                        <button type="button"
-				class="btn btn-sm btn-default trash-button"
-				title="удалить">
+                                class="btn btn-sm btn-default trash-button"
+                                title="удалить">
                           <span class="glyphicon glyphicon-trash"
-				aria-hidden="true"></span>
-			</button>
-			<button type="button"
-				class="btn btn-sm btn-danger remove-button
-				       to-be-hidden"
-				data-suffix="{{ album['suffix'] }}"
-				data-page="{{ pagination['page'] }}"
-				data-last="{{ last_item }}"
-				data-url=""
-				title="удалить безвозвратно">
+                                aria-hidden="true"></span>
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-danger remove-button
+                                       to-be-hidden"
+                                data-suffix="{{ album['suffix'] }}"
+                                data-page="{{ pagination['page'] }}"
+                                data-last="{{ last_item }}"
+                                data-url=""
+                                title="удалить безвозвратно">
                           <span class="glyphicon glyphicon-remove-circle"
-				aria-hidden="true"></span>
-			</button>#}
-			<button type="button"
-				class="btn btn-sm btn-primary show-album"
-				title="войти в альбом"
-				data-dest="{{ url_for(
-				  'pictures:show-album',
-				  suffix=album['suffix']) }}">
+                                aria-hidden="true"></span>
+                        </button>#}
+                        <button type="button"
+                                class="btn btn-sm btn-primary show-album"
+                                title="войти в альбом"
+                                data-dest="{{ url_for(
+                                  'pictures:show-album',
+                                  suffix=album['suffix']) }}">
                           <span class="glyphicon glyphicon-folder-open"
-				aria-hidden="true"></span>
-			</button>
-		      </td>
-		    </tr>
-		  {% endfor %}
-		</tbody>
-	      </table>
-	    </div>
+                                aria-hidden="true"></span>
+                        </button>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           {% else %}
             <div id="no-albums" class="alert alert-warning">
               Альбомы ещё не созданы.
@@ -258,20 +258,20 @@
   {{ super() }}
   {% assets filters='rjsmin', output='generic/js/pictures/show-albums.js',
             'js/check-mc.js',
-	    'js/hide-hidden.js',
+            'js/hide-hidden.js',
             'js/top-flashed.js',
             'js/footer.js',
-	    'js/render-tf.js',
-	    'js/checkbox.js',
-	    'js/scroll-panel.js',
-	    'js/mark-input-error.js',
-	    'js/show-datetime.js',
-	    'js/show-album-stat.js',
-	    'js/show-rename-form.js',
-	    'js/show-state-form.js',
-	    'js/change-status.js',
-	    'js/rename-album.js',
-	    'js/show-user-stat.js',
+            'js/render-tf.js',
+            'js/checkbox.js',
+            'js/scroll-panel.js',
+            'js/mark-input-error.js',
+            'js/show-datetime.js',
+            'js/show-album-stat.js',
+            'js/show-rename-form.js',
+            'js/show-state-form.js',
+            'js/change-status.js',
+            'js/rename-album.js',
+            'js/show-user-stat.js',
             'js/pictures/show-albums.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

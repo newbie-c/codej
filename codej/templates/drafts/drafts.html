@@ -12,10 +12,10 @@
             'css/top-flashed.css',
             'css/next-block.css',
             'css/content-block.css',
-	    'css/avatar.css',
-	    'css/entity-attributes.css',
-	    'css/entity-details.css',
-	    'css/pagination.css',
+            'css/avatar.css',
+            'css/entity-attributes.css',
+            'css/entity-details.css',
+            'css/pagination.css',
             'css/labeled-form.css',
             'css/drafts/drafts.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
@@ -65,7 +65,7 @@
                     <td>
                       <button id="title-submit"
                               class="btn btn-primary"
-			      data-url="{{ url_for('drafts:create') }}"
+                              data-url="{{ url_for('drafts:create') }}"
                               type="button">Создать</button>
                     </td>
                   </tr>
@@ -86,14 +86,14 @@
           <div class="block-header">
             <h3 class="panel-title">
               <a class="entity-link"
-		 {% if art['title']|length > 80 -%}
-		 title="{{ art['title'] }}"{%- endif %}
-		 href="{{ url_for('drafts:show-draft', slug=art['slug']) }}">
+                 {% if art['title']|length > 80 -%}
+                 title="{{ art['title'] }}"{%- endif %}
+                 href="{{ url_for('drafts:show-draft', slug=art['slug']) }}">
                 {{ art['title80'] }}
-	      </a>
-	    </h3>
-	  </div>
-	  <div class="block-body">
+              </a>
+            </h3>
+          </div>
+          <div class="block-body">
             <div class="entity-attributes">
               <div class="author-avatar avatar"
                    style="background:url({{ art['ava'] }})"></div>
@@ -101,14 +101,14 @@
                 <h4>
                   <a class="author-profile-link"
                      href="{{ url_for(
-		       'profile', username=art['author']) }}">
+                       'profile', username=art['author']) }}">
                     {{ art['author'] }}
                   </a>
                 </h4>
                 <div class="info-line-block">
-		  <table>
+                  <table>
                     <tbody>
-		    {% if art['published'] %}
+                    {% if art['published'] %}
                       <tr>
                         <td>
                           <span class="date-info">Опубликован:&nbsp;</span>
@@ -136,70 +136,70 @@
               </div>
               <div class="footer-bottom"></div>
             </div>
-	    <div class="entity-details">
+            <div class="entity-details">
               <table align="center" class="entity-details-table">
                 <tbody>
                 <tr>
                   <td>
                     <div class="labeled labeled-text labeled-info viewed-ind">
                       <span class="glyphicon glyphicon-eye-open"
-		            aria-hidden="true"></span><span
-			    class="value">{{ art['viewed'] }}</span>
-	            </div>
-	          </td>
-	          <td>
+                            aria-hidden="true"></span><span
+                            class="value">{{ art['viewed'] }}</span>
+                    </div>
+                  </td>
+                  <td>
                     <div class="labeled labeled-text
-			        labeled-success like-block">
+                                labeled-success like-block">
                       <span class="glyphicon glyphicon-thumbs-up"
-		            aria-hidden="true"></span><span
-			    class="value">{{ art['likes'] }}</span>
-	            </div>
-	          </td>
-	          <td>
+                            aria-hidden="true"></span><span
+                            class="value">{{ art['likes'] }}</span>
+                    </div>
+                  </td>
+                  <td>
                     <div class="labeled labeled-text
-			        labeled-danger dislike-block">
+                                labeled-danger dislike-block">
                       <span class="glyphicon glyphicon-thumbs-down"
-		            aria-hidden="true"></span><span
-			    class="value">{{ art['dislikes'] }}</span>
-	            </div>
-	          </td>
-	          <td>
+                            aria-hidden="true"></span><span
+                            class="value">{{ art['dislikes'] }}</span>
+                    </div>
+                  </td>
+                  <td>
                     <div class="labeled labeled-text
-		         {% if art['commented'] %}labeled-info
-		         {% else %}labeled-warning{% endif %}">
+                         {% if art['commented'] %}labeled-info
+                         {% else %}labeled-warning{% endif %}">
                       <span class="glyphicon glyphicon-comment"
-		            aria-hidden="true"></span><span
-			    class="value">{{ art['commentaries'] }}</span>
-	            </div>
-	          </td>
-	          <td>
+                            aria-hidden="true"></span><span
+                            class="value">{{ art['commentaries'] }}</span>
+                    </div>
+                  </td>
+                  <td>
                     {% if art['state'] == status.mod %}
                       <div class="labeled labeled-text labeled-danger">
                         <span class="glyphicon glyphicon-lock"
-			      aria-hidden="true"></span><span
-			      class="value">mod</span>
-		      </div>
-	            {% elif art['state'] == status.draft %}
+                              aria-hidden="true"></span><span
+                              class="value">mod</span>
+                      </div>
+                    {% elif art['state'] == status.draft %}
                       <div class="labeled labeled-text labeled-success">
                         <span class="glyphicon glyphicon-edit"
                               aria-hidden="true"></span><span
-			      class="value">draft</span>
-		      </div>
+                              class="value">draft</span>
+                      </div>
                     {% endif %}
-	          </td>
-	        </tr>
-	        </tbody>
-	      </table>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
             </div>
-	    <div class="entity-summary">
+            <div class="entity-summary">
               {% if art['summary'] %}
                 <p>{{ art['summary'] }}</p>
-	      {% else %}
+              {% else %}
                 <div class="alert alert-warning">Аннотация отсутствует.</div>
-	      {% endif %}
-	    </div>
-	  </div>
-	</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
       {% endfor %}
     {% else %}
       <div class="alert alert-warning next-block">
@@ -222,11 +222,11 @@
             'js/render-tf.js',
             'js/footer.js',
             'js/top-flashed.js',
-	    'js/check-next.js',
+            'js/check-next.js',
             'js/mark-input-error.js',
-	    'js/show-datetime.js',
-	    'js/scroll-panel.js',
-	    'js/show-hide.js',
+            'js/show-datetime.js',
+            'js/scroll-panel.js',
+            'js/show-hide.js',
             'js/drafts/drafts.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

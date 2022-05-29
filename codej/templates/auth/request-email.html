@@ -35,7 +35,7 @@
             Уважаемый {{ current_user['username'] }}, для смены адреса
             электронной почты Вашего аккаунта необходимо заполнить форму ниже.
             Введите в соответствующие поля Ваш новый адрес электронной почты
-	    и пароль,
+            и пароль,
             нажмите кнопку "Отправить запрос". На ваш новый адрес будет
             выслана инструкция о дальнейших действиях, следуйте ей. Имейте
             ввиду, что смену адреса и сброс пароля Вы можете запросить один
@@ -43,22 +43,22 @@
             с момента регистрации.
           </p>
         </div>
-	<div class="form-form">
+        <div class="form-form">
           <form class="form" method="POST" role="form">
             {{ form.csrf_token }}
-	    {{ render_form_group(
-	      form, form.address,
-	      'address', 'Введите свой новый адрес электронной почты') }}
-	    {{ render_form_group(
-	      form, form.password,
-	      'password', 'Введите свой пароль') }}
-	    <div class="form-group">
+            {{ render_form_group(
+              form, form.address,
+              'address', 'Введите свой новый адрес электронной почты') }}
+            {{ render_form_group(
+              form, form.password,
+              'password', 'Введите свой пароль') }}
+            <div class="form-group">
               <div class="form-input">
                 {{ form.submit(class="btn btn-primary btn-block") }}
-	      </div>
-	    </div>
-	  </form>
-	</div>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>

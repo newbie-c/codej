@@ -11,11 +11,11 @@
             'css/base.css',
             'css/mc780.css',
             'css/top-flashed.css',
-	    'css/content-block.css',
-	    'css/pagination.css',
-	    'css/next-block.css',
-	    'css/labeled-form.css',
-	    'css/find-block.css',
+            'css/content-block.css',
+            'css/pagination.css',
+            'css/next-block.css',
+            'css/labeled-form.css',
+            'css/find-block.css',
             'css/admin/society.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
@@ -34,56 +34,56 @@
         <div class="content-block create-block slidable">
           <div class="block-header">
             <h3 class="panel-title">Создайте новый аккаунт пользователя</h3>
-	  </div>
-	  <div class="block-body to-be-hidden">
+          </div>
+          <div class="block-body to-be-hidden">
             <div class="today-field"></div>
-	    <div class="form-help">
+            <div class="form-help">
               <p>
               Здесь можно создать новый аккаунт пользователя, для этого
-	      заполните форму ниже. Имейте ввиду, псевдоним должен быть
-	      уникальным, может содержать от 3-х до 16-ти знаков, включая
-	      латинские буквы, буквы русского алфавита, цифры, дефис,
-	      знак подчёркивания, точку и должен начинаться с латинской или
-	      русской буквы. Адрес электронной почты нового пользователя
-	      должен умещаться в 128 знаков, адрес должен быть уникальным и
-	      незарегистрированным в сервисе.
-	      </p>
-	    </div>
-	    <div class="form-form">
+              заполните форму ниже. Имейте ввиду, псевдоним должен быть
+              уникальным, может содержать от 3-х до 16-ти знаков, включая
+              латинские буквы, буквы русского алфавита, цифры, дефис,
+              знак подчёркивания, точку и должен начинаться с латинской или
+              русской буквы. Адрес электронной почты нового пользователя
+              должен умещаться в 128 знаков, адрес должен быть уникальным и
+              незарегистрированным в сервисе.
+              </p>
+            </div>
+            <div class="form-form">
               <form class="form" method="POST" role="form">
                 {{ form.csrf_token() }}
-		{{ render_form_group(
-		  form, form.username, 'username', 'введите псевдоним') }}
-		{{ render_form_group(
-		  form, form.address, 'address', 'введите адрес эл.почты') }}
-		{{ render_form_group(
+                {{ render_form_group(
+                  form, form.username, 'username', 'введите псевдоним') }}
+                {{ render_form_group(
+                  form, form.address, 'address', 'введите адрес эл.почты') }}
+                {{ render_form_group(
                   form, form.password, 'password', 'введите пароль') }}
-		{{ render_form_group(
-		  form, form.confirmation,
-		  'confirmation', 'повторите пароль') }}
-		<div class="form-group">
+                {{ render_form_group(
+                  form, form.confirmation,
+                  'confirmation', 'повторите пароль') }}
+                <div class="form-group">
                   {{ form.submit(class="btn btn-primary btn-block") }}
-		</div>
-	      </form>
-	    </div>
-	  </div>
-	</div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       {% endif %}
       {% if pagination['next'] %}
-	<div class="content-block find-block
-		    {% if form %}next-block{% endif %}">
-	  <div class="find-label text-right">
+        <div class="content-block find-block
+                    {% if form %}next-block{% endif %}">
+          <div class="find-label text-right">
             <label for="username-input">Найти псевдоним:</label>
-	  </div>
-	  <div class="find-input">
+          </div>
+          <div class="find-input">
             <input type="text"
-		   id="username-input"
-		   name="username-input"
-		   class="form-control"
-		   data-url="{{ url_for('admin:find-user') }}"
-		   placeholder="введите псевдоним пользователя">
-	  </div>
-	</div>
+                   id="username-input"
+                   name="username-input"
+                   class="form-control"
+                   data-url="{{ url_for('admin:find-user') }}"
+                   placeholder="введите псевдоним пользователя">
+          </div>
+        </div>
       {% endif %}
     {% endif %}
     <div id="society-block" class="content-block slidable">
@@ -96,30 +96,30 @@
             <tbody>
             <tr>
               <th>Псевдоним</th>
-	      <th>Группа</th>
-	      <th class="text-right">Был здесь</th>
-	    </tr>
-	    {% for user in pagination['users'] %}
+              <th>Группа</th>
+              <th class="text-right">Был здесь</th>
+            </tr>
+            {% for user in pagination['users'] %}
               <tr {% if not loop.last %}class="bordered"{% endif %}>
                 <td class="username-field">
                   <a href="{{ url_for(
-			  'profile', username=user['username']) }}">
-		    {{ user['username'] }}
-		  </a>
-		</td>
-		<td>{{ user['group'] }}</td>
-		<td class="last-seen text-right">
+                          'profile', username=user['username']) }}">
+                    {{ user['username'] }}
+                  </a>
+                </td>
+                <td>{{ user['group'] }}</td>
+                <td class="last-seen text-right">
                   {{ user['last_visit'] }}
-		</td>
-	      </tr>
-	    {% endfor %}
-	    </tbody>
-	  </table>
-	{% else %}
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
           <div class="alert alert-warning">
             В сервисе нет активных аккаунтов.
-	  </div>
-	{% endif %}
+          </div>
+        {% endif %}
       </div>
     </div>
     {% if pagination['prev'] or pagination['next'] %}
@@ -134,15 +134,15 @@
   {{ super() }}
   {% assets filters='rjsmin', output='generic/js/admin/society.js',
             'js/check-mc.js',
-	    'js/hide-hidden.js',
-	    'js/render-tf.js',
+            'js/hide-hidden.js',
+            'js/render-tf.js',
             'js/footer.js',
             'js/top-flashed.js',
-	    'js/check-next.js',
-	    'js/scroll-panel.js',
-	    'js/show-hide.js',
-	    'js/slide-error-form.js',
-	    'js/last-seen.js',
+            'js/check-next.js',
+            'js/scroll-panel.js',
+            'js/show-hide.js',
+            'js/slide-error-form.js',
+            'js/last-seen.js',
             'js/admin/society.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

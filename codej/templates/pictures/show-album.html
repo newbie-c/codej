@@ -13,8 +13,8 @@
             'css/top-flashed.css',
             'css/content-block.css',
             'css/twopanels.css',
-	    'css/aoptions.css',
-	    'css/labeled-form.css',
+            'css/aoptions.css',
+            'css/labeled-form.css',
             'css/pagination.css',
             'css/pictures/show-album.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
@@ -39,143 +39,143 @@
           </h3>
         </div>
         <div class="block-body">
-	  <div class="albums-options text-center">
+          <div class="albums-options text-center">
             <button type="button"
-		    class="btn btn-info btn-sm go-home"
-		    data-dest="{{ url_for('pictures:show-albums') }}"
-		    title="вернуться к списку альбомов">
+                    class="btn btn-info btn-sm go-home"
+                    data-dest="{{ url_for('pictures:show-albums') }}"
+                    title="вернуться к списку альбомов">
               <span class="glyphicon glyphicon-home"
-		    aria-hidden="true"></span>
-	    </button>
+                    aria-hidden="true"></span>
+            </button>
             <button type="button"
-		    data-suffix="{{ target['suffix'] }}"
-		    data-url="{{ url_for(
-		    	'pictures:show-album-stat') }}"
-		    class="btn btn-info btn-sm show-statistic"
-		    title="показать статистику альбома">
+                    data-suffix="{{ target['suffix'] }}"
+                    data-url="{{ url_for(
+                            'pictures:show-album-stat') }}"
+                    class="btn btn-info btn-sm show-statistic"
+                    title="показать статистику альбома">
               <span class="glyphicon glyphicon-repeat"
-		    aria-hidden="true"></span>
-	    </button>
-	    {% if not pagination or
-	          (pagination and pagination['page'] == 1) %}
+                    aria-hidden="true"></span>
+            </button>
+            {% if not pagination or
+                  (pagination and pagination['page'] == 1) %}
               <button type="button"
-		      class="btn btn-default btn-sm album-reload"
-		      data-dest="{{ url_for(
-			'pictures:show-album', suffix=target['suffix']) }}"
-		      title="обновить">
+                      class="btn btn-default btn-sm album-reload"
+                      data-dest="{{ url_for(
+                        'pictures:show-album', suffix=target['suffix']) }}"
+                      title="обновить">
                 <span class="glyphicon glyphicon-refresh"
-		      aria-hidden="true"></span>
-	      </button>
-	      <button type="button"
-		      class="btn btn-primary btn-sm upload-new"
-		      title="добавить картинку">
+                      aria-hidden="true"></span>
+              </button>
+              <button type="button"
+                      class="btn btn-primary btn-sm upload-new"
+                      title="добавить картинку">
                 <span class="glyphicon glyphicon-upload"
-		      aria-hidden="true"></span>
-	      </button>
+                      aria-hidden="true"></span>
+              </button>
             {% else %}
               <button type="button"
-		      class="btn btn-default btn-sm album-first-page"
-		      data-dest="{{ url_for(
-			'pictures:show-album', suffix=target['suffix']) }}"
-		      title="в начало альбома">
+                      class="btn btn-default btn-sm album-first-page"
+                      data-dest="{{ url_for(
+                        'pictures:show-album', suffix=target['suffix']) }}"
+                      title="в начало альбома">
                 <span class="glyphicon glyphicon-circle-arrow-left"
-		      aria-hidden="true"></span>
-	      </button>
-	    {% endif %}
-	  </div>
-	  {% if not pagination or (pagination and pagination['page'] == 1) %}
-	  <div {% if form %}
+                      aria-hidden="true"></span>
+              </button>
+            {% endif %}
+          </div>
+          {% if not pagination or (pagination and pagination['page'] == 1) %}
+          <div {% if form %}
                id="progress-block"{% else %}
-	       id="data-panel"{% endif %}
-	       class="text-center {% if form %}to-be-hidden{% endif %}"
-	       {% if not form %}
-	       data-url="{{ url_for('pictures:check-pic') }}"
-	       data-cache="{{ cache }}"
-	       data-redirect="{{ url_for(
+               id="data-panel"{% endif %}
+               class="text-center {% if form %}to-be-hidden{% endif %}"
+               {% if not form %}
+               data-url="{{ url_for('pictures:check-pic') }}"
+               data-cache="{{ cache }}"
+               data-redirect="{{ url_for(
                  'pictures:show-album', suffix=target['suffix']) }}"
-	       {% endif %}>
+               {% endif %}>
               <img alt="progress show"
-		   width="48"
-		   height="48"
-		   src="{{ url_for('static', path='images/upload.gif') }}">
-	    </div>
-	    {% if form %}
+                   width="48"
+                   height="48"
+                   src="{{ url_for('static', path='images/upload.gif') }}">
+            </div>
+            {% if form %}
             <div id="upload-form-block">
               <div class="today-field"></div>
-	      <div class="form-help">
+              <div class="form-help">
                 <p>
                 Выберите файл изображения, процесс выгрузки начнётся
-		автоматически. Поддерживаются файлы JPEG, PNG и GIF форматов.
-		Максимальный размер файла ограничен - 5МиБ. Длина имени
-		файла не может превышать 128 символов. После загрузки файл
-		будет верифицирован и доступен в списке ниже.
-		</p>
-	      </div>
-	      <div class="form-form">
+                автоматически. Поддерживаются файлы JPEG, PNG и GIF форматов.
+                Максимальный размер файла ограничен - 5МиБ. Длина имени
+                файла не может превышать 128 символов. После загрузки файл
+                будет верифицирован и доступен в списке ниже.
+                </p>
+              </div>
+              <div class="form-form">
                 <form class="form" method="POST" role="form"
                       novalidate
                       enctype="multipart/form-data">
                   <div class="form-group">
                     {{ form.image(accept="image/jpeg,image/png,image/gif") }}
                   </div>
-		  <div class="form-group hidden">
+                  <div class="form-group hidden">
                     {{ form.submit(class="btn btn-default") }}
-		  </div>
-		</form>
-	      </div>
-	    </div>
-	    {% endif %}
-	  {% endif %}
-	  {% if pagination %}
-	    <div class="items-table-block">
+                  </div>
+                </form>
+              </div>
+            </div>
+            {% endif %}
+          {% endif %}
+          {% if pagination %}
+            <div class="items-table-block">
               <table class="items-table">
                 <tbody>
                 {% for pic in pagination['pictures'] %}
                   {% if loop.first and loop.last %}
                     {% set last_item = 1 %}
-		  {% else %}
+                  {% else %}
                     {% set last_item = 0 %}
-		  {% endif %}
-		  <tr {% if not loop.last %}class="bordered"{% endif %}>
+                  {% endif %}
+                  <tr {% if not loop.last %}class="bordered"{% endif %}>
                     <td class="album-header-panel"
-			data-url="{{ url_for('pictures:show-pic-stat') }}"
-			data-suffix="{{ pic['suffix'] }}"
-			{% if pic['filename']|length > 40 %}
-			title="{{ pic['filename'] }}"
-			{% endif %}>
+                        data-url="{{ url_for('pictures:show-pic-stat') }}"
+                        data-suffix="{{ pic['suffix'] }}"
+                        {% if pic['filename']|length > 40 %}
+                        title="{{ pic['filename'] }}"
+                        {% endif %}>
                       <span class="glyphicon glyphicon-picture"
-			    aria-hidden="true"></span>
-		      {{ pic['parsed40'] }}
-		    </td>
-		    <td class="text-right album-tools-panel">
+                            aria-hidden="true"></span>
+                      {{ pic['parsed40'] }}
+                    </td>
+                    <td class="text-right album-tools-panel">
                       <button type="button"
-			      class="btn btn-sm btn-danger remove-button
-				     to-be-hidden"
-			      data-suffix="{{ pic['suffix'] }}"
-			      data-page="{{ pagination['page'] }}"
-			      data-last="{{ last_item }}"
-			      data-url="{{ url_for('pictures:remove-pic') }}"
-			      title="удалить безвозвратно">
+                              class="btn btn-sm btn-danger remove-button
+                                     to-be-hidden"
+                              data-suffix="{{ pic['suffix'] }}"
+                              data-page="{{ pagination['page'] }}"
+                              data-last="{{ last_item }}"
+                              data-url="{{ url_for('pictures:remove-pic') }}"
+                              title="удалить безвозвратно">
                         <span class="glyphicon glyphicon-remove-circle"
-			      aria-hidden="true"></span>
-		      </button>
-		      <button type="button"
-			      class="btn btn-sm btn-default trash-button"
-			      title="удалить">
+                              aria-hidden="true"></span>
+                      </button>
+                      <button type="button"
+                              class="btn btn-sm btn-default trash-button"
+                              title="удалить">
                         <span class="glyphicon glyphicon-trash"
-			      aria-hidden="true"></span>
-		      </button>
-		    </td>
-		  </tr>
-		{% endfor %}
-		</tbody>
-	      </table>
-	    </div>
-	  {% else %}
+                              aria-hidden="true"></span>
+                      </button>
+                    </td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
             <div id="no-albums" class="alert alert-warning">
               В альбоме пока нет изображений.
-	    </div>
-	  {% endif %}
+            </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -185,8 +185,8 @@
     {% if pagination and (pagination['next'] or pagination['prev']) %}
       <div class="entity-pagination next-block footer-bottom text-center">
         {{ paginate(
-	  request, pagination,
-	  'pictures:show-album', suffix=target['suffix']) }}
+          request, pagination,
+          'pictures:show-album', suffix=target['suffix']) }}
       </div>
     {% else %}
       <div class="footer-bottom"></div>
@@ -202,21 +202,21 @@
   {% endassets %}
   {% assets filters='rjsmin', output='generic/js/pictures/show-album.js',
             'js/check-mc.js',
-	    'js/hide-hidden.js',
+            'js/hide-hidden.js',
             'js/top-flashed.js',
             'js/footer.js',
-	    'js/render-tf.js',
-	    'js/show-datetime.js',
-	    'js/scroll-panel.js',
-	    'js/mark-input-error.js',
-	    'js/show-rename-form.js',
-	    'js/show-state-form.js',
-	    'js/change-status.js',
-	    'js/rename-album.js',
-	    'js/copy-this.js',
-	    'js/show-album-stat.js',
-	    'js/hidden-button.js',
-	    'js/remove-this.js',
+            'js/render-tf.js',
+            'js/show-datetime.js',
+            'js/scroll-panel.js',
+            'js/mark-input-error.js',
+            'js/show-rename-form.js',
+            'js/show-state-form.js',
+            'js/change-status.js',
+            'js/rename-album.js',
+            'js/copy-this.js',
+            'js/show-album-stat.js',
+            'js/hidden-button.js',
+            'js/remove-this.js',
             'js/pictures/show-album.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

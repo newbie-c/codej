@@ -42,9 +42,9 @@
                  width="28" height="28">
           </a>
         </div>
-	{% if current_user %}
+        {% if current_user %}
           {% set cuperms = current_user.get('permissions') %}
-	{% endif %}
+        {% endif %}
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li class="dropdown">
@@ -57,119 +57,119 @@
                 </li>
               </ul>
             </li>
-	    {% if current_user and
-	          (permissions.CREATE_LINK_ALIAS in cuperms or
-		   permissions.UPLOAD_PICTURES in cuperms or
-		   permissions.MAKE_ANNOUNCEMENT in cuperms or
-		   permissions.CREATE_ENTITY in cuperms) %}
+            {% if current_user and
+                  (permissions.CREATE_LINK_ALIAS in cuperms or
+                   permissions.UPLOAD_PICTURES in cuperms or
+                   permissions.MAKE_ANNOUNCEMENT in cuperms or
+                   permissions.CREATE_ENTITY in cuperms) %}
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                   Инструменты <b class="caret"></b>
-		</a>
-		<ul class="dropdown-menu">
+                </a>
+                <ul class="dropdown-menu">
                   {% if permissions.CREATE_LINK_ALIAS in cuperms %}
                     <li>
                       <a href="">Ссылки</a>
-		    </li>
-		  {% endif %}
-		  {% if permissions.UPLOAD_PICTURES in cuperms %}
+                    </li>
+                  {% endif %}
+                  {% if permissions.UPLOAD_PICTURES in cuperms %}
                     <li>
                       <a href="{{ url_for('pictures:show-albums') }}">
                         Картинки
-		      </a>
-		    </li>
-		  {% endif %}
-		  {% if permissions.CREATE_ENTITY in cuperms %}
-		    <li>
+                      </a>
+                    </li>
+                  {% endif %}
+                  {% if permissions.CREATE_ENTITY in cuperms %}
+                    <li>
                       <a href="{{ url_for('drafts:show-drafts') }}">
-			      Черновики</a>
-		    </li>
-		  {% endif %}
-		</ul>
-	      </li>
-	    {% endif %}
-	    {% if current_user and
-	          (permissions.FOLLOW_USERS in cuperms or
-		   permissions.BLOCK_ENTITY in cuperms or
-		   permissions.ADMINISTER_SERVICE in cuperms) %}
-	      <li class="dropdown">
+                              Черновики</a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </li>
+            {% endif %}
+            {% if current_user and
+                  (permissions.FOLLOW_USERS in cuperms or
+                   permissions.BLOCK_ENTITY in cuperms or
+                   permissions.ADMINISTER_SERVICE in cuperms) %}
+              <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                   Сервис <b class="caret"></b>
-		</a>
-		<ul class="dropdown-menu">
+                </a>
+                <ul class="dropdown-menu">
                   <li>
-		    <a href="{{ url_for('admin:users') }}">
-		      Сообщество</a>
-		  </li>
-		  {% if permissions.ADMINISTER_SERVICE in cuperms %}
-		    <li role="separator" class="divider"></li>
-		    <li>
+                    <a href="{{ url_for('admin:users') }}">
+                      Сообщество</a>
+                  </li>
+                  {% if permissions.ADMINISTER_SERVICE in cuperms %}
+                    <li role="separator" class="divider"></li>
+                    <li>
                       <a href="{{ url_for('admin:pictures') }}">Картинки</a>
-		    </li>
-		    <li>
-		      <a href="{{ url_for('admin:settings') }}">
-			Настройки</a>
-		    </li>
-		    <li role="separator" class="divider"></li>
-		    <li>
+                    </li>
+                    <li>
+                      <a href="{{ url_for('admin:settings') }}">
+                        Настройки</a>
+                    </li>
+                    <li role="separator" class="divider"></li>
+                    <li>
                       <a href="{{ url_for(
-			       'admin:logs', filename='access.log') }}"
-			 rel="nofollow"
-			 target="_blank">Текущий лог</a>
-		    </li>
-		    <li>
+                               'admin:logs', filename='access.log') }}"
+                         rel="nofollow"
+                         target="_blank">Текущий лог</a>
+                    </li>
+                    <li>
                       <a href="{{ url_for(
-			       'admin:logs', filename='previous.log') }}"
-			 rel="nofollow"
-			 target="_blank">Предыдущий лог</a>
-		    </li>
-		  {% endif %}
-		</ul>
-	      </li>
-	    {% endif %}
+                               'admin:logs', filename='previous.log') }}"
+                         rel="nofollow"
+                         target="_blank">Предыдущий лог</a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </li>
+            {% endif %}
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
               {% if current_user %}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 <img alt="avatar"
-		     src="{{ current_user.get('ava') }}"><span
-		     class="current-user-name">{{ current_user.get(
-		     'username') }}</span><b class="caret"></b>
-	      </a>
-	      {% else %}
+                     src="{{ current_user.get('ava') }}"><span
+                     class="current-user-name">{{ current_user.get(
+                     'username') }}</span><b class="caret"></b>
+              </a>
+              {% else %}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 Действия <b class="caret"></b>
               </a>
-	      {% endif %}
+              {% endif %}
               <ul class="dropdown-menu">
                 {% if current_user %}
                   {% if permissions.SEND_PM in current_user['permissions'] %}
-		  <li>
+                  <li>
                     <a href="">
                       Приваты
-		    </a>
-		  </li>
-		  {% endif %}
-		  <li>
+                    </a>
+                  </li>
+                  {% endif %}
+                  <li>
                     <a href="{{ url_for(
-		        'profile', username=current_user['username']) }}">
-		      Профиль
-		    </a>
-		  </li>
-		  <li role="separator" class="divider"></li>
-		  <li>
+                        'profile', username=current_user['username']) }}">
+                      Профиль
+                    </a>
+                  </li>
+                  <li role="separator" class="divider"></li>
+                  <li>
                     <a href="{{ url_for('auth:logout') }}">Выйти</a>
-		  </li>
-		{% else %}
+                  </li>
+                {% else %}
                 <li>
-	          <a href="{{ url_for('auth:login') }}">Войти</a>
+                  <a href="{{ url_for('auth:login') }}">Войти</a>
                 </li>
                 <li>
                   <a href="{{ url_for('auth:get-password') }}">
                     Получить пароль</a>
                 </li>
-		{% endif %}
+                {% endif %}
               </ul>
             </li>
           </ul>
@@ -206,7 +206,7 @@
       {% assets filters='rjsmin', output='generic/js/vendor.js',
                 'vendor/jquery-3.6.0.js',
                 'vendor/bootstrap-3.4.1/js/bootstrap.js',
-		'vendor/luxon.js' %}
+                'vendor/luxon.js' %}
         <script src="{{ ASSET_URL }}"></script>
       {% endassets %}
     {% endblock scripts %}
