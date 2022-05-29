@@ -12,6 +12,46 @@ from .md import check_text, parse_md
 from .slugs import check_max, parse_match, make
 
 
+async def prepend_par(conn, art, num, text, code):
+    loop = asyncio.get_running_loop()
+    text, spec = await loop.run_in_executor(
+        None, functools.partial(check_text, text, code))
+    if spec and text:
+        if await conn.fetchrow(
+            '''SELECT num FROM paragraphs
+                 WHERE mdtext = $1 AND article_id = $2''', text, art):
+            text = None
+    if text:
+        after = await conn.fetch(
+            '''SELECT num FROM paragraphs
+                 WHERE article_id = $1 AND num >= $2
+                 ORDER BY num DESC''', art, num)
+        if after:
+            last = after[0].get('num')
+        else:
+            last = num
+        i = last
+        while i >= num:
+            await conn.execute(
+                '''UPDATE paragraphs SET num = num + 1
+                     WHERE num = $1 AND article_id = $2''', i, art)
+            i -= 1
+        await conn.execute(
+            '''INSERT INTO paragraphs (mdtext, article_id, num)
+                 VALUES ($1, $2, $3)''',
+            text, art, num)
+        pars = await conn.fetch(
+            '''SELECT mdtext FROM paragraphs
+                 WHERE article_id = $1 ORDER BY num ASC''', art)
+        html = await loop.run_in_executor(
+            None, functools.partial(parse_md, pars))
+        if html:
+            await conn.execute(
+                'UPDATE articles SET html = $1, edited = $2 WHERE id = $3',
+                html, datetime.utcnow(), art)
+        return html
+
+
 async def remove_this(conn, art, num):
     after = await conn.fetch(
         '''SELECT num FROM paragraphs

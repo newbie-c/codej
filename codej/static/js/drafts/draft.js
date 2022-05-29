@@ -55,6 +55,36 @@ $(function() {
         dataType: 'json'
       });
     });
+    $('#main-container').on('click', '.add-before', function() {
+      $(this).blur();
+      let par = $(this).parent();
+      let html = '<div id="paragraph-editor" class="form-form hidden">' +
+                 '  <div class="form-group">' +
+                 '    <textarea id="paragraph-text-edit"' +
+                 '              placeholder="oтредактируйте абзац топика"' +
+                 '              data-url="' +
+                 $('.entity-text-block').data().insert + '"' +
+                 '              data-num="' + $(this).data().num + '"' +
+                 '              data-art="' + $(this).data().art + '"' +
+                 '              class="form-control"' +
+                 '              rows="5"></textarea>' +
+                 '  </div>' +
+                 '  <div class="form-group last-group">' +
+                 '    <button id="cancel-edit"' +
+                 '            type="button"' +
+                 '            title="отменить"' +
+                 '            class="btn btn-info btn-sm">' +
+                 '      <span class="glyphicon glyphicon-refresh"' +
+                 '            aria-hidden="true"></span>' +
+                 '    </button>' +
+                 '  </div>' +
+                 '</div>';
+      par.before(html);
+      $('#sp-case').trigger('click');
+      $('#paragraph-editor').hide()
+        .removeClass('hidden').slideDown('slow').css({'margin': 0});
+      $('#paragraph-text-edit').focus();
+    });
     $('#main-container').on('click', '#cancel-edit', function() {
       $(this).blur();
       let pare = $('#paragraph-editor');
