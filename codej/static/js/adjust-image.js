@@ -12,7 +12,6 @@ function adjust(image) {
   var $parent = image.parents('p');
   var $width = parseInt($parent.outerWidth());
   if (width > $width) image.attr('width', $width);
-  $parent.addClass('image-par');
 }
 
 function adjustImage() {
@@ -20,6 +19,7 @@ function adjustImage() {
   $(this).on('load', function() {
     adjust($(this));
   });
+  $(this).parents('p').addClass('image-par');
 }
 
 function adjustImageW() {
@@ -28,4 +28,5 @@ function adjustImageW() {
     adjust($(this));
   });
   wrapImage($(this));
+  $(this).parents('p').addClass('image-par');
 }

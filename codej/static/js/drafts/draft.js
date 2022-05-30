@@ -9,9 +9,6 @@ $(function() {
   $('#html-text-edit').focus();
   $('.slidable .block-header').on('click', showHideBlock);
   if ($('.entity-text-block').length) {
-    $('.entity-text-block iframe').each(adjustFrame);
-    $('.entity-text-block').children().each(setMargin);
-    $('.entity-text-block img').each(adjustImage);
     let ch = $('.entity-text-block').children();
     let len = $('.entity-text-block').data().len;
     for (let i = 0, m = 0; i < ch.length && m < len; i++) {
@@ -30,6 +27,9 @@ $(function() {
         m++;
       }
     }
+    $('.entity-text-block iframe').each(adjustFrame);
+    $('.entity-text-block').children().each(setMargin);
+    $('.entity-text-block img').each(adjustImage);
     $('#main-container').on('click', '.edit-par', function() {
       $(this).blur();
       let par = $(this).parent().next();
@@ -211,5 +211,23 @@ $(function() {
   $('#sp-case').on('click', function() {
     let o = $('#editor-opts');
     if (o.length) o.slideUp('slow');
+  });
+  $('.copy-link').on('click', showCopyForm);
+  $('#copy-button').on('click', {cls: '.entity-link-copy-form'}, copyThis);
+  $('#labels-button').on('click', function() {
+    $(this).blur();
+  });
+  $('#edit-metadesc').on('click', function() {
+    $(this).blur();
+  });
+  $('#edit-title').on('click', function() {
+    $(this).blur();
+  });
+  $('#edit-summary').on('click', function() {
+    $(this).blur();
+  });
+  let stbtn = $('#state-button');
+  if (stbtn.length) stbtn.on('click', function() {
+    $(this).blur();
   });
 });

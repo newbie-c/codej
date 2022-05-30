@@ -12,3 +12,16 @@
 .entity-details {
   margin: 3px 0 4px;
 }
+
+.entity-copy-link {
+  width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 4px;
+  padding: 0;
+}
+
+.entity-link-copy-form .form-group {
+  margin-top: 4px;
+  margin-bottom: 0;
+}

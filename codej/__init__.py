@@ -31,8 +31,8 @@ from .errors import (
     handle_csrf_error, notify_not_found_page,
     refuse_method, refuse_request)
 from .main.views import (
-    make_friend, show_index, show_picture, show_profile,
-    show_robots, show_favicon)
+    make_friend, jump, show_index, show_picture,
+    show_profile, show_robots, show_favicon)
 from .pictures.views import (
     change_state, check_pic, create_album, find_album,
     remove_pic, rename_album, show_album, show_album_stat,
@@ -83,6 +83,7 @@ app = Starlette(
     routes=[Route('/', show_index, name='index'),
             Route('/robots.txt', show_robots, name='robots'),
             Route('/favicon.ico', show_favicon, name='favicon'),
+            Route('/{suffix}', jump, name='jump'),
             Route('/ajax/make-friend', make_friend,
                   name="make-friend", methods=['POST']),
             Route('/picture/{suffix}', show_picture, name='show-picture'),

@@ -137,6 +137,7 @@ async def show_draft(request):
     length = await conn.fetchval(
         'SELECT count(*) FROM paragraphs WHERE article_id = $1', target['id'])
     await conn.close()
+    print(target)
     return request.app.jinja.TemplateResponse(
         'drafts/draft.html',
         {'request': request,

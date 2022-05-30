@@ -21,6 +21,11 @@ Disallow: /
 """
 
 
+async def jump(request):
+    return JSONResponse({'suffix': request.path_params.get('suffix'),
+                         'state': 'Not implemented yet.'})
+
+
 async def show_picture(request):
     current_user = await checkcu(request)
     conn = await get_conn(request.app.config)
