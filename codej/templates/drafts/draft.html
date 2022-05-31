@@ -210,6 +210,29 @@
                     rows="5"></textarea>
         </div>
       </div>
+      <div id="entity-title-editor" class="form-form to-be-hidden">
+        <table class="inline-form-table">
+          <tbody>
+            <tr>
+              <td class="input-field">
+                <input id="title"
+                       class="form-control"
+                       type="text"
+                       value="{{ target['title'] }}"
+                       placeholder="введите заголовок топика">
+              </td>
+              <td>&nbsp;</td>
+              <td>
+                <button id="title-submit"
+                        class="btn btn-danger"
+                        data-art="{{ target['id'] }}"
+                        data-url="{{ url_for('drafts:ch-title') }}"
+                        type="button">Сохранить</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div id="options-block" class="content-block next-block">
       <button id="sp-case"
@@ -283,6 +306,7 @@
             'js/set-margin.js',
             'js/show-copy-form.js',
             'js/copy-this.js',
+            'js/mark-input-error.js',
             'js/drafts/draft.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

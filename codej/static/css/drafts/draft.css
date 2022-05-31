@@ -18,6 +18,15 @@
   text-align: justify;
 }
 
+.inline-form-table {
+  margin: 0;
+  width: 100%;
+}
+
+.input-field {
+  width: 90%;
+}
+
 #options-block {
   text-align: center;
   padding: 4px 0;

@@ -10,7 +10,8 @@ from ..common.urls import get_next
 from .attri import status
 from .pg import (
     prepend_par, change_par, check_article, create_d,
-    check_last_drafts, remove_this, save_par, select_drafts)
+    check_last_drafts, check_slug, remove_this, save_par,
+    select_drafts)
 
 spar = '''SELECT par.num, par.article_id, par.mdtext
             FROM paragraphs AS par, articles AS arts
@@ -18,6 +19,27 @@ spar = '''SELECT par.num, par.article_id, par.mdtext
                 AND par.article_id = $2
                 AND arts.author_id = $3
                 AND par.article_id = arts.id'''
+
+
+async def change_title(request):
+    res = {'empty': True}
+    d = await request.form()
+    art, title = int(d.get('art')), d.get('title')
+    current_user = await checkcu(request)
+    if title and len(title) <= 100 and current_user and \
+            permissions.CREATE_ENTITY in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            'SELECT id, title, slug FROM articles WHERE id = $1', art)
+        if target and title != target.get('title'):
+            slug = await check_slug(conn, title)
+            await conn.execute(
+                '''UPDATE articles SET title = $1, slug = $2
+                     WHERE id = $3''', title, slug, art)
+            res = {'empty': False,
+                   'url': request.url_for('drafts:show-draft', slug=slug)}
+        await conn.close()
+    return JSONResponse(res)
 
 
 async def insert_par(request):
@@ -137,7 +159,6 @@ async def show_draft(request):
     length = await conn.fetchval(
         'SELECT count(*) FROM paragraphs WHERE article_id = $1', target['id'])
     await conn.close()
-    print(target)
     return request.app.jinja.TemplateResponse(
         'drafts/draft.html',
         {'request': request,

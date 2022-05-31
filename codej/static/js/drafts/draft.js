@@ -222,6 +222,46 @@ $(function() {
   });
   $('#edit-title').on('click', function() {
     $(this).blur();
+    let f = $('#entity-title-editor');
+    if (f.is(':hidden')) {
+      f.slideDown('slow', function() {
+        $('#title').focus();
+      });
+      $('#new-paragraph-editor').slideUp('slow');
+    } else {
+      f.slideUp('slow');
+      $('#new-paragraph-editor').slideDown('slow', function() {
+        $('#html-text-edit').focus();
+      });
+    }
+  });
+  $('#title')
+    .on('keyup blur',
+        {min: 3, max: 100, block: '.input-field'}, markInputError);
+  $('#title').on('keyup', function(event) {
+    if (event.which == 13) $('#title-submit').trigger('click');
+  });
+  $('#title-submit').on('click', function() {
+    $(this).blur();
+    if (!$('.input-field').hasClass('has-error')) {
+      $.ajax({
+        method: 'POST',
+        url: $(this).data().url,
+        data: {
+          title: $('#title').val().trim(),
+          art: $(this).data().art
+        },
+        success: function(data) {
+          if (!data.empty) {
+            window.location.replace(data.url);
+          } else {
+            $('#edit-title').trigger('click');
+          }
+        },
+        error: function(data) {},
+        dataType: 'json'
+      });
+    }
   });
   $('#edit-summary').on('click', function() {
     $(this).blur();
