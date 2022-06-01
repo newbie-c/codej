@@ -210,6 +210,30 @@
                     rows="5"></textarea>
         </div>
       </div>
+      <div id="meta-description-editor" class="form-form to-be-hidden">
+        <div id="d-length-marker">
+          Осталось: <span
+            id="d-length-value">{%- if not target['meta'] -%}180
+          {%- else -%}{{- 180 - target['meta']|length -}}{%- endif -%}</span>
+        </div>
+        <div class="form-group">
+          <textarea id="metadesc-edit"
+                    placeholder="введите текст описания"
+                    class="form-control"
+                    rows="3">
+            {%- if target['meta'] -%}{{- target['meta'] -}}
+            {%- endif -%}
+          </textarea>
+        </div>
+        <div class="form-group last-group">
+          <button id="metadesc-submit"
+                 class="btn {% if target['meta'] %}btn-danger
+                        {% else %}btn-info{% endif %} btn-block"
+                 type="button"
+                 data-url="{{ url_for('drafts:edit-meta') }}"
+                 data-art="{{ target['id'] }}">Сохранить</button>
+        </div>
+      </div>
       <div id="entity-title-editor" class="form-form to-be-hidden">
         <table class="inline-form-table">
           <tbody>
@@ -241,6 +265,13 @@
         <span class="glyphicon glyphicon-wrench"
               aria-hidden="true"></span>
       </button>
+      <button id="move-screen-up"
+              class="btn btn-default btn-sm"
+              type="button"
+              title="прокрутить наверх">
+        <span class="glyphicon glyphicon-hand-up"
+              aria-hidden="true"></span>
+      </button>
       <button id="labels-button"
               type="button"
               title="редактировать метки"
@@ -251,11 +282,9 @@
       <button id="edit-metadesc"
               type="button"
               title="редактировать тег meta description"
-              class="btn {% if target['meta'] %}btn-danger
+              class="btn {% if target['meta'] %}btn-success
                          {% else %}btn-info{% endif %} btn-sm">
-        <span class="glyphicon {% if target['meta'] %}
-                               glyphicon-edit{% else %}
-                               glyphicon-pencil{% endif %}"
+        <span class="glyphicon glyphicon-pencil"
               aria-hidden="true"></span>
       </button>
       <button id="edit-title"
@@ -307,6 +336,7 @@
             'js/show-copy-form.js',
             'js/copy-this.js',
             'js/mark-input-error.js',
+            'js/track-marker.js',
             'js/drafts/draft.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

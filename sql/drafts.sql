@@ -5,7 +5,7 @@ CREATE TABLE articles (
     suffix    varchar(13)  UNIQUE,
     html      text         DEFAULT NULL,
     summary   varchar(512) DEFAULT NULL,
-    meta      varchar(160) DEFAULT NULL,
+    meta      varchar(180) DEFAULT NULL,
     published timestamp    DEFAULT NULL,
     edited    timestamp,
     state     varchar(10),

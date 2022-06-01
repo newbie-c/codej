@@ -214,11 +214,55 @@ $(function() {
   });
   $('.copy-link').on('click', showCopyForm);
   $('#copy-button').on('click', {cls: '.entity-link-copy-form'}, copyThis);
+  $('#move-screen-up').on('click', function() {
+    $(this).blur();
+    scrollPanel($('#navigation'));
+  });
   $('#labels-button').on('click', function() {
     $(this).blur();
   });
   $('#edit-metadesc').on('click', function() {
     $(this).blur();
+    let f = $('#meta-description-editor');
+    if (f.is(':hidden')) {
+      f.slideDown('slow', function() {
+        $('#metadesc-edit').focus();
+        scrollPanel(f);
+      });
+      $('#new-paragraph-editor').slideUp('slow');
+      $('#entity-title-editor').slideUp('slow');
+    } else {
+      f.slideUp('slow');
+      $('#new-paragraph-editor').slideDown('slow', function() {
+        $('#html-text-edit').focus();
+      });
+    }
+  });
+  $('#metadesc-edit')
+    .on('keyup blur',
+        {len: 180, marker: '#d-length-value', block: '#d-length-marker'},
+        trackMarker);
+  $('#metadesc-submit').on('click', function() {
+    $(this).blur();
+    if (!$('#metadesc-edit').parents('.form-group').hasClass('has-error')) {
+      $.ajax({
+        method: 'POST',
+        url: $(this).data().url,
+        data: {
+          meta: $('#metadesc-edit').val(),
+          art: $(this).data().art
+        },
+        success: function(data) {
+          if (!data.empty) {
+            window.location.reload();
+          } else {
+            $('#edit-metadesc').trigger('click');
+          }
+        },
+        error: function(data) {},
+        dataType: 'json'
+      });
+    }
   });
   $('#edit-title').on('click', function() {
     $(this).blur();
@@ -226,8 +270,10 @@ $(function() {
     if (f.is(':hidden')) {
       f.slideDown('slow', function() {
         $('#title').focus();
+        scrollPanel(f);
       });
       $('#new-paragraph-editor').slideUp('slow');
+      $('#meta-description-editor').slideUp('slow');
     } else {
       f.slideUp('slow');
       $('#new-paragraph-editor').slideDown('slow', function() {

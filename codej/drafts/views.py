@@ -21,6 +21,26 @@ spar = '''SELECT par.num, par.article_id, par.mdtext
                 AND par.article_id = arts.id'''
 
 
+async def edit_meta(request):
+    res = {'empty': True}
+    d = await request.form();
+    art, meta = int(d.get('art')), d.get('meta')
+    current_user = await checkcu(request)
+    if meta and current_user and \
+            permissions.CREATE_ENTITY in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            'SELECT id, meta FROM articles WHERE id = $1 AND author_id = $2',
+            art, current_user['id'])
+        if target and meta != target.get('meta') and len(meta) <= 180:
+            await conn.execute(
+                'UPDATE articles SET meta = $1 WHERE id = $2',
+                meta, art)
+            res = {'empty': False}
+        await conn.close()
+    return JSONResponse(res);
+
+
 async def change_title(request):
     res = {'empty': True}
     d = await request.form()
@@ -30,7 +50,9 @@ async def change_title(request):
             permissions.CREATE_ENTITY in current_user['permissions']:
         conn = await get_conn(request.app.config)
         target = await conn.fetchrow(
-            'SELECT id, title, slug FROM articles WHERE id = $1', art)
+            '''SELECT id, title, slug FROM articles
+                 WHERE id = $1 AND author_id = $2''',
+            art, current_user['id'])
         if target and title != target.get('title'):
             slug = await check_slug(conn, title)
             await conn.execute(
