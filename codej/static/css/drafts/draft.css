@@ -10,7 +10,7 @@
   margin-top: 6px;
 }
 
-#d-length-marker {
+#d-length-marker, #s-length-marker {
   margin-bottom: 6px;
 }
 
@@ -18,7 +18,7 @@
   padding: 12px 0;
 }
 
-#html-text-edit {
+#html-text-edit, #summary-edit, #metadesc-edit {
   text-align: justify;
 }
 

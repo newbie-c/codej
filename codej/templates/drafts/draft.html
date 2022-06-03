@@ -16,7 +16,7 @@
             'css/common-details.css',
             'css/entity-details.css',
             'css/entity-text.css',
-            'css/paraiso-dark.css',
+            'css/pygments.css',
             'css/drafts/draft.css' %}
     <link rel="stylesheet" type="text/css", href="{{ ASSET_URL }}">
   {% endassets %}
@@ -234,6 +234,70 @@
                  data-art="{{ target['id'] }}">Сохранить</button>
         </div>
       </div>
+      <div id="summary-editor" class="form-form to-be-hidden">
+        <div id="s-length-marker">
+          Осталось: <span
+            id="s-length-value">{%- if not target['summary'] -%}512
+          {%- else -%}{{- 512 - target['summary']|length -}}
+          {%- endif -%}</span>
+        </div>
+        <div class="form-group">
+          <textarea id="summary-edit"
+                    placeholder="введите текст аннотации"
+                    class="form-control"
+                    rows="5">
+            {%- if target['summary'] -%}{{- target['summary'] -}}
+            {%- endif -%}
+          </textarea>
+        </div>
+        <div class="form-group last-group">
+          <button id="summary-submit"
+                  class="btn btn-danger"
+                  type="button"
+                  title="сохранить"
+                  data-url="{{ url_for('drafts:edit-sum') }}"
+                  data-art="{{ target['id'] }}">
+            Сохранить
+          </button>
+          <button id="summary-from-text"
+                  class="btn btn-default"
+                  title="взять из текста"
+                  type="button">
+            Из текста
+          </button>
+        </div>
+      </div>
+      {% if target['state'] != status.mod %}
+        <div id="status-editor" class="form-form to-be-hidden">
+          <div class="form-group">
+            <select id="select-status"
+                    class="form-control"
+                    data-url="{{ url_for('drafts:edit-state') }}"
+                    data-art="{{ target['id'] }}">
+              <option value="{{ status.pub }}"
+                      {% if target['state'] == status.pub %}
+                      selected{% endif %}>
+                {{ status.pub }}
+              </option>
+              <option value="{{ status.priv }}"
+                      {% if target['state'] == status.priv %}
+                      selected{% endif %}>
+                {{ status.priv }}
+              </option>
+              <option value="{{ status.hidden }}"
+                      {% if target['state'] == status.hidden %}
+                      selected{% endif %}>
+                {{ status.hidden }}
+              </option>
+              <option value="{{ status.draft }}"
+                      {% if target['state'] == status.draft %}
+                      selected{% endif %}>
+                {{ status.draft }}
+              </option>
+            </select>
+          </div>
+        </div>
+      {% endif %}
       <div id="entity-title-editor" class="form-form to-be-hidden">
         <table class="inline-form-table">
           <tbody>

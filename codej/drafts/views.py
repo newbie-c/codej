@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse, RedirectResponse
 
@@ -19,6 +21,53 @@ spar = '''SELECT par.num, par.article_id, par.mdtext
                 AND par.article_id = $2
                 AND arts.author_id = $3
                 AND par.article_id = arts.id'''
+
+
+async def edit_state(request):
+    res = {'empty': True}
+    d = await request.form()
+    art, state = int(d.get('art')), d.get('state')
+    current_user = await checkcu(request)
+    if state and state in status and current_user and \
+            permissions.CREATE_ENTITY in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT id, state, published FROM articles
+                 WHERE id = $1 AND author_id = $2''', art, current_user['id'])
+        if target:
+            if target.get('published') is None and \
+                    state in (status.pub, status.priv, status.hidden):
+                await conn.execute(
+                    '''UPDATE articles SET state = $1, published = $2
+                         WHERE id = $3 AND author_id = $4''',
+                    state, datetime.utcnow(), art, current_user['id'])
+            else:
+                await conn.execute(
+                    '''UPDATE articles SET state = $1
+                         WHERE id = $2 AND author_id = $3''',
+                    state, art, current_user['id'])
+            res = {'empty': False}
+        await conn.close()
+    return JSONResponse(res)
+
+
+async def edit_sum(request):
+    res = {'empty': True}
+    d = await request.form()
+    art, s = int(d.get('art')), d.get('summary')
+    current_user = await checkcu(request)
+    if s and len(s) <= 512 and current_user and \
+            permissions.CREATE_ENTITY in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT id, summary FROM articles
+                 WHERE id = $1 AND author_id = $2''', art, current_user['id'])
+        if target and s != target.get('summary'):
+            await conn.execute(
+                'UPDATE articles SET summary = $1 WHERE id = $2', s, art)
+            res = {'empty': False}
+        await conn.close()
+    return JSONResponse(res)
 
 
 async def edit_meta(request):

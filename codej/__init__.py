@@ -26,8 +26,8 @@ from .auth.views import (
 from .captcha.views import show_captcha
 from .drafts.views import (
     change_title, check_par, create_draft, create_par,
-    edit_par, edit_meta, insert_par, rem_par,
-    show_draft, show_drafts)
+    edit_par, edit_meta, edit_state, edit_sum,
+    insert_par, rem_par, show_draft, show_drafts)
 from .errors import (
     handle_csrf_error, notify_not_found_page,
     refuse_method, refuse_request)
@@ -142,7 +142,11 @@ app = Starlette(
                 Route('/ajax/ch-title', change_title,
                       name='ch-title', methods=['POST']),
                 Route('/ajax/edit-meta', edit_meta,
-                      name='edit-meta', methods=['POST'])]),
+                      name='edit-meta', methods=['POST']),
+                Route('/ajax/edit-sum', edit_sum,
+                      name='edit-sum', methods=['POST']),
+                Route('/ajax/edit-state', edit_state,
+                      name='edit-state', methods=['POST'])]),
             Mount('/pictures', name='pictures', routes=[
                 Route('/', show_albums,
                       name='show-albums', methods=['GET', 'POST']),
