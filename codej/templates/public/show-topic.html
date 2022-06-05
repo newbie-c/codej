@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
+
+{% block title %}{{ target.get('title') }}{% endblock title %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/public/show-topic.css',
+            'css/base.css',
+            'css/mc780.css',
+            'css/top-flashed.css',
+            'css/next-block.css',
+            'css/content-block.css',
+            'css/avatar.css',
+            'css/entity-attributes.css',
+            'css/common-details.css',
+            'css/entity-details.css',
+            'css/entity-text.css',
+            'css/pygments.css',
+            'css/public/show-topic.css' %}
+    <link rel="stylesheet" type="text/css", href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- public/show-topic.html -->
+  <div id="main-container">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    <div id="entity-header-block"
+         data-suffix="{{ target['suffix'] }}"
+         data-url="{{ url_for('count-views') }}"
+         class="content-block slidable">
+      <div class="block-header">
+        <h1 class="panel-title"
+            {% if target['title']|length > 80 %}
+            title="{{ target['title'] }}"{% endif %}>
+          {% if target['title']|length > 80 %}
+            {{ target['title80'] }}
+          {% else %}
+            {{ target['title'] }}
+          {% endif %}
+        </h1>
+      </div>
+      <div class="block-body to-be-hidden">
+        <div class="entity-attributes">
+          <div class="author-avatar avatar"
+               style="background:url({{ target['ava'] }})"></div>
+          <div class="entity-info">
+            <h4>
+              <a class="author-profile-link"
+                 href="{{ url_for('profile', username=target['author']) }}">
+                {{ target['author'] }}
+              </a>
+            </h4>
+            <div class="info-line-block">
+              <table>
+                <tbody>
+                  {% if target['published'] %}
+                    <tr>
+                      <td>
+                        <span class="date-info">Опубликован:&nbsp;</span>
+                      </td>
+                      <td>
+                        <span class="date-info date-field">
+                          {{ target['published'] }}</span>
+                      </td>
+                    </tr>
+                  {% endif %}
+                  <tr>
+                    <td>
+                      <span class="date-info">Отредактирован:&nbsp;</span>
+                    </td>
+                    <td>
+                      <span class="date-info date-field">
+                        {{ target['edited'] }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="footer-bottom"></div>
+        </div>
+      </div>
+    </div>
+    <div class="next-block content-block common-details">
+      <div class="entity-blog-link">
+        <a href="">{{ target['author'] }}&nbsp;блог</a>
+      </div>
+      <div class="entity-details">
+        <table align="center" class="entity-details-table">
+          <tbody>
+          <tr>
+            <td>
+              <div class="labeled labeled-text labeled-info viewed-ind">
+                <span class="glyphicon glyphicon-eye-open"
+                      aria-hidden="true"></span><span
+                      class="value">{{ target['viewed'] }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="labeled labeled-text labeled-success like-block">
+                <span class="glyphicon glyphicon-thumbs-up"
+                      aria-hidden="true"></span><span
+                      class="value">{{ target['likes'] }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="labeled labeled-text labeled-danger dislike-block">
+                <span class="glyphicon glyphicon-thumbs-down"
+                      aria-hidden="true"></span><span
+                      class="value">{{ target['dislikes'] }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="labeled labeled-text
+                   {% if target['commented'] %}labeled-info
+                   {% else %}labeled-warning{% endif %}">
+                <span class="glyphicon glyphicon-comment"
+                      aria-hidden="true"></span><span
+                      class="value">{{ target['commentaries'] }}</span>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="entity-copy-link">
+        <button type="button"
+                class="btn btn-xs btn-default btn-block copy-link">
+          поделиться ссылкой
+        </button>
+        <div class="entity-link-copy-form to-be-hidden">
+          <div class="form-group">
+            <input id="copy-box"
+                   class="form-control"
+                   type="text"
+                   name="copy-box"
+                   value="{{ url_for('jump', suffix=target['suffix']) }}">
+          </div>
+          <div class="form-group">
+            <button id="copy-button"
+                    type="button"
+                    data-clipboard-target="#copy-box"
+                    class="btn btn-xs btn-primary btn-block">
+              скопировать в буфер обмена
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content-block next-block entity-text-block">
+      {{ target['html']|safe }}
+    </div>
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/vendor-clipboard.js',
+            'vendor/clipboard.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+  {% assets filters='rjsmin', output='generic/js/public/show-topic.js',
+            'js/check-mc.js',
+            'js/hide-hidden.js',
+            'js/footer.js',
+            'js/top-flashed.js',
+            'js/show-datetime.js',
+            'js/show-hide.js',
+            'js/scroll-panel.js',
+            'js/adjust-frame.js',
+            'js/adjust-image.js',
+            'js/set-margin.js',
+            'js/show-copy-form.js',
+            'js/copy-this.js',
+            'js/count-clicks.js',
+            'js/ping.js',
+            'js/public/show-topic.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}

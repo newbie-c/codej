@@ -18,6 +18,7 @@ from webassets.ext.jinja2 import assets
 from .admin.views import (
     admin_pictures, admin_users, find_user, find_pic,
     rem_pic, set_init_perms, set_service, show_log)
+from .arts.views import show_art
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
 from .auth.views import (
@@ -32,12 +33,14 @@ from .errors import (
     handle_csrf_error, notify_not_found_page,
     refuse_method, refuse_request)
 from .main.views import (
-    make_friend, jump, show_index, show_picture,
-    show_profile, show_robots, show_favicon)
+    count_views, make_friend, jump, ping,
+    show_index, show_picture, show_profile, show_robots,
+    show_favicon)
 from .pictures.views import (
     change_state, check_pic, create_album, find_album,
     remove_pic, rename_album, show_album, show_album_stat,
     show_albums, show_pic_stat, show_user_stat)
+from .public.views import show_topic
 
 base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
@@ -85,8 +88,12 @@ app = Starlette(
             Route('/robots.txt', show_robots, name='robots'),
             Route('/favicon.ico', show_favicon, name='favicon'),
             Route('/{suffix}', jump, name='jump'),
+            Route('/ajax/count-views', count_views,
+                  name='count-views', methods=['POST']),
             Route('/ajax/make-friend', make_friend,
                   name="make-friend", methods=['POST']),
+            Route('/ajax/ping', ping,
+                  name='ping', methods=['POST']),
             Route('/picture/{suffix}', show_picture, name='show-picture'),
             Route('/society/{username}', show_profile,
                   name='profile', methods=['GET', 'POST']),
@@ -104,6 +111,8 @@ app = Starlette(
                 Route('/ajax/find-pic', find_pic,
                       name='find-pic', methods=['POST']),
                 Route('/logs/{filename}', show_log, name='logs')]),
+            Mount('/arts', name='arts', routes=[
+                Route('/{slug}', show_art, name='show-art')]),
             Mount('/auth', name='auth', routes=[
                 Route('/login', login,
                       name='login', methods=['GET', 'POST']),
@@ -170,6 +179,8 @@ app = Starlette(
                       name='find-album', methods=['POST']),
                 Route('/ajax/remove-pic', remove_pic,
                       name='remove-pic', methods=['POST'])]),
+            Mount('/public', name='public', routes=[
+                Route('/{slug}', show_topic, name='show-topic')]),
             Mount('/static',
                   app=StaticFiles(directory=static), name='static')],
     on_startup=[run_before],

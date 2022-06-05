@@ -12,6 +12,7 @@ from ..common.flashed import get_flashed, set_flashed
 from ..common.parsers import parse_address
 from ..common.pg import get_conn
 from ..common.urls import get_next
+from ..drafts.attri import status
 from .pg import check_friends, filter_target_user
 from .redi import change_udata
 from .tools import check_state
@@ -19,6 +20,32 @@ from .tools import check_state
 robots = """User-agent: *
 Disallow: /
 """
+
+
+async def ping(request):
+    res = {'empty': True}
+    current_user = await checkcu(request)
+    if current_user:
+        res = {'empty': False}
+    return JSONResponse(res)
+
+
+async def count_views(request):
+    res = {'empty': True}
+    d = await request.form()
+    conn = await get_conn(request.app.config)
+    target = await conn.fetchrow(
+        'SELECT id, suffix, state, viewed FROM articles WHERE suffix = $1',
+        d.get('suffix'))
+    if target and \
+            target.get('state') in (status.pub, status.priv, status.hidden):
+        await conn.execute(
+            'UPDATE articles SET viewed = $1 WHERE suffix = $2',
+            target.get('viewed')+1, target.get('suffix'))
+        res = {'empty': False,
+                'views': target.get('viewed')+1}
+    await conn.close()
+    return JSONResponse(res)
 
 
 async def jump(request):

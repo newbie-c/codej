@@ -37,7 +37,11 @@
         <h3 class="panel-title"
             {% if target['title']|length > 80 %}
             title="{{ target['title'] }}"{% endif %}>
+          {% if target['title']|length > 80 %}
+            {{ target['title80'] }}
+          {% else %}
           {{ target['title'] }}
+          {% endif %}
         </h3>
       </div>
       <div class="block-body to-be-hidden">
