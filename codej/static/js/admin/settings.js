@@ -23,4 +23,19 @@ $(function() {
       dataType: 'json'
     });
   });
+  $('#robots-submit').on('click', function() {
+    $(this).blur();
+    $.ajax({
+      method: 'POST',
+      url: $(this).data().url,
+      data: {
+        text: $('#robots-editor').val()
+      },
+      success: function(data) {
+        window.location.assign('/robots.txt');
+      },
+      error: function(data) {},
+      dataType: 'json'
+    });
+  });
 });

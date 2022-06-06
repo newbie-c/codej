@@ -17,7 +17,8 @@ from webassets.ext.jinja2 import assets
 
 from .admin.views import (
     admin_pictures, admin_users, find_user, find_pic,
-    rem_pic, set_init_perms, set_service, show_log)
+    rem_pic, set_init_perms, set_robots, set_service,
+    show_log)
 from .arts.views import show_art
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
@@ -34,8 +35,8 @@ from .errors import (
     refuse_method, refuse_request)
 from .main.views import (
     count_views, make_friend, jump, ping,
-    show_index, show_picture, show_profile, show_robots,
-    show_favicon)
+    show_favicon, show_index, show_picture, show_profile,
+    show_robots, show_sitemap)
 from .pictures.views import (
     change_state, check_pic, create_album, find_album,
     remove_pic, rename_album, show_album, show_album_stat,
@@ -87,6 +88,7 @@ app = Starlette(
     routes=[Route('/', show_index, name='index'),
             Route('/robots.txt', show_robots, name='robots'),
             Route('/favicon.ico', show_favicon, name='favicon'),
+            Route('/sitemap.xml', show_sitemap, name='sitemap'),
             Route('/{suffix}', jump, name='jump'),
             Route('/ajax/count-views', count_views,
                   name='count-views', methods=['POST']),
@@ -110,6 +112,8 @@ app = Starlette(
                       name='rem-pic', methods=['POST']),
                 Route('/ajax/find-pic', find_pic,
                       name='find-pic', methods=['POST']),
+                Route('/ajax/set-robots', set_robots,
+                      name='set-robots', methods=['POST']),
                 Route('/logs/{filename}', show_log, name='logs')]),
             Mount('/arts', name='arts', routes=[
                 Route('/{slug}', show_art, name='show-art')]),

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemap.org/schemas/sitemap/0.9">
+  <url>
+    <loc>{{ url_for('index') }}</loc>
+    <lastmod>{{ now }}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1</priority>
+  </url>
+	{% if arts %}
+    {% for art in arts %}
+      <url>
+        <loc>{{ url_for('public:show-topic', slug=art.get('slug')) }}</loc>
+        <lastmod>{{ art.get('edited').isoformat() + 'Z' }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1</priority>
+      </url>
+    {% endfor %}
+	{% endif %}
+</urlset>

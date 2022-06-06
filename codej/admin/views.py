@@ -14,10 +14,21 @@ from ..common.aparsers import (
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
+from ..main.views import robots
 from .forms import CreateUser
 from .pg import (
     check_last_pictures, check_last_users, create_user, select_found,
     select_pictures, select_users)
+
+
+async def set_robots(request):
+    res = {'empty': True}
+    text = (await request.form()).get('text')
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.ADMINISTER_SERVICE in current_user['permissions']:
+        await request.app.rc.set('robots:page', text)
+    return JSONResponse(res)
 
 
 async def find_pic(request):
@@ -259,11 +270,13 @@ async def set_service(request):
     perms = await conn.fetch(
         'SELECT * FROM permissions WHERE permission = any($1::varchar[])',
         [permission for permission in initials])
+    robo = await request.app.rc.get('robots:page') or robots
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'admin/settings.html',
         {'request': request,
          'current_user': current_user,
          'perms': perms,
+         'robots': robo,
          'token': csrf_token(request),
          'flashed': await get_flashed(request)})

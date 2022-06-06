@@ -1,5 +1,7 @@
 import os
 
+from datetime import datetime
+
 from starlette.exceptions import HTTPException
 from starlette.responses import (
     FileResponse, JSONResponse, PlainTextResponse, Response, RedirectResponse)
@@ -20,6 +22,23 @@ from .tools import check_state
 robots = """User-agent: *
 Disallow: /
 """
+
+
+async def show_sitemap(request):
+    conn = await get_conn(request.app.config)
+    arts = await conn.fetch(
+        '''SELECT slug, published, edited FROM articles
+             WHERE state = $1 ORDER BY published DESC LIMIT 250''',
+        status.pub)
+    await conn.close()
+    response = request.app.jinja.TemplateResponse(
+        'main/sitemap.xml',
+        {'request': request,
+         'arts': arts,
+         'now': f'{datetime.utcnow().isoformat()}Z'})
+    response.media_type = 'application/xml'
+    response.headers['content-type'] = 'application/xml'
+    return response
 
 
 async def ping(request):
@@ -203,7 +222,8 @@ async def show_index(request):
 
 async def show_robots(request):
     if request.method == 'GET':
-        return PlainTextResponse(robots)
+        text = await request.app.rc.get('robots:page') or robots
+        return PlainTextResponse(text)
 
 
 async def show_favicon(request):

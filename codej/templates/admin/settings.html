@@ -55,6 +55,39 @@
         </div>
       </div>
     </div>
+    <div id="robots-block" class="content-block slidable next-block">
+      <div class="block-header">
+        <h3 class="panel-title">
+          Редактор файла robots.txt
+        </h3>
+      </div>
+      <div class="block-body to-be-hidden">
+        <div class="help-field">
+          <p>
+            В этой секции настроек можно создать и отредактировать файл
+            <em>robors.txt</em>, для этого следует заполнить форму ниже,
+            вписать все необходимые директивы в поле ввода и нажать кнопку
+            "Сохранить".
+          </p>
+        </div>
+        <div class="robots-form">
+          <div class="form-group">
+            <textarea id="robots-editor"
+                      class="form-control"
+                      placeholder="введите или отредактируйте текст файла"
+                      rows="10">{{ robots }}</textarea>
+          </div>
+          <div class="form-group submit-group">
+            <button id="robots-submit"
+                    type="button"
+                    class="btn btn-primary btn-block"
+                    title="сохранить"
+                    data-url="{{ url_for('admin:set-robots') }}">
+              Сохранить</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 {% endblock page_body %}
 
