@@ -11,9 +11,10 @@ from .pg import check_topic
 async def show_topic(request):
     slug = request.path_params.get('slug')
     current_user = await checkcu(request)
+    print(current_user)
     if current_user:
         return RedirectResponse(
-            request.url_for('arts:show-art', slug=slug), 301)
+            request.url_for('arts:show-art', slug=slug), 302)
     conn = await get_conn(request.app.config)
     target = await check_topic(request, conn, slug)
     if target is None:

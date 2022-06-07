@@ -88,6 +88,40 @@
         </div>
       </div>
     </div>
+    <div id="index-page-block" class="content-block slidable next-block">
+      <div class="block-header">
+        <h3 class="panel-title">Настройка стартовой страницы</h3>
+      </div>
+      <div class="block-body to-be-hidden">
+        <div class="help-field">
+          <p>
+            Если создать черновик и скопировать в поле ввода ниже
+            восьмизначный суффикс этого черновика, заголовок и текст этой
+            статьи будут показаны на стартовой странице сайта.
+          </p>
+        </div>
+        <div class="index-page-form">
+          <div class="inline-form-group">
+            <label class="sr-only" for="index-page-suffix">Суффикс:</label>
+            <input id="index-page-suffix"
+                   type="text"
+                   class="index-page-suffix form-control"
+                   name="index-page-suffix"
+                   {% if index %}value="{{ index }}"{% endif %}
+                   placeholder="введите суффикс приватной статьи">
+          </div>
+          <div class="inline-submit-group">
+            <button id="index-page-submit"
+                    type="button"
+                    class="btn btn-primary"
+                    title="задать"
+                    data-url="{{ url_for('admin:set-index') }}">
+              Задать</button>
+          </div>
+          <div class="footer-bottom"></div>
+        </div>
+      </div>
+    </div>
   </div>
 {% endblock page_body %}
 

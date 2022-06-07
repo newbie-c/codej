@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% from "macros/_common.html" import show_messages %}
 
+{% block metas %}
+  {{ super() }}
+  <meta name="description" content="{{ target['meta'] }}">
+{% endblock metas %}
+
 {% block title %}{{ target.get('title') }}{% endblock title %}
 
 {% block styles %}
@@ -20,6 +25,8 @@
             'css/public/show-topic.css' %}
     <link rel="stylesheet" type="text/css", href="{{ ASSET_URL }}">
   {% endassets %}
+  <link rel="canonical"
+        href="{{ url_for('public:show-topic', slug=target['slug']) }}">
 {% endblock styles %}
 
 {% block page_body %}

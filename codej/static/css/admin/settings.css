@@ -24,3 +24,16 @@
 .submit-group {
   margin-bottom: 4px;
 }
+
+.index-page-form {
+  margin: 4px 0;
+}
+
+.inline-form-group {
+  width: 30%;
+  float: left;
+}
+
+.inline-submit-group {
+  margin-left: 30.5%;
+}

@@ -13,9 +13,11 @@
   {{ super() }}
   {% assets filters='cssmin', output='generic/css/main/index.css',
             'css/base.css',
-	    'css/mc780.css',
-	    'css/top-flashed.css',
-	    'css/next-block.css',
+            'css/mc780.css',
+            'css/top-flashed.css',
+            'css/next-block.css',
+            'css/content-block.css',
+            'css/entity-text.css',
             'css/main/index.css' %}
     <link rel="stylesheet" type="text/css"
           href="{{ ASSET_URL }}">
@@ -33,7 +35,18 @@
       </div>
     {% endif %}
     {% if target %}
-      <!-- this block is not available yet -->
+    <div id="entity-header-block" class="content-block">
+      <div class="block-header">
+        <h1 class="panel-title">{{ target.get('title') }}</h1>
+      </div>
+    </div>
+    <div class="content-block next-block entity-text-block">
+      <div id="header-date-field" class="date-field">
+        {{ target.get('edited').isoformat() + 'Z' }}
+      </div>
+      {{ target.get('html')|safe }}
+      <div id="admin-sign-block">{{ target.get('username') }}</div>
+    </div>
     {% else %}
       <div class="alert alert-warning">
         <div class="today-field"></div>
@@ -49,9 +62,13 @@
   {{ super() }}
   {% assets filters='rjsmin', output='generic/js/main/index.js',
             'js/check-mc.js',
-	    'js/render-tf.js',
-	    'js/footer.js',
-	    'js/top-flashed.js',
+            'js/render-tf.js',
+            'js/footer.js',
+            'js/top-flashed.js',
+            'js/show-datetime.js',
+            'js/adjust-frame.js',
+            'js/adjust-image.js',
+            'js/set-margin.js',
             'js/main/index.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

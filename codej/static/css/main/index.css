@@ -7,3 +7,16 @@
 .message-text {
   font-style: italic;
 }
+
+#header-date-field {
+  font-style: italic;
+  margin-bottom: 8px;
+  text-shadow: 0 0 3px #d9dcec;
+}
+
+#admin-sign-block {
+  font-style: italic;
+  font-size: 1.2em;
+  margin-bottom: 0;
+  text-shadow: 0 0 3px #d9dcec;
+}

@@ -17,8 +17,8 @@ from webassets.ext.jinja2 import assets
 
 from .admin.views import (
     admin_pictures, admin_users, find_user, find_pic,
-    rem_pic, set_init_perms, set_robots, set_service,
-    show_log)
+    rem_pic, set_index, set_init_perms, set_robots,
+    set_service, show_log)
 from .arts.views import show_art
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
@@ -114,6 +114,8 @@ app = Starlette(
                       name='find-pic', methods=['POST']),
                 Route('/ajax/set-robots', set_robots,
                       name='set-robots', methods=['POST']),
+                Route('/ajax/set-index', set_index,
+                      name='set-index', methods=['POST']),
                 Route('/logs/{filename}', show_log, name='logs')]),
             Mount('/arts', name='arts', routes=[
                 Route('/{slug}', show_art, name='show-art')]),

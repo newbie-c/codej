@@ -38,4 +38,24 @@ $(function() {
       dataType: 'json'
     });
   });
+  $('#index-page-submit').on('click', function() {
+    $(this).blur();
+    $.ajax({
+      method: 'POST',
+      url: $(this).data().url,
+      data: {
+        suffix: $('#index-page-suffix').val()
+      },
+      success: function(data) {
+        if (!data.empty) {
+          window.location.assign(data.redirect);
+        } else {
+          $('#index-page-suffix').val('');
+          $('#index-page-block .block-header').trigger('click');
+        }
+      },
+      error: function(data) {},
+      dataType: 'json'
+    });
+  });
 });

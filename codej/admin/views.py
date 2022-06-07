@@ -14,11 +14,32 @@ from ..common.aparsers import (
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
+from ..drafts.attri import status
 from ..main.views import robots
 from .forms import CreateUser
 from .pg import (
     check_last_pictures, check_last_users, create_user, select_found,
     select_pictures, select_users)
+
+
+async def set_index(request):
+    res = {'empty': True}
+    suffix = (await request.form()).get('suffix')
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.ADMINISTER_SERVICE in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT state, author_id, suffix FROM articles
+                 WHERE suffix = $1 AND author_id = $2''',
+            suffix, current_user['id'])
+        if target and target.get('state') == status.draft:
+            await request.app.rc.set('index:page', suffix)
+            res = {'empty': False,
+                   'redirect': '/'}
+            await set_flashed(request, 'Проверьте текст стартовой страницы.')
+        await conn.close()
+    return JSONResponse(res)
 
 
 async def set_robots(request):
@@ -271,6 +292,7 @@ async def set_service(request):
         'SELECT * FROM permissions WHERE permission = any($1::varchar[])',
         [permission for permission in initials])
     robo = await request.app.rc.get('robots:page') or robots
+    index = await request.app.rc.get('index:page')
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'admin/settings.html',
@@ -278,5 +300,6 @@ async def set_service(request):
          'current_user': current_user,
          'perms': perms,
          'robots': robo,
+         'index': index,
          'token': csrf_token(request),
          'flashed': await get_flashed(request)})

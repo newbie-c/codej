@@ -68,8 +68,26 @@ async def count_views(request):
 
 
 async def jump(request):
-    return JSONResponse({'suffix': request.path_params.get('suffix'),
-                         'state': 'Not implemented yet.'})
+    suffix = request.path_params.get('suffix')
+    if len(suffix) in (6, 7, 9, 10):
+        raise HTTPException(status_code=403, detail='Not implemented yet')
+    elif len(suffix) in (8, 11, 12, 13):
+        current_user = await checkcu(request)
+        conn = await get_conn(request.app.config)
+        article = await conn.fetchrow(
+            'SELECT suffix, slug FROM articles WHERE suffix = $1', suffix)
+        await conn.close()
+        if article:
+            if current_user:
+                url = request.url_for(
+                    'arts:show-art', slug=article.get('slug'))
+            else:
+                url = request.url_for(
+                    'public:show-topic', slug=article.get('slug'))
+            response = RedirectResponse(url, 301)
+            response.headers.append('Link', f'<{url}>; rel="canonical"')
+            return response
+    raise HTTPException(status_code=404, detail='Такой страницы у нас нет.')
 
 
 async def show_picture(request):
@@ -211,12 +229,21 @@ async def show_profile(request):
 
 async def show_index(request):
     current_user = await checkcu(request)
-    print(current_user)
+    target = None
+    suffix = await request.app.rc.get('index:page')
+    if suffix:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT a.id, a.suffix, a.title, a.html, a.edited, u.username
+                 FROM articles AS a, users AS u
+                 WHERE a.author_id = u.id AND a.suffix = $1''',
+            suffix)
+        await conn.close()
     return request.app.jinja.TemplateResponse(
         'main/index.html',
         {'request': request,
          'flashed': await get_flashed(request),
-         'target': None,
+         'target': target,
          'current_user': current_user})
 
 
