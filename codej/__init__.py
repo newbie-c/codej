@@ -47,6 +47,14 @@ base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
 templates = os.path.join(base, 'templates')
 settings = Config(os.path.join(os.path.dirname(base), '.env'))
+try:
+    from .addenv import SITE_NAME, SITE_DESCRIPTION
+    if SITE_NAME:
+        settings.file_values["SITE_NAME"] = SITE_NAME
+    if SITE_DESCRIPTION:
+        settings.file_values["SITE_DESCRIPTION"] = SITE_DESCRIPTION
+except ModuleNotFoundError:
+    pass
 
 
 class J2Templates(Jinja2Templates):
