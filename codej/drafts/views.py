@@ -37,10 +37,14 @@ async def edit_state(request):
         if target:
             if target.get('published') is None and \
                     state in (status.pub, status.priv, status.hidden):
+                now = datetime.utcnow()
                 await conn.execute(
                     '''UPDATE articles SET state = $1, published = $2
                          WHERE id = $3 AND author_id = $4''',
-                    state, datetime.utcnow(), art, current_user['id'])
+                    state, now, art, current_user['id'])
+                await conn.execute(
+                    'UPDATE users SET last_published = $1 WHERE id = $2',
+                    now, current_user['id'])
             else:
                 await conn.execute(
                     '''UPDATE articles SET state = $1

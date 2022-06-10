@@ -19,7 +19,7 @@ from .admin.views import (
     admin_pictures, admin_users, find_user, find_pic,
     rem_pic, set_index, set_init_perms, set_robots,
     set_service, show_log)
-from .arts.views import show_art
+from .arts.views import show_art, show_arts
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
 from .auth.views import (
@@ -41,7 +41,7 @@ from .pictures.views import (
     change_state, check_pic, create_album, find_album,
     remove_pic, rename_album, show_album, show_album_stat,
     show_albums, show_pic_stat, show_user_stat)
-from .public.views import show_topic
+from .public.views import show_blogs, show_topic
 
 base = os.path.dirname(__file__)
 static = os.path.join(base, 'static')
@@ -126,6 +126,7 @@ app = Starlette(
                       name='set-index', methods=['POST']),
                 Route('/logs/{filename}', show_log, name='logs')]),
             Mount('/arts', name='arts', routes=[
+                Route('/', show_arts, name='show-arts'),
                 Route('/{slug}', show_art, name='show-art')]),
             Mount('/auth', name='auth', routes=[
                 Route('/login', login,
@@ -194,6 +195,7 @@ app = Starlette(
                 Route('/ajax/remove-pic', remove_pic,
                       name='remove-pic', methods=['POST'])]),
             Mount('/public', name='public', routes=[
+                Route('/', show_blogs, name='show-blogs'),
                 Route('/{slug}', show_topic, name='show-topic')]),
             Mount('/static',
                   app=StaticFiles(directory=static), name='static')],

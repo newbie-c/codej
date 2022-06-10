@@ -8,6 +8,15 @@ from ..drafts.attri import status
 from .pg import check_topic
 
 
+async def show_blogs(request):
+    current_user = await checkcu(request)
+    return request.app.jinja.TemplateResponse(
+        'public/show-blogs.html',
+        {'request': request,
+         'current_user': current_user,
+         'flashed': await get_flashed(request)})
+
+
 async def show_topic(request):
     slug = request.path_params.get('slug')
     current_user = await checkcu(request)

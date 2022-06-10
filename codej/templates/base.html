@@ -49,12 +49,31 @@
           <ul class="nav navbar-nav">
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                Почитать <b class="caret"></b>
+                CodeJ <b class="caret"></b>
               </a>
               <ul class="dropdown-menu">
                 <li>
-                  <a href="">Блоги</a>
+                  <a href="{{ url_for('public:show-blogs') }}">Блоги</a>
                 </li>
+                {% if current_user %}
+                  <li>
+                    <a href="{{ url_for('arts:show-arts') }}">Текущее</a>
+                  </li>
+                  {% if permissions.FOLLOW_USERS in cuperms %}
+                  <li>
+                    <a href="">В ленте</a>
+                  </li>
+                  {% endif %}
+                  {% if permissions.CREATE_ENTITY in cuperms %}
+                  <li>
+                    <a href="">Свои</a>
+                  </li>
+                  {% endif %}
+                  <li role="separator" class="divider"></li>
+                  <li>
+                    <a href="">Поиск по меткам</a>
+                  </li>
+                {% endif %}
               </ul>
             </li>
             {% if current_user and
