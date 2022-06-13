@@ -2,19 +2,38 @@ from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse, RedirectResponse
 
 from ..auth.common import checkcu
+from ..common.aparsers import parse_page
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
 from ..drafts.attri import status
-from .pg import check_art
+from .pg import check_art, check_last_arts, select_arts
 
 
 async def show_arts(request):
     current_user = await checkcu(request)
+    if current_user is None:
+        await set_flashed(request, 'Требуется авторизация.')
+        return RedirectResponse(
+            await get_next(request, request.app.url_path_for(
+                'arts:show-arts')), 302)
+    conn = await get_conn(request.app.config)
+    if not (page := await parse_page(request)) or \
+       not (last := await check_last_arts(
+           conn, current_user, page,
+           request.app.config.get('ARTS_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    pagination = await select_arts(
+        request, conn, current_user, page,
+        request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
     return request.app.jinja.TemplateResponse(
         'arts/show-arts.html',
         {'request': request,
          'current_user': current_user,
+         'pagination': pagination,
+         'status': status,
          'flashed': await get_flashed(request)})
 
 

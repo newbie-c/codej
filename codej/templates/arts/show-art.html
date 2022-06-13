@@ -31,7 +31,6 @@
       </div>
     {% endif %}
     <div id="entity-header-block"
-         {#data-id="{{ target['id'] }}"#}
          data-suffix="{{ target['suffix'] }}"
          data-url="{{ url_for('count-views') }}"
          class="content-block slidable">
@@ -129,7 +128,7 @@
             </td>
             <td>
               {% if current_user['id'] == target['author_id'] or
-                    permissions.BLOCK_ENTITY in current_user['permissions'] %}
+                    permissions.BLOCK_ENTITY in cuperms %}
                 {% if target['state'] == status.mod %}
                   <div class="labeled labeled-text labeled-danger">
                     <span class="glyphicon glyphicon-lock"
@@ -223,7 +222,7 @@
       <script src="{{ ASSET_URL }}"></script>
     {% endassets %}
   {% else %}
-    {% if permissions.ADMINISTER_SERVICE in cuperms %}
+    {% if permissions.BLOCK_ENTITY in cuperms %}
       {% assets filters='rjsmin', output='generic/js/arts/show-art-admin.js',
                 'js/check-mc.js',
                 'js/hide-hidden.js',
