@@ -10,6 +10,17 @@ from ..drafts.attri import status
 from .pg import check_art, check_last_arts, select_arts
 
 
+async def show_author(request):
+    current_user = await checkcu(request)
+    return request.app.jinja.TemplateResponse(
+        'arts/show-author.html',
+        {'request': request,
+         'current_user': current_user,
+         'pagination': None,
+         'status': status,
+         'flashed': await get_flashed(request)})
+
+
 async def show_arts(request):
     current_user = await checkcu(request)
     if current_user is None:

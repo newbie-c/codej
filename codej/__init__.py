@@ -19,7 +19,7 @@ from .admin.views import (
     admin_pictures, admin_users, find_user, find_pic,
     rem_pic, set_index, set_init_perms, set_robots,
     set_service, show_log)
-from .arts.views import show_art, show_arts
+from .arts.views import show_art, show_arts, show_author
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
 from .auth.views import (
@@ -34,9 +34,9 @@ from .errors import (
     handle_csrf_error, notify_not_found_page,
     refuse_method, refuse_request)
 from .main.views import (
-    count_views, make_friend, jump, ping,
-    show_favicon, show_index, show_picture, show_profile,
-    show_robots, show_sitemap)
+    count_views, edit_desc, make_friend, jump,
+    ping, show_favicon, show_index, show_picture,
+    show_profile, show_robots, show_sitemap)
 from .pictures.views import (
     change_state, check_pic, create_album, find_album,
     remove_pic, rename_album, show_album, show_album_stat,
@@ -100,6 +100,8 @@ app = Starlette(
             Route('/{suffix}', jump, name='jump'),
             Route('/ajax/count-views', count_views,
                   name='count-views', methods=['POST']),
+            Route('/ajax/edit-desc', edit_desc,
+                  name='edit-desc', methods=['POST']),
             Route('/ajax/make-friend', make_friend,
                   name="make-friend", methods=['POST']),
             Route('/ajax/ping', ping,
@@ -127,7 +129,8 @@ app = Starlette(
                 Route('/logs/{filename}', show_log, name='logs')]),
             Mount('/arts', name='arts', routes=[
                 Route('/', show_arts, name='show-arts'),
-                Route('/{slug}', show_art, name='show-art')]),
+                Route('/{slug}', show_art, name='show-art'),
+                Route('/a/{username}', show_author, name='show-auth')]),
             Mount('/auth', name='auth', routes=[
                 Route('/login', login,
                       name='login', methods=['GET', 'POST']),

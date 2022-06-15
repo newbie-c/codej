@@ -24,6 +24,26 @@ Disallow: /
 """
 
 
+async def edit_desc(request):
+    res = {'empty': True}
+    d = await request.form()
+    uid, text = int(d.get('uid')), d.get('desc')
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.CREATE_ENTITY in current_user['permissions'] and \
+            current_user['id'] == uid and text:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchval(
+            'SELECT description FROM users WHERE id = $1', uid)
+        if target != text:
+            await conn.execute(
+                'UPDATE users SET description = $1 WHERE id = $2',
+                text[:500], uid)
+        await conn.close()
+        res = {'empty': False}
+    return JSONResponse(res)
+
+
 async def show_sitemap(request):
     conn = await get_conn(request.app.config)
     arts = await conn.fetch(

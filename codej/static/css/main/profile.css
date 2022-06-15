@@ -35,3 +35,38 @@
 .user-info-table td {
   padding: 4px 2px;
 }
+
+.description-block, #description-e {
+  padding: 6px 8px;
+}
+
+.blog-description {
+  text-align: justify;
+  font-style: italic;
+  text-shadow: 0 0 3px #d9dcec;
+  margin: 0;
+  padding: 0 4px;
+}
+
+.description-options {
+  margin-left: 12px;
+  margin-right: 12px;
+  padding-top: 4px;
+  border-top: 1px dashed #d3ddd3;
+}
+
+#description-editor {
+  text-align: justify;
+}
+
+.length-marker {
+  margin-bottom: 4px;
+}
+
+.form-group {
+  margin: 0 0 6px;
+}
+
+.submit-group {
+  margin-bottom: 0;
+}

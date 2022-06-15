@@ -83,6 +83,62 @@ $(function() {
     checkAverage('#make-announcement');
     checkAverage('#special-case');
   }
+  let $desc = $('#fix-description');
+  if ($desc.length) {
+    $desc.on('click', function() {
+      $(this).blur();
+      $(this).parents('.description-block').slideUp('slow');
+      let $editor = $('#description-e');
+      $editor.slideDown('slow', function() { scrollPanel($editor); });
+      $('#description-editor').focus();
+    });
+  }
+  let $cancel = $('#cancel-description');
+  if ($cancel.length) {
+    $cancel.on('click', function() {
+      $(this).blur();
+      $(this).parents('#description-e').slideUp('slow');
+      let $description = $('.description-block');
+      $description.slideDown(
+        'slow', function() { scrollPanel($description); });
+    });
+  }
+  let $d_ed = $('#description-editor');
+  if ($d_ed.length) {
+    $d_ed.on(
+      'keyup',
+      {len: 500, marker: '#length-marker', block: '.length-marker'},
+      trackMarker);
+    $d_ed.on('blur', function() {
+      let v = $(this).val();
+      let g = $(this).parents('.form-group');
+      if (v.length === 0) g.addClass('has-error');
+    });
+  }
+  let $d_submit = $('#description-submit');
+  if ($d_submit.length) {
+    $d_submit.on('click', function(event) {
+      $(this).blur();
+      event.preventDefault();
+      $('#description-editor').trigger('blur');
+      if (!$(this).parents('.form-group')
+                  .siblings('.form-group').hasClass('has-error')) {
+        $.ajax({
+          method: 'POST',
+          url: $(this).data().url,
+          data: {
+            uid: $(this).data().id,
+            desc: $('#description-editor').val()
+          },
+          success: function(data) {
+            if (!data.empty) window.location.reload();
+          },
+          error: function(data) {},
+          dataType: 'json'
+        });
+      }
+    });
+  }
   let $fr = $('#make-friend');
   if ($fr.length) {
     $fr.on('click', function() {

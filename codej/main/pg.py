@@ -42,6 +42,7 @@ async def filter_target_user(request, conn):
                   users.last_visit AS last_visit,
                   users.permissions AS permissions,
                   users.description AS description,
+                  users.last_published AS last_pub,
                   accounts.address AS address,
                   accounts.ava_hash AS ava_hash
               FROM users, accounts WHERE users.username = $1
@@ -55,6 +56,8 @@ async def filter_target_user(request, conn):
                 'last_visit': query.get('last_visit').isoformat() + 'Z',
                 'permissions': tuple(query.get('permissions')),
                 'description': query.get('description'),
+                'last_pub': f'{query.get("last_pub").isoformat()}Z'
+                if query.get('last_pub') else None,
                 'address': query.get('address'),
                 'ava': await get_ava_url(
                     request, query.get('ava_hash'), size=160)}
