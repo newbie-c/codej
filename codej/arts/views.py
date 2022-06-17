@@ -14,30 +14,31 @@ from .pg import (
 
 async def show_author(request):
     current_user = await checkcu(request)
-    auth = request.path_params.get('username')
+    username = request.path_params.get('username')
     if current_user is None:
         await set_flashed(request, 'Требуется авторизация.')
         return RedirectResponse(
             await get_next(request, request.app.url_path_for(
-                'arts:show-auth', username=auth)), 302)
+                'arts:show-auth', username=username)), 302)
     conn = await get_conn(request.app.config)
     auth = await conn.fetchrow(
         '''SELECT id, username, description, last_published FROM users
              WHERE username = $1
                AND last_published IS NOT null
-               AND description IS NOT null''', auth)
-    if auth is None or \
-       not (page := await parse_page(request)) or \
-       not (last := await check_last_auth(
-           conn, auth, current_user, page,
-           request.app.config.get('ARTS_PER_PAGE', cast=int, default=3))):
-        await conn.close()
-        raise HTTPException(
-            status_code=404, detail='Такой страницы у нас нет.')
-    pagination = await select_auth(
-        request, conn, auth, current_user, page,
-        request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
-    print(pagination)
+               AND description IS NOT null''', username)
+    if auth:
+        if not (page := await parse_page(request)) or \
+           not (last := await check_last_auth(
+               conn, auth, current_user, page,
+               request.app.config.get('ARTS_PER_PAGE', cast=int, default=3))):
+            await conn.close()
+            raise HTTPException(
+                status_code=404, detail='Такой страницы у нас нет.')
+        pagination = await select_auth(
+            request, conn, auth, current_user, page,
+            request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
+    else:
+        pagination = None
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'arts/show-author.html',
@@ -45,6 +46,7 @@ async def show_author(request):
          'current_user': current_user,
          'pagination': pagination,
          'author': auth,
+         'username': username,
          'status': status,
          'flashed': await get_flashed(request)})
 

@@ -6,6 +6,7 @@
 
 .message-text {
   font-style: italic;
+  text-align: justify;
 }
 
 .entity-details {

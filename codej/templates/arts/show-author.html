@@ -174,7 +174,13 @@
       <div class="alert alert-warning">
         <div class="today-field"></div>
         <div class="message-text">
-          {{ author['username'] }} до сих пор не нашёл чем поделиться с миром.
+          {% if current_user['username'] == username %}
+            В вашем блоге нет опубликованных текстов или у блога нет описания.
+            Если хотите вести свой блог, обратитесь к администратору сайта.
+            И не забудьте заполнить в профиле описание блога.
+          {% else %}
+            Похоже, что {{ username }} пока ничего не написал в свой блог.
+          {% endif %}
         </div>
       </div>
     {% endif %}
