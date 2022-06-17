@@ -2,7 +2,13 @@
 {% from "macros/_common.html" import show_messages %}
 {% from "macros/_common.html" import paginate %}
 
-{% block title %}В блогах{% endblock title %}
+{% block title %}
+  {% if author['id'] == current_user['id'] %}
+    Свои
+  {% else %}
+    {{ author['username'] }} блог
+  {% endif %}
+{% endblock title %}
 
 {% block styles %}
   {{ super() }}
@@ -27,6 +33,11 @@
     {% if flashed %}
       <div class="top-flashed-block">
         {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    {% if author and pagination and pagination['page'] == 1 %}
+      <div class="content-block description-block">
+        {{ author['description'] }}
       </div>
     {% endif %}
     {% if pagination %}
@@ -163,13 +174,15 @@
       <div class="alert alert-warning">
         <div class="today-field"></div>
         <div class="message-text">
-          Сайт в стадии разработки, попробуйте зайти позже.
+          {{ author['username'] }} до сих пор не нашёл чем поделиться с миром.
         </div>
       </div>
     {% endif %}
     {% if pagination['prev'] or pagination['next'] %}
       <div class="next-block entity-pagination text-center">
-        {{ paginate(request, pagination, 'arts:show-arts') }}
+        {{ paginate(
+          request, pagination,
+          'arts:show-auth', username=author['username']) }}
       </div>
     {% endif %}
   </div>
