@@ -96,7 +96,9 @@
     </div>
     <div class="next-block content-block common-details">
       <div class="entity-blog-link">
-        <a href="">{{ target['author'] }}&nbsp;блог</a>
+        <a href="{{ url_for(
+          'arts:show-auth', username=target['author']) }}">
+          {{ target['author'] }}&nbsp;блог</a>
       </div>
       <div class="entity-details">
         <table align="center" class="entity-details-table">

@@ -31,7 +31,6 @@ async def select_auth(request, conn, auth, current_user, page, per_page, last):
                    AND a.state IN ($2, $3)
                 ORDER BY a.published DESC LIMIT $4 OFFSET $5''',
             auth['id'], status.pub, status.priv, per_page, per_page*(page-1))
-    print(q)
     if q:
         return {'page': page,
                 'next': page + 1 if page + 1 <= last else None,

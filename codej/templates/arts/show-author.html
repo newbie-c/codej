@@ -35,12 +35,13 @@
         {{ show_messages(flashed) }}
       </div>
     {% endif %}
-    {% if author and pagination and pagination['page'] == 1 %}
+    {% if author and author['description'] and
+          pagination and pagination['page'] == 1 %}
       <div class="content-block description-block">
         {{ author['description'] }}
       </div>
     {% endif %}
-    {% if pagination %}
+    {% if author and author['description'] and pagination %}
       {% for art in pagination['articles'] %}
         <div class="content-block slidable">
           <div class="block-header">
@@ -170,25 +171,26 @@
           </div>
         </div>
       {% endfor %}
+      {% if (pagination['prev'] or pagination['next']) %}
+        <div class="next-block entity-pagination text-center">
+          {{ paginate(
+            request, pagination,
+            'arts:show-auth', username=author['username']) }}
+        </div>
+      {% endif %}
     {% else %}
       <div class="alert alert-warning">
         <div class="today-field"></div>
         <div class="message-text">
-          {% if current_user['username'] == username %}
-            В вашем блоге нет опубликованных текстов или у блога нет описания.
-            Если хотите вести свой блог, обратитесь к администратору сайта.
-            И не забудьте заполнить в профиле описание блога.
+          {% if current_user['id'] == author['id'] %}
+            У блога до сих пор нет описания, его можно создать в
+            <a href={{ url_for('profile', username=author['username']) }}>
+              профиле</a>.
           {% else %}
-            Похоже, что {{ username }} пока ничего не написал в свой блог.
+            Похоже, что {{ author['username'] }} пока ничего не написал в
+            свой блог.
           {% endif %}
         </div>
-      </div>
-    {% endif %}
-    {% if pagination['prev'] or pagination['next'] %}
-      <div class="next-block entity-pagination text-center">
-        {{ paginate(
-          request, pagination,
-          'arts:show-auth', username=author['username']) }}
       </div>
     {% endif %}
   </div>

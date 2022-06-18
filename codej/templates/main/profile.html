@@ -137,6 +137,13 @@
         </div>
       {% endif %}
     {% endif %}
+    {% if target['last_pub'] and target['description'] %}
+      <div class="content-block blog-link-block next-block text-center">
+        <a href="{{ url_for(
+          'arts:show-auth', username=target['username']) }}">
+          {{ target['username'] }}&nbsp;блог</a>
+      </div>
+    {% endif %}
     {% if current_user['username'] != target['username'] and
           (permissions.ADMINISTER_SERVICE in current_user['permissions'] or
            (permissions.CHANGE_USER_ROLE in current_user['permissions'] and
