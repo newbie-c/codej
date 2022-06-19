@@ -6,7 +6,9 @@
   <meta name="description" content="{{ target['meta'] }}">
 {% endblock metas %}
 
-{% block title %}{{ target.get('title') }}{% endblock title %}
+{% block title_tag %}
+  <title>{{ target.get('title') }}</title>
+{% endblock title_tag %}
 
 {% block styles %}
   {{ super() }}

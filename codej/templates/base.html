@@ -61,7 +61,7 @@
                   </li>
                   {% if permissions.FOLLOW_USERS in cuperms %}
                   <li>
-                    <a href="">В ленте</a>
+                    <a href="{{ url_for('arts:lenta') }}">В ленте</a>
                   </li>
                   {% endif %}
                   {% if permissions.CREATE_ENTITY in cuperms %}

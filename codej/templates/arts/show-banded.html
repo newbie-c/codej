@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
+
+{% block title %}Лента{% endblock title %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/arts/show-banded.css',
+            'css/base.css',
+            'css/mc780.css',
+            'css/top-flashed.css',
+            'css/arts/show-banded.css' %}
+    <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- arts/show-banded.html -->
+  <div id="main-container">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    <div class="alert alert-warning">
+      <div class="today-field"></div>
+      <div class="message-text">
+        Сайт в стадии разработки, попробуйте зайти позже.
+      </div>
+    </div>
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/arts/show-banded.js',
+            'js/check-mc.js',
+            'js/render-tf.js',
+            'js/footer.js',
+            'js/top-flashed.js',
+            'js/arts/show-banded.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}

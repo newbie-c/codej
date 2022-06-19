@@ -13,6 +13,20 @@ from .pg import (
     select_auth)
 
 
+async def show_banded(request):
+    current_user = await checkcu(request)
+    if current_user is None:
+        await set_flashed(request, 'Требуется авторизация')
+        return RedirectResponse(
+            await get_next(request, request.app.url_path_for(
+                'arts:lenta')), 302)
+    return request.app.jinja.TemplateResponse(
+        'arts/show-banded.html',
+        {'request': request,
+         'current_user': current_user,
+         'flashed': await get_flashed(request)})
+
+
 async def show_author(request):
     current_user = await checkcu(request)
     username = request.path_params.get('username')

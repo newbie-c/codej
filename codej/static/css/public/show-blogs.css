@@ -7,3 +7,44 @@
 .message-text {
   font-style: italic;
 }
+
+.author-attributes {
+  padding: 8px;
+}
+
+.author-avatar {
+  width: 90px;
+  height: 90px;
+  float: left;
+}
+
+.blogger-info {
+  margin-left: 98px;
+  padding: 8px;
+}
+
+.blogger-info h4 {
+  margin: 0;
+}
+
+.author-blog-link {
+  color: #83858f;
+  font-style: italic;
+  text-shadow: 0 0 3px #d9dcec;
+}
+
+.info-block {
+  font-size: 0.9em;
+  font-style: italic;
+  text-shadow: 0 0 3px #d9dcec;
+  margin: 4px 0 0;
+}
+
+.date-info {
+  padding: 0 5px 0 0;
+}
+
+.blog-description {
+  margin: 6px 4px 0 4px;
+  text-align: justify;
+}

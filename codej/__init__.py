@@ -19,7 +19,7 @@ from .admin.views import (
     admin_pictures, admin_users, find_user, find_pic,
     rem_pic, set_index, set_init_perms, set_robots,
     set_service, show_log)
-from .arts.views import show_art, show_arts, show_author
+from .arts.views import show_art, show_arts, show_author, show_banded
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
 from .auth.views import (
@@ -130,6 +130,7 @@ app = Starlette(
             Mount('/arts', name='arts', routes=[
                 Route('/', show_arts, name='show-arts'),
                 Route('/{slug}', show_art, name='show-art'),
+                Route('/l/', show_banded, name='lenta'),
                 Route('/a/{username}', show_author, name='show-auth')]),
             Mount('/auth', name='auth', routes=[
                 Route('/login', login,

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "macros/_common.html" import show_messages %}
+{% from "macros/_common.html" import paginate %}
 
 {% block title %}Блоги{% endblock title %}
 
@@ -9,6 +10,10 @@
             'css/base.css',
             'css/mc780.css',
             'css/top-flashed.css',
+            'css/content-block.css',
+            'css/avatar.css',
+            'css/next-block.css',
+            'css/pagination.css',
             'css/public/show-blogs.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
@@ -22,12 +27,57 @@
         {{ show_messages(flashed) }}
       </div>
     {% endif %}
-    <div class="alert alert-warning">
-      <div class="today-field"></div>
-      <div class="message-text">
-        Сайт в стадии разработки, попробуйте зайти позже.
+    {% if pagination %}
+      {% for blog in pagination['blogs'] %}
+        <div class="content-block">
+          <div class="author-attributes">
+            <div class="author-avatar avatar"
+                 style="background:url({{ blog['ava'] }})"></div>
+            <div class="blogger-info">
+              <h4>
+                <a class="author-blog-link"
+                   href="{{ url_for(
+                    'arts:show-auth', username=blog['username']) }}">
+                  {{ blog['username'] }}
+                </a>
+              </h4>
+              <div class="info-block">
+                <table>
+                  <tbody>
+                  <tr>
+                    <td><span class="date-info">Зарегистрирован: </span></td>
+                    <td><span
+                      class="date-field">{{ blog['registered'] }}</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="date-info">Обновлён: </span></td>
+                    <td><span
+                      class="date-field">{{ blog['last_pub'] }}</span></td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="footer-bottom"></div>
+            <div class="blog-description">
+              {{ blog['description'] }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      {% if pagination['next'] or pagination['prev'] %}
+        <div class="next-block entity-pagination text-center">
+          {{ paginate(request, pagination, 'public:show-blogs') }}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="alert alert-warning">
+        <div class="today-field"></div>
+        <div class="message-text">
+          Сайт в стадии разработки, попробуйте зайти позже.
+        </div>
       </div>
-    </div>
+    {% endif %}
   </div>
 {% endblock page_body %}
 
@@ -38,6 +88,8 @@
             'js/render-tf.js',
             'js/footer.js',
             'js/top-flashed.js',
+            'js/check-next.js',
+            'js/show-datetime.js',
             'js/public/show-blogs.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
