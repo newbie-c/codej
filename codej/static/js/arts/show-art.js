@@ -25,4 +25,8 @@ $(function() {
     $('.entity-text-block').empty().append(html);
   }
   pingU();
+  $('#move-screen-up').on('click', function() {
+    $(this).blur();
+    scrollPanel($('#navigation'));
+  });
 });

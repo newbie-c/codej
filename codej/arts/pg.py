@@ -4,6 +4,21 @@ from ..common.avatar import get_ava_url
 from ..drafts.attri import status
 
 
+async def check_rel(conn, cu, authid):
+    f = await conn.fetchrow(
+        '''SELECT author_id, follower_id FROM followers
+             WHERE author_id = $1 AND follower_id = $2''', authid, cu)
+    b = await conn.fetchrow(
+        '''SELECT target_id, blocker_id FROM blockers
+             WHERE target_id = $1 AND blocker_id = $2''', cu, authid)
+    bb = await conn.fetchrow(
+        '''SELECT target_id, blocker_id FROM blockers
+             WHERE target_id = $1 AND blocker_id = $2''', authid, cu)
+    return {'follower': bool(f),
+            'blocker': bool(b),
+            'blocked': bool(bb)}
+
+
 async def select_auth(request, conn, auth, current_user, page, per_page, last):
     if permissions.BLOCK_ENTITY in current_user['permissions'] or \
             auth['id'] == current_user['id']:
@@ -52,8 +67,12 @@ async def select_auth(request, conn, auth, current_user, page, per_page, last):
                      'author': record.get('username'),
                      'ava': await get_ava_url(
                          request, record.get('ava_hash'), size=88),
-                     'likes': 0,
-                     'dislikes': 0,
+                     'likes': await conn.fetchval(
+                        '''SELECT count(*) FROM art_likes
+                             WHERE article_id = $1''', record.get('id')),
+                     'dislikes': await conn.fetchval(
+                        '''SELECT count(*) FROM art_dislikes
+                             WHERE article_id = $1''', record.get('id')),
                      'commentaries': 0} for record in q]}
 
 
@@ -102,8 +121,12 @@ async def select_arts(request, conn, current_user, page, per_page, last):
                      'author': record.get('username'),
                      'ava': await get_ava_url(
                          request, record.get('ava_hash'), size=88),
-                     'likes': 0,
-                     'dislikes': 0,
+                     'likes': await conn.fetchval(
+                        'SELECT count(*) FROM art_likes WHERE article_id = $1',
+                        record.get('id')),
+                     'dislikes': await conn.fetchval(
+                        '''SELECT count(*) FROM art_dislikes
+                             WHERE article_id = $1''', record.get('id')),
                      'commentaries': 0} for record in q]}
 
 
@@ -150,7 +173,8 @@ async def check_art(request, conn, slug):
                   articles.viewed,
                   articles.author_id,
                   accounts.ava_hash,
-                  users.username FROM articles, accounts, users
+                  users.username,
+                  users.permissions FROM articles, accounts, users
              WHERE articles.slug = $1
                AND articles.state IN ($2, $3, $4)
                AND users.id = articles.author_id
@@ -172,9 +196,14 @@ async def check_art(request, conn, slug):
                 'commented': query.get('commented'),
                 'viewed': query.get('viewed'),
                 'author': query.get('username'),
+                'author_perms': query.get('permissions'),
                 'author_id': query.get('author_id'),
                 'ava': await get_ava_url(
                     request, query.get('ava_hash'), size=88),
-                'likes': 0,
-                'dislikes': 0,
+                'likes': await conn.fetchval(
+                    'SELECT count(*) FROM art_likes WHERE article_id = $1',
+                    query.get('id')),
+                'dislikes': await conn.fetchval(
+                    'SELECT count(*) FROM art_dislikes WHERE article_id = $1',
+                    query.get('id')),
                 'commentaries': 0}

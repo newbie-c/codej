@@ -9,8 +9,8 @@ from ..common.pg import get_conn
 from ..common.urls import get_next
 from ..drafts.attri import status
 from .pg import (
-    check_art, check_last_arts, check_last_auth, select_arts,
-    select_auth)
+    check_art, check_last_arts, check_last_auth, check_rel,
+    select_arts, select_auth)
 
 
 async def show_banded(request):
@@ -101,14 +101,20 @@ async def show_art(request):
         return RedirectResponse(url, 302)
     conn = await get_conn(request.app.config)
     target = await check_art(request, conn, slug)
-    await conn.close()
     if target is None:
+        await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
+    rel = None
+    if current_user['id'] != target['author_id']:
+        rel = await check_rel(conn, current_user['id'], target['author_id'])
+    await conn.close()
+    print(target)
     return request.app.jinja.TemplateResponse(
         'arts/show-art.html',
         {'request': request,
          'flashed': await get_flashed(request),
          'current_user': current_user,
          'status': status,
+         'rel': rel,
          'target': target})

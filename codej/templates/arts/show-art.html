@@ -194,7 +194,85 @@
     <div class="content-block next-block entity-text-block">
       {{ target['html']|safe }}
     </div>
-    <!-- -->
+    <div id="options-block" class="content-block next-block">
+      {% if current_user['id'] == target['author_id'] %}
+        <div class="button-block">
+          <button id="to-editor"
+                  type="button"
+                  data-url="{{ url_for(
+                      'drafts:show-draft', slug=target['slug']) }}"
+                  class="btn btn-primary btn-sm btn-block">
+            <span class="glyphicon glyphicon-edit"
+                  aria-hidden="true"></span>&nbsp;редактор
+          </button>
+        </div>
+      {% else %}
+        <button id="move-screen-up"
+                type="button"
+                class="btn btn-default btn-sm"
+                title="прокрутить наверх">
+          <span class="glyphicon glyphicon-hand-up"
+                aria-hidden="true"></span>
+        </button>
+        {% if not rel['follower'] and not rel['blocker']
+              and not rel['blocked'] and
+              permissions.FOLLOW_USERS in cuperms %}
+          <button type="button"
+                  id="tape-in"
+                  data-url=""
+                  title="добавить в ленту"
+                  class="btn btn-success btn-sm">
+            <span class="glyphicon glyphicon-hand-right"
+                  aria-hidden="true"></span>
+          </button>
+        {% endif %}
+        {% if permissions.LIKE_DISLIKE in cuperms %}
+          <button id="like-button"
+                  type="button"
+                  title="нравится"
+                  data-url=""
+                  class="btn btn-success btn-sm">
+            <span class="glyphicon glyphicon-thumbs-up white-space"
+                  aria-hidden="true"></span><span
+                  class="value">{{ target['likes'] }}</span>
+          </button>
+          {% if not rel['blocker'] and not rel['blocked'] %}
+            <button id="dislike-button"
+                    type="button"
+                    title="не нравится"
+                    data-url=""
+                    class="btn btn-warning btn-sm">
+              <span class="glyphicon glyphicon-thumbs-down white-space"
+                    aria-hidden="true"></span><span
+                    class="value">{{ target['dislikes'] }}</span>
+            </button>
+          {% endif %}
+        {% endif %}
+        {% if rel['follower'] %}
+          <button id="tape-out"
+                  type="button"
+                  title="удалить из ленты"
+                  data-url=""
+                  class="btn btn-warning btn-sm">
+            <span class="glyphicon glyphicon-hand-left"
+                  aria-hidden="true"></span>
+          </button>
+        {% endif %}
+        {% if permissions.BLOCK_ENTITY in cuperms and
+              permissions.ADMINISTER_SERVICE not in target['author_perms'] %}
+          <button id="censor-this"
+                  type="button"
+                  data-url=""
+                  title=""
+                  class="btn {% if target['state'] != status.mod %}
+                         btn-danger{% else %}btn-success{% endif %} btn-sm">
+            <span class="glyphicon {% if target['state'] != status.mod %}
+                       glyphicon-lock{% else %}glyphicon-check{% endif %}"
+                  aria-hidden="true"></span>
+          </button>
+        {% endif %}
+      {% endif %}
+    </div>
   </div>
 {% endblock page_body %}
 

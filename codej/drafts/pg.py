@@ -177,8 +177,12 @@ async def select_drafts(request, conn, current, page, per_page, last):
                      'author': record.get('username'),
                      'ava': await get_ava_url(
                          request, record.get('ava_hash'), size=88),
-                     'likes': 0,
-                     'dislikes': 0,
+                     'likes': await conn.fetchval(
+                        'SELECT count(*) FROM art_likes WHERE article_id = $1',
+                        record.get('id')),
+                     'dislikes': await conn.fetchval(
+                        '''SELECT count(*) FROM art_dislikes
+                             WHERE article_id = $1''', record.get('id')),
                      'commentaries': 0} for record in query]}
 
 
@@ -230,8 +234,12 @@ async def check_article(request, conn, slug):
                 'author_id': query.get('author_id'),
                 'ava': await get_ava_url(
                     request, query.get('ava_hash'), size=88),
-                'likes': 0,
-                'dislikes': 0,
+                'likes': await conn.fetchval(
+                    'SELECT count(*) FROM art_likes WHERE article_id = $1',
+                    query.get('id')),
+                'dislikes': await conn.fetchval(
+                    'SELECT count(*) FROM art_dislikes WHERE article_id = $1',
+                    query.get('id')),
                 'commentaries': 0}
 
 

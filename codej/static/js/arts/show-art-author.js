@@ -12,4 +12,8 @@ $(function() {
   $('.entity-text-block').children().each(setMargin);
   $('.entity-text-block img').each(adjustImageW);
   pingU();
+  $('#to-editor').on('click', function() {
+    $(this).blur();
+    window.location.assign($(this).data().url);
+  });
 });
