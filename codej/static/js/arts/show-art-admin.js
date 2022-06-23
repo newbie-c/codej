@@ -12,4 +12,9 @@ $(function() {
   $('.entity-text-block').children().each(setMargin);
   $('.entity-text-block img').each(adjustImageW);
   pingU();
+  $('#move-screen-up').on('click', function() {
+    $(this).blur();
+    scrollPanel($('#navigation'));
+  });
+  $('#tape-in').on('click', tapeIn);
 });

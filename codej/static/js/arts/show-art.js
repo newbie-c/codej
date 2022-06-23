@@ -29,4 +29,5 @@ $(function() {
     $(this).blur();
     scrollPanel($('#navigation'));
   });
+  $('#tape-in').on('click', tapeIn);
 });

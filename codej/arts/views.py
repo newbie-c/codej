@@ -13,6 +13,33 @@ from .pg import (
     select_arts, select_auth)
 
 
+async def follow_auth(request):
+    res = {'empty': True}
+    suffix = (await request.form()).get('suffix')
+    current_user = await checkcu(request)
+    if suffix and current_user and \
+            permissions.FOLLOW_USERS in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT users.id, users.username FROM users, articles
+                 WHERE articles.suffix = $1
+                   AND users.id = articles.author_id''', suffix)
+        if target:
+            rel = await check_rel(conn, current_user['id'], target.get('id'))
+            if not rel['follower'] and not rel['blocker'] \
+                    and not rel['blocked']:
+                await conn.execute(
+                    '''INSERT INTO followers (author_id, follower_id)
+                         VALUES ($1, $2)''',
+                    target.get('id'), current_user['id'])
+                res = {'empty': False}
+                await set_flashed(
+                    request,
+                    f'Блог {target.get("username")} добавлен в вашу ленту.')
+        await conn.close()
+    return JSONResponse(res)
+
+
 async def show_banded(request):
     current_user = await checkcu(request)
     if current_user is None:
@@ -109,7 +136,6 @@ async def show_art(request):
     if current_user['id'] != target['author_id']:
         rel = await check_rel(conn, current_user['id'], target['author_id'])
     await conn.close()
-    print(target)
     return request.app.jinja.TemplateResponse(
         'arts/show-art.html',
         {'request': request,

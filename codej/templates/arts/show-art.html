@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% from "macros/_common.html" import show_messages %}
 
-{% block title %}{{ target['title'] }}{% endblock title %}
+{% block title_tag %}
+  <title>{{ target['title'] }}</title>
+{% endblock title_tag %}
 
 {% block styles %}
   {{ super() }}
@@ -217,9 +219,9 @@
         {% if not rel['follower'] and not rel['blocker']
               and not rel['blocked'] and
               permissions.FOLLOW_USERS in cuperms %}
-          <button type="button"
-                  id="tape-in"
-                  data-url=""
+          <button id="tape-in"
+                  type="button"
+                  data-url="{{ url_for('arts:follow-auth') }}"
                   title="добавить в ленту"
                   class="btn btn-success btn-sm">
             <span class="glyphicon glyphicon-hand-right"
@@ -316,6 +318,7 @@
                 'js/adjust-image.js',
                 'js/set-margin.js',
                 'js/ping.js',
+                'js/tape-in.js',
                 'js/arts/show-art-admin.js' %}
         <script src="{{ ASSET_URL }}"></script>
       {% endassets %}
@@ -335,6 +338,7 @@
                 'js/set-margin.js',
                 'js/count-clicks.js',
                 'js/ping.js',
+                'js/tape-in.js',
                 'js/arts/show-art.js' %}
         <script src="{{ ASSET_URL }}"></script>
       {% endassets %}
