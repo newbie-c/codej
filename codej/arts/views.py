@@ -9,8 +9,8 @@ from ..common.pg import get_conn
 from ..common.urls import get_next
 from ..drafts.attri import status
 from .pg import (
-    check_art, check_last_arts, check_last_auth, check_rel,
-    select_arts, select_auth)
+    check_art, check_last_arts, check_last_auth, check_last_banded,
+    check_rel, select_arts, select_auth, select_banded)
 
 
 async def follow_auth(request):
@@ -47,10 +47,26 @@ async def show_banded(request):
         return RedirectResponse(
             await get_next(request, request.app.url_path_for(
                 'arts:lenta')), 302)
+    if permissions.FOLLOW_USERS not in current_user['permissions']:
+        raise HTTPException(status_code=403,detail='Для вас доступ ограничен.')
+    conn = await get_conn(request.app.config)
+    if not (page := await parse_page(request)) or \
+       not (last := await check_last_banded(
+           conn, current_user['id'], page,
+           request.app.config.get('ARTS_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    pagination = await select_banded(
+        request, conn, current_user['id'], page,
+        request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
+    await conn.close()
     return request.app.jinja.TemplateResponse(
         'arts/show-banded.html',
         {'request': request,
          'current_user': current_user,
+         'pagination': pagination,
+         'status': status,
          'flashed': await get_flashed(request)})
 
 

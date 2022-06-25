@@ -159,17 +159,17 @@
           </div>
         </div>
       {% endfor %}
+      {% if pagination['prev'] or pagination['next'] %}
+        <div class="next-block entity-pagination text-center">
+          {{ paginate(request, pagination, 'arts:show-arts') }}
+        </div>
+      {% endif %}
     {% else %}
       <div class="alert alert-warning">
         <div class="today-field"></div>
         <div class="message-text">
           Сайт в стадии разработки, попробуйте зайти позже.
         </div>
-      </div>
-    {% endif %}
-    {% if pagination['prev'] or pagination['next'] %}
-      <div class="next-block entity-pagination text-center">
-        {{ paginate(request, pagination, 'arts:show-arts') }}
       </div>
     {% endif %}
   </div>
