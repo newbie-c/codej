@@ -254,7 +254,7 @@
           <button id="tape-out"
                   type="button"
                   title="удалить из ленты"
-                  data-url=""
+                  data-url="{{ url_for('arts:unfollow-auth') }}"
                   class="btn btn-warning btn-sm">
             <span class="glyphicon glyphicon-hand-left"
                   aria-hidden="true"></span>
@@ -319,6 +319,7 @@
                 'js/set-margin.js',
                 'js/ping.js',
                 'js/tape-in.js',
+                'js/tape-out.js',
                 'js/arts/show-art-admin.js' %}
         <script src="{{ ASSET_URL }}"></script>
       {% endassets %}
@@ -339,6 +340,7 @@
                 'js/count-clicks.js',
                 'js/ping.js',
                 'js/tape-in.js',
+                'js/tape-out.js',
                 'js/arts/show-art.js' %}
         <script src="{{ ASSET_URL }}"></script>
       {% endassets %}

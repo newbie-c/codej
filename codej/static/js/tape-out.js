@@ -1,4 +1,4 @@
-function tapeIn() {
+function tapeOut() {
   $(this).blur();
   $.ajax({
     method: 'POST',

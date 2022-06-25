@@ -20,7 +20,8 @@ from .admin.views import (
     rem_pic, set_index, set_init_perms, set_robots,
     set_service, show_log)
 from .arts.views import (
-    follow_auth, show_art, show_arts, show_author, show_banded)
+    follow_auth, show_art, show_arts, show_author,
+    show_banded, unfollow_auth)
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
 from .auth.views import (
@@ -134,7 +135,9 @@ app = Starlette(
                 Route('/l/', show_banded, name='lenta'),
                 Route('/a/{username}', show_author, name='show-auth'),
                 Route('/ajax/follow-auth', follow_auth,
-                      name='follow-auth', methods=['POST'])]),
+                      name='follow-auth', methods=['POST']),
+                Route('/ajax/unfollow-auth', unfollow_auth,
+                      name='unfollow-auth', methods=['POST'])]),
             Mount('/auth', name='auth', routes=[
                 Route('/login', login,
                       name='login', methods=['GET', 'POST']),

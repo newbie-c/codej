@@ -13,6 +13,32 @@ from .pg import (
     check_rel, select_arts, select_auth, select_banded)
 
 
+async def unfollow_auth(request):
+    res = {'empty': True}
+    suffix = (await request.form()).get('suffix')
+    current_user = await checkcu(request)
+    if suffix and current_user and \
+            permissions.FOLLOW_USERS in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT users.id, users.username FROM users, articles
+                 WHERE articles.suffix = $1
+                   AND users.id = articles.author_id''', suffix)
+        if target:
+            rel = await check_rel(conn, current_user['id'], target.get('id'))
+            if rel['follower']:
+                await conn.execute(
+                    '''DELETE FROM followers
+                       WHERE author_id = $1 AND follower_id = $2''',
+                    target.get('id'), current_user['id'])
+                res = {'empty': False}
+                await set_flashed(
+                    request,
+                    f'Блог {target.get("username")} удалён из вашей ленты.')
+        await conn.close()
+    return JSONResponse(res)
+
+
 async def follow_auth(request):
     res = {'empty': True}
     suffix = (await request.form()).get('suffix')

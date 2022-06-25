@@ -30,4 +30,5 @@ $(function() {
     scrollPanel($('#navigation'));
   });
   $('#tape-in').on('click', tapeIn);
+  $('#tape-out').on('click', tapeOut);
 });
