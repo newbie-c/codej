@@ -21,7 +21,7 @@ from .admin.views import (
     set_service, show_log)
 from .arts.views import (
     follow_auth, show_art, show_arts, show_author,
-    show_banded, unfollow_auth)
+    show_banded, send_dislike, send_like, unfollow_auth)
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
 from .auth.views import (
@@ -137,7 +137,11 @@ app = Starlette(
                 Route('/ajax/follow-auth', follow_auth,
                       name='follow-auth', methods=['POST']),
                 Route('/ajax/unfollow-auth', unfollow_auth,
-                      name='unfollow-auth', methods=['POST'])]),
+                      name='unfollow-auth', methods=['POST']),
+                Route('/ajax/send-like', send_like,
+                      name='send-like', methods=['POST']),
+                Route('/ajax/send-dislike', send_dislike,
+                      name='send-dislike', methods=['POST'])]),
             Mount('/auth', name='auth', routes=[
                 Route('/login', login,
                       name='login', methods=['GET', 'POST']),

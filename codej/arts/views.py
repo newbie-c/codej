@@ -13,6 +13,93 @@ from .pg import (
     check_rel, select_arts, select_auth, select_banded)
 
 
+async def send_dislike(request):
+    res = {'empty': True}
+    suffix = (await request.form()).get('suffix')
+    current_user = await checkcu(request)
+    if suffix and current_user and \
+            permissions.LIKE_DISLIKE in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT id, suffix, author_id, state FROM articles
+                 WHERE suffix = $1''', suffix)
+        if target and target.get('author_id') != current_user['id'] and \
+                target.get('state') in (
+                        status.pub, status.priv, status.hidden):
+            rel = await check_rel(
+                conn, current_user['id'], target['author_id'])
+            if not rel['blocker'] and not rel['blocked']:
+                l = await conn.fetchrow(
+                    '''SELECT * FROM art_likes
+                         WHERE article_id = $1 AND user_id = $2''',
+                    target.get('id'), current_user['id'])
+                d = await conn.fetchrow(
+                    '''SELECT * FROM art_dislikes
+                         WHERE article_id = $1 AND user_id = $2''',
+                    target.get('id'), current_user['id'])
+                if l:
+                    await conn.execute(
+                        '''DELETE FROM art_likes
+                             WHERE article_id = $1 AND user_id = $2''',
+                        target.get('id'), current_user['id'])
+                if not l and not d:
+                    await conn.execute(
+                        '''INSERT INTO art_dislikes (article_id, user_id)
+                           VALUES ($1, $2)''',
+                        target.get('id'), current_user['id'])
+                res = {'empty': False,
+                   'likes': await conn.fetchval(
+                       'SELECT count(*) FROM art_likes WHERE article_id = $1',
+                       target.get('id')),
+                   'dislikes': await conn.fetchval(
+                       '''SELECT count(*) FROM art_dislikes
+                            WHERE article_id = $1''', target.get('id'))}
+        await conn.close()
+    return JSONResponse(res)
+
+
+async def send_like(request):
+    res = {'empty': True}
+    suffix = (await request.form()).get('suffix')
+    current_user = await checkcu(request)
+    if suffix and current_user and \
+            permissions.LIKE_DISLIKE in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            '''SELECT id, suffix, author_id, state FROM articles
+                 WHERE suffix = $1''', suffix)
+        if target and target.get('author_id') != current_user['id'] and \
+                target.get('state') in (
+                        status.pub, status.priv, status.hidden):
+            l = await conn.fetchrow(
+                '''SELECT * FROM art_likes
+                     WHERE article_id = $1 AND user_id = $2''',
+                target.get('id'), current_user['id'])
+            d = await conn.fetchrow(
+                '''SELECT * FROM art_dislikes
+                     WHERE article_id = $1 AND user_id = $2''',
+                target.get('id'), current_user['id'])
+            if d:
+                await conn.execute(
+                    '''DELETE FROM art_dislikes
+                         WHERE article_id = $1 AND user_id = $2''',
+                    target.get('id'), current_user['id'])
+            if not d and not l:
+                await conn.execute(
+                    '''INSERT INTO art_likes (article_id, user_id)
+                       VALUES ($1, $2)''',
+                    target.get('id'), current_user['id'])
+            res = {'empty': False,
+                   'likes': await conn.fetchval(
+                       'SELECT count(*) FROM art_likes WHERE article_id = $1',
+                       target.get('id')),
+                   'dislikes': await conn.fetchval(
+                       '''SELECT count(*) FROM art_dislikes
+                            WHERE article_id = $1''', target.get('id'))}
+        await conn.close()
+    return JSONResponse(res)
+
+
 async def unfollow_auth(request):
     res = {'empty': True}
     suffix = (await request.form()).get('suffix')

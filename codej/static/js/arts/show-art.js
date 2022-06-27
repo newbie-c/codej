@@ -31,4 +31,6 @@ $(function() {
   });
   $('#tape-in').on('click', tapeIn);
   $('#tape-out').on('click', tapeOut);
+  $('#like-button').on('click', likeArt);
+  $('#dislike-button').on('click', likeArt);
 });

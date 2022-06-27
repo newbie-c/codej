@@ -232,7 +232,7 @@
           <button id="like-button"
                   type="button"
                   title="нравится"
-                  data-url=""
+                  data-url="{{ url_for('arts:send-like') }}"
                   class="btn btn-success btn-sm">
             <span class="glyphicon glyphicon-thumbs-up white-space"
                   aria-hidden="true"></span><span
@@ -242,7 +242,7 @@
             <button id="dislike-button"
                     type="button"
                     title="не нравится"
-                    data-url=""
+                    data-url="{{ url_for('arts:send-dislike') }}"
                     class="btn btn-warning btn-sm">
               <span class="glyphicon glyphicon-thumbs-down white-space"
                     aria-hidden="true"></span><span
@@ -320,6 +320,7 @@
                 'js/ping.js',
                 'js/tape-in.js',
                 'js/tape-out.js',
+                'js/like-art.js',
                 'js/arts/show-art-admin.js' %}
         <script src="{{ ASSET_URL }}"></script>
       {% endassets %}
@@ -341,6 +342,7 @@
                 'js/ping.js',
                 'js/tape-in.js',
                 'js/tape-out.js',
+                'js/like-art.js',
                 'js/arts/show-art.js' %}
         <script src="{{ ASSET_URL }}"></script>
       {% endassets %}
