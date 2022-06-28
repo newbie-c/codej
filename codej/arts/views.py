@@ -13,6 +13,29 @@ from .pg import (
     check_rel, select_arts, select_auth, select_banded)
 
 
+async def censor_art(request):
+    res = {'empty': True}
+    suffix = (await request.form()).get('suffix')
+    current_user = await checkcu(request)
+    if suffix and current_user and \
+            permissions.BLOCK_ENTITY in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        target = await conn.fetchrow(
+            'SELECT id, state FROM articles WHERE suffix = $1', suffix)
+        if target:
+            if target.get('state') != status.mod:
+                await conn.execute(
+                    'UPDATE articles SET state = $1 WHERE id = $2',
+                    status.mod, target.get('id'))
+            else:
+                await conn.execute(
+                    'UPDATE articles SET state = $1 WHERE id = $2',
+                    status.hidden, target.get('id'))
+            res = {'empty': False}
+        await conn.close()
+    return JSONResponse(res)
+
+
 async def send_dislike(request):
     res = {'empty': True}
     suffix = (await request.form()).get('suffix')
@@ -256,7 +279,7 @@ async def show_art(request):
             request, request.app.url_path_for('arts:show-art', slug=slug))
         return RedirectResponse(url, 302)
     conn = await get_conn(request.app.config)
-    target = await check_art(request, conn, slug)
+    target = await check_art(request, conn, current_user, slug)
     if target is None:
         await conn.close()
         raise HTTPException(

@@ -210,29 +210,27 @@ async def check_last_arts(conn, current_user, page, per_page):
     return await parse_last_page(page, per_page, q)
 
 
-async def check_art(request, conn, slug):
-    query = await conn.fetchrow(
-        '''SELECT articles.id,
-                  articles.title,
-                  articles.slug,
-                  articles.suffix,
-                  articles.html,
-                  articles.summary,
-                  articles.meta,
-                  articles.published,
-                  articles.edited,
-                  articles.state,
-                  articles.commented,
-                  articles.viewed,
-                  articles.author_id,
-                  accounts.ava_hash,
-                  users.username,
-                  users.permissions FROM articles, accounts, users
-             WHERE articles.slug = $1
-               AND articles.state IN ($2, $3, $4)
-               AND users.id = articles.author_id
-               AND accounts.user_id = articles.author_id''',
-        slug, status.pub, status.priv, status.hidden)
+async def check_art(request, conn, cu, slug):
+    part = '''SELECT articles.id, articles.title, articles.slug,
+                     articles.suffix, articles.html, articles.summary,
+                     articles.meta, articles.published, articles.edited,
+                     articles.state, articles.commented, articles.viewed,
+                     articles.author_id, accounts.ava_hash, users.username,
+                     users.permissions FROM articles, accounts, users'''
+    if permissions.BLOCK_ENTITY in cu['permissions']:
+        query = await conn.fetchrow(
+            f'''{part} WHERE articles.slug = $1
+                         AND articles.state IN ($2, $3, $4, $5)
+                         AND users.id = articles.author_id
+                         AND accounts.user_id = articles.author_id''',
+            slug, status.pub, status.priv, status.hidden, status.mod)
+    else:
+        query = await conn.fetchrow(
+            f'''{part} WHERE articles.slug = $1
+                         AND articles.state IN ($2, $3, $4)
+                         AND users.id = articles.author_id
+                         AND accounts.user_id = articles.author_id''',
+            slug, status.pub, status.priv, status.hidden)
     if query:
         return {'id': query.get('id'),
                 'title': query.get('title'),

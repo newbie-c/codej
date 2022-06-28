@@ -264,8 +264,9 @@
               permissions.ADMINISTER_SERVICE not in target['author_perms'] %}
           <button id="censor-this"
                   type="button"
-                  data-url=""
-                  title=""
+                  data-url="{{ url_for('arts:censor-art') }}"
+                  title="{% if target['state'] != status.mod %}блокировать
+                         {% else %}вернуть в публичные{% endif %}"
                   class="btn {% if target['state'] != status.mod %}
                          btn-danger{% else %}btn-success{% endif %} btn-sm">
             <span class="glyphicon {% if target['state'] != status.mod %}
