@@ -311,8 +311,9 @@ async def show_art(request):
             request, request.app.url_path_for('arts:show-art', slug=slug))
         return RedirectResponse(url, 302)
     conn = await get_conn(request.app.config)
-    target = await check_art(request, conn, current_user, slug)
-    if target is None:
+    target = dict()
+    await check_art(request, conn, current_user, slug, target)
+    if not target:
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
@@ -327,4 +328,4 @@ async def show_art(request):
          'current_user': current_user,
          'status': status,
          'rel': rel,
-         'target': target})
+         'target': target or None})

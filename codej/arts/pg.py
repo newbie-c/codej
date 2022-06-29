@@ -258,7 +258,7 @@ async def check_last_arts(conn, current_user, page, per_page):
     return await parse_last_page(page, per_page, q)
 
 
-async def check_art(request, conn, cu, slug):
+async def check_art(request, conn, cu, slug, target):
     part = '''SELECT articles.id, articles.title, articles.slug,
                      articles.suffix, articles.html, articles.summary,
                      articles.meta, articles.published, articles.edited,
@@ -280,29 +280,29 @@ async def check_art(request, conn, cu, slug):
                          AND accounts.user_id = articles.author_id''',
             slug, status.pub, status.priv, status.hidden)
     if query:
-        return {'id': query.get('id'),
-                'title': query.get('title'),
-                'title80': await parse_title(query.get('title'), 80),
-                'slug': query.get('slug'),
-                'suffix': query.get('suffix'),
-                'html': query.get('html'),
-                'summary': query.get('summary'),
-                'meta': query.get('meta'),
-                'published': f'{query.get("published").isoformat()}Z'
-                if query.get('published') else None,
-                'edited': f'{query.get("edited").isoformat()}Z',
-                'state': query.get('state'),
-                'commented': query.get('commented'),
-                'viewed': query.get('viewed'),
-                'author': query.get('username'),
-                'author_perms': query.get('permissions'),
-                'author_id': query.get('author_id'),
-                'ava': await get_ava_url(
-                    request, query.get('ava_hash'), size=88),
-                'likes': await conn.fetchval(
-                    'SELECT count(*) FROM art_likes WHERE article_id = $1',
-                    query.get('id')),
-                'dislikes': await conn.fetchval(
-                    'SELECT count(*) FROM art_dislikes WHERE article_id = $1',
-                    query.get('id')),
-                'commentaries': 0}
+        target['id'] = query.get('id')
+        target['title'] = query.get('title')
+        target['title80'] = await parse_title(query.get('title'), 80)
+        target['slug'] = query.get('slug')
+        target['suffix'] = query.get('suffix')
+        target['html'] = query.get('html')
+        target['summary'] = query.get('summary')
+        target['meta'] = query.get('meta')
+        target['published'] = f'{query.get("published").isoformat()}Z' \
+        if query.get('published') else None
+        target['edited'] = f'{query.get("edited").isoformat()}Z'
+        target['state'] = query.get('state')
+        target['commented'] = query.get('commented')
+        target['viewed'] = query.get('viewed')
+        target['author'] = query.get('username')
+        target['author_perms'] = query.get('permissions')
+        target['author_id'] = query.get('author_id')
+        target['ava'] = await get_ava_url(
+            request, query.get('ava_hash'), size=88)
+        target['likes'] = await conn.fetchval(
+            'SELECT count(*) FROM art_likes WHERE article_id = $1',
+            query.get('id'))
+        target['dislikes'] = await conn.fetchval(
+            'SELECT count(*) FROM art_dislikes WHERE article_id = $1',
+            query.get('id'))
+        target['commentaries'] = 0
