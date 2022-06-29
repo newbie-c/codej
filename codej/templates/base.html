@@ -71,6 +71,11 @@
                               username=current_user['username']) }}">Свои</a>
                   </li>
                   {% endif %}
+                  {% if permissions.BLOCK_ENTITY in cuperms %}
+                  <li>
+                    <a href="{{ url_for('arts:show-blocked') }}">Закрытое</a>
+                  </li>
+                  {% endif %}
                   <li role="separator" class="divider"></li>
                   <li>
                     <a href="">Поиск по меткам</a>

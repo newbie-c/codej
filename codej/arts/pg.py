@@ -130,6 +130,48 @@ async def select_arts(request, conn, current_user, page, per_page, last):
                      'commentaries': 0} for record in q]}
 
 
+async def select_blocked(request, conn, page, per_page, last):
+    q = await conn.fetch(
+        '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
+                  a.edited, a.state, a.commented, a.viewed, acc.ava_hash,
+                  u.username
+             FROM articles AS a, accounts AS acc, users AS u
+             WHERE a.author_id = u.id
+               AND acc.user_id = a.author_id
+               AND a.state = $1
+             ORDER BY a.published DESC LIMIT $2 OFFSET $3''',
+        status.mod, per_page, per_page*(page-1))
+    if q:
+        return {'page': page,
+                'next': page + 1 if page + 1 <= last else None,
+                'prev': page - 1 or None,
+                'pages': await iter_pages(page, last),
+                'articles': [
+                    {'id': record.get('id'),
+                     'title': record.get('title'),
+                     'title80': await parse_title(record.get('title'), 80),
+                     'slug': record.get('slug'),
+                     'suffix': record.get('suffix'),
+                     'summary': record.get('summary'),
+                     'published': f'{record.get("published").isoformat()}Z'
+                     if record.get('published') else None,
+                     'edited': f'{record.get("edited").isoformat()}Z',
+                     'state': record.get('state'),
+                     'commented': record.get('commented'),
+                     'viewed': record.get('viewed'),
+                     'author': record.get('username'),
+                     'ava': await get_ava_url(
+                         request, record.get('ava_hash'), size=88),
+                     'likes': await conn.fetchval(
+                         '''SELECT count(*) FROM art_likes
+                              WHERE article_id = $1''', record.get('id')),
+                     'dislikes': await conn.fetchval(
+                         '''SELECT count(*) FROM art_dislikes
+                              WHERE article_id = $1''', record.get('id')),
+                     'commentaries': 0} for record in q]}
+
+
+
 async def select_banded(request, conn, cuid, page, per_page, last):
     q = await conn.fetch(
         '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
@@ -172,6 +214,12 @@ async def select_banded(request, conn, cuid, page, per_page, last):
                          '''SELECT count(*) FROM art_dislikes
                               WHERE article_id = $1''', record.get('id')),
                      'commentaries': 0} for record in q]}
+
+
+async def check_last_blocked(conn, page, per_page):
+    return await parse_last_page(
+        page, per_page, await conn.fetchval(
+            'SELECT count(*) FROM articles WHERE state = $1', status.mod))
 
 
 async def check_last_banded(conn, cuid, page, per_page):
