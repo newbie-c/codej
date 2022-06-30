@@ -38,9 +38,10 @@ async def show_topic(request):
         return RedirectResponse(
             request.url_for('arts:show-art', slug=slug), 302)
     conn = await get_conn(request.app.config)
-    target = await check_topic(request, conn, slug)
+    target = dict()
+    await check_topic(request, conn, slug, target)
     await conn.close()
-    if target is None:
+    if not target :
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
     return request.app.jinja.TemplateResponse(
@@ -48,4 +49,4 @@ async def show_topic(request):
         {'request': request,
          'flashed': await get_flashed(request),
          'current_user': current_user,
-         'target': target})
+         'target': target or None})

@@ -214,23 +214,19 @@ async def create_par(request):
 async def show_draft(request):
     current_user = await checkcu(request)
     slug = request.path_params.get('slug')
-    conn = await get_conn(request.app.config)
-    target = await check_article(request, conn, slug)
-    if target is None:
-        await conn.close()
-        raise HTTPException(
-            status_code=404, detail='Такой страницы у нас нет.')
     if current_user is None:
-        await conn.close()
         await set_flashed(request, 'Требуется авторизация.')
         return RedirectResponse(
             await get_next(request, request.app.url_path_for(
                 'drafts:show-draft', slug=slug)), 302)
-    if target.get('author_id') != current_user['id'] or \
-            permissions.CREATE_ENTITY not in current_user['permissions']:
+    slug = request.path_params.get('slug')
+    conn = await get_conn(request.app.config)
+    target = dict()
+    await check_article(request, conn, slug, current_user['id'], target)
+    if not target:
         await conn.close()
         raise HTTPException(
-            status_code=403, detail='Для вас доступ ограничен.')
+            status_code=404, detail='Такой страницы у нас нет.')
     length = await conn.fetchval(
         'SELECT count(*) FROM paragraphs WHERE article_id = $1', target['id'])
     await conn.close()
@@ -241,7 +237,7 @@ async def show_draft(request):
          'status': status,
          'length': length,
          'flashed': await get_flashed(request),
-         'target': target})
+         'target': target or None})
 
 
 async def create_draft(request):

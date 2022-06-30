@@ -9,6 +9,7 @@ from ..common.avatar import get_ava_url
 from ..common.random import get_unique_s
 from .attri import status
 from .md import check_text, parse_md
+from .parse import parse_art_query
 from .slugs import check_max, parse_match, make
 
 
@@ -195,52 +196,21 @@ async def check_last_drafts(conn, current, page, per_page):
             current, status.draft, status.mod))
 
 
-async def check_article(request, conn, slug):
+async def check_article(request, conn, slug, cuid, target):
     query = await conn.fetchrow(
-        '''SELECT articles.id,
-                  articles.title,
-                  articles.slug,
-                  articles.suffix,
-                  articles.html,
-                  articles.summary,
-                  articles.meta,
-                  articles.published,
-                  articles.edited,
-                  articles.state,
-                  articles.commented,
-                  articles.viewed,
-                  articles.author_id,
-                  accounts.ava_hash,
-                  users.username FROM articles, accounts, users
+        '''SELECT articles.id, articles.title, articles.slug,
+                  articles.suffix, articles.html, articles.summary,
+                  articles.meta, articles.published, articles.edited,
+                  articles.state, articles.commented, articles.viewed,
+                  articles.author_id, accounts.ava_hash, users.username
+             FROM articles, accounts, users
              WHERE articles.slug = $1
+               AND articles.author_id = $2
                AND users.id = articles.author_id
-               AND accounts.user_id = articles.author_id''', slug)
+               AND accounts.user_id = articles.author_id''',
+               slug, cuid)
     if query:
-        return {'id': query.get('id'),
-                'title': query.get('title'),
-                'title80': await parse_title(query.get('title'), 80),
-                'slug': query.get('slug'),
-                'suffix': query.get('suffix'),
-                'html': query.get('html'),
-                'summary': query.get('summary'),
-                'meta': query.get('meta'),
-                'published': f'{query.get("published").isoformat()}Z'
-                if query.get('published') else None,
-                'edited': f'{query.get("edited").isoformat()}Z',
-                'state': query.get('state'),
-                'commented': query.get('commented'),
-                'viewed': query.get('viewed'),
-                'author': query.get('username'),
-                'author_id': query.get('author_id'),
-                'ava': await get_ava_url(
-                    request, query.get('ava_hash'), size=88),
-                'likes': await conn.fetchval(
-                    'SELECT count(*) FROM art_likes WHERE article_id = $1',
-                    query.get('id')),
-                'dislikes': await conn.fetchval(
-                    'SELECT count(*) FROM art_dislikes WHERE article_id = $1',
-                    query.get('id')),
-                'commentaries': 0}
+        await parse_art_query(request, conn, query, target)
 
 
 async def create_d(conn, title, uid):
