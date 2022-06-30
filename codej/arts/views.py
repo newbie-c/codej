@@ -195,15 +195,16 @@ async def show_blocked(request):
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
-    pagination = await select_blocked(
-        request, conn, page,
+    pagination = dict()
+    await select_blocked(
+        request, conn, pagination, page,
         request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'arts/show-blocked.html',
         {'request': request,
          'current_user': current_user,
-         'pagination': pagination,
+         'pagination': pagination or None,
          'status': status,
          'flashed': await get_flashed(request)})
 
@@ -225,15 +226,16 @@ async def show_banded(request):
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
-    pagination = await select_banded(
-        request, conn, current_user['id'], page,
+    pagination = dict()
+    await select_banded(
+        request, conn, current_user['id'], pagination, page,
         request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'arts/show-banded.html',
         {'request': request,
          'current_user': current_user,
-         'pagination': pagination,
+         'pagination': pagination or None,
          'status': status,
          'flashed': await get_flashed(request)})
 
@@ -260,15 +262,16 @@ async def show_author(request):
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
-    pagination = await select_auth(
-        request, conn, target, current_user, page,
+    pagination = dict()
+    await select_auth(
+        request, conn, target, current_user, pagination, page,
         request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'arts/show-author.html',
         {'request': request,
          'current_user': current_user,
-         'pagination': pagination,
+         'pagination': pagination or None,
          'author': target,
          'status': status,
          'flashed': await get_flashed(request)})
@@ -289,15 +292,16 @@ async def show_arts(request):
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
-    pagination = await select_arts(
-        request, conn, current_user, page,
+    pagination = dict()
+    await select_arts(
+        request, conn, current_user, pagination, page,
         request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'arts/show-arts.html',
         {'request': request,
          'current_user': current_user,
-         'pagination': pagination,
+         'pagination': pagination or None,
          'status': status,
          'flashed': await get_flashed(request)})
 

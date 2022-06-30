@@ -9,7 +9,7 @@ from ..common.avatar import get_ava_url
 from ..common.random import get_unique_s
 from .attri import status
 from .md import check_text, parse_md
-from .parse import parse_art_query
+from .parse import parse_art_query, parse_arts_query
 from .slugs import check_max, parse_match, make
 
 
@@ -145,7 +145,7 @@ async def save_par(conn, art, text, code):
         return html
 
 
-async def select_drafts(request, conn, current, page, per_page, last):
+async def select_drafts(request, conn, current, target, page, per_page, last):
     query = await conn.fetch(
         '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
                   a.edited, a.state, a.commented, a.viewed,
@@ -158,33 +158,7 @@ async def select_drafts(request, conn, current, page, per_page, last):
              ORDER BY a.edited DESC LIMIT $4 OFFSET $5''',
         current, status.draft, status.mod, per_page, per_page*(page-1))
     if query:
-        return {'page': page,
-                'next': page + 1 if page + 1 <= last else None,
-                'prev': page - 1 or None,
-                'pages': await iter_pages(page, last),
-                'articles': [
-                    {'id': record.get('id'),
-                     'title': record.get('title'),
-                     'title80': await parse_title(record.get('title'), 80),
-                     'slug': record.get('slug'),
-                     'suffix': record.get('suffix'),
-                     'summary': record.get('summary'),
-                     'published': f'{record.get("published").isoformat()}Z'
-                     if record.get('published') else None,
-                     'edited': f'{record.get("edited").isoformat()}Z',
-                     'state': record.get('state'),
-                     'commented': record.get('commented'),
-                     'viewed': record.get('viewed'),
-                     'author': record.get('username'),
-                     'ava': await get_ava_url(
-                         request, record.get('ava_hash'), size=88),
-                     'likes': await conn.fetchval(
-                        'SELECT count(*) FROM art_likes WHERE article_id = $1',
-                        record.get('id')),
-                     'dislikes': await conn.fetchval(
-                        '''SELECT count(*) FROM art_dislikes
-                             WHERE article_id = $1''', record.get('id')),
-                     'commentaries': 0} for record in query]}
+        await parse_arts_query(request, conn, query, target, page, last)
 
 
 async def check_last_drafts(conn, current, page, per_page):

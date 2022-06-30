@@ -1,8 +1,8 @@
 from ..auth.attri import permissions
-from ..common.aparsers import iter_pages, parse_last_page, parse_title
+from ..common.aparsers import parse_last_page
 from ..common.avatar import get_ava_url
 from ..drafts.attri import status
-from ..drafts.parse import parse_art_query
+from ..drafts.parse import parse_art_query, parse_arts_query
 
 
 async def check_rel(conn, cu, authid):
@@ -20,9 +20,9 @@ async def check_rel(conn, cu, authid):
             'blocked': bool(bb)}
 
 
-async def select_auth(request, conn, auth, current_user, page, per_page, last):
-    if permissions.BLOCK_ENTITY in current_user['permissions'] or \
-            auth['id'] == current_user['id']:
+async def select_auth(request, conn, auth, cu, target, page, per_page, last):
+    if permissions.BLOCK_ENTITY in cu['permissions'] or \
+            auth['id'] == cu['id']:
         q = await conn.fetch(
             '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
                       a.edited, a.state, a.commented, a.viewed,
@@ -48,37 +48,11 @@ async def select_auth(request, conn, auth, current_user, page, per_page, last):
                 ORDER BY a.published DESC LIMIT $4 OFFSET $5''',
             auth['id'], status.pub, status.priv, per_page, per_page*(page-1))
     if q:
-        return {'page': page,
-                'next': page + 1 if page + 1 <= last else None,
-                'prev': page - 1 or None,
-                'pages': await iter_pages(page, last),
-                'articles': [
-                    {'id': record.get('id'),
-                     'title': record.get('title'),
-                     'title80': await parse_title(record.get('title'), 80),
-                     'slug': record.get('slug'),
-                     'suffix': record.get('suffix'),
-                     'summary': record.get('summary'),
-                     'published': f'{record.get("published").isoformat()}Z'
-                     if record.get('published') else None,
-                     'edited': f'{record.get("edited").isoformat()}Z',
-                     'state': record.get('state'),
-                     'commented': record.get('commented'),
-                     'viewed': record.get('viewed'),
-                     'author': record.get('username'),
-                     'ava': await get_ava_url(
-                         request, record.get('ava_hash'), size=88),
-                     'likes': await conn.fetchval(
-                        '''SELECT count(*) FROM art_likes
-                             WHERE article_id = $1''', record.get('id')),
-                     'dislikes': await conn.fetchval(
-                        '''SELECT count(*) FROM art_dislikes
-                             WHERE article_id = $1''', record.get('id')),
-                     'commentaries': 0} for record in q]}
+        await parse_arts_query(request, conn, q, target, page, last)
 
 
-async def select_arts(request, conn, current_user, page, per_page, last):
-    if permissions.BLOCK_ENTITY in current_user['permissions']:
+async def select_arts(request, conn, cu, target, page, per_page, last):
+    if permissions.BLOCK_ENTITY in cu['permissions']:
         q = await conn.fetch(
             '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
                       a.edited, a.state, a.commented, a.viewed,
@@ -102,36 +76,10 @@ async def select_arts(request, conn, current_user, page, per_page, last):
                  ORDER BY a.published DESC LIMIT $3 OFFSET $4''',
             status.pub, status.priv, per_page, per_page*(page-1))
     if q:
-        return {'page': page,
-                'next': page + 1 if page + 1 <= last else None,
-                'prev': page - 1 or None,
-                'pages': await iter_pages(page, last),
-                'articles': [
-                    {'id': record.get('id'),
-                     'title': record.get('title'),
-                     'title80': await parse_title(record.get('title'), 80),
-                     'slug': record.get('slug'),
-                     'suffix': record.get('suffix'),
-                     'summary': record.get('summary'),
-                     'published': f'{record.get("published").isoformat()}Z'
-                     if record.get('published') else None,
-                     'edited': f'{record.get("edited").isoformat()}Z',
-                     'state': record.get('state'),
-                     'commented': record.get('commented'),
-                     'viewed': record.get('viewed'),
-                     'author': record.get('username'),
-                     'ava': await get_ava_url(
-                         request, record.get('ava_hash'), size=88),
-                     'likes': await conn.fetchval(
-                        'SELECT count(*) FROM art_likes WHERE article_id = $1',
-                        record.get('id')),
-                     'dislikes': await conn.fetchval(
-                        '''SELECT count(*) FROM art_dislikes
-                             WHERE article_id = $1''', record.get('id')),
-                     'commentaries': 0} for record in q]}
+        await parse_arts_query(request, conn, q, target, page, last)
 
 
-async def select_blocked(request, conn, page, per_page, last):
+async def select_blocked(request, conn, target, page, per_page, last):
     q = await conn.fetch(
         '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
                   a.edited, a.state, a.commented, a.viewed, acc.ava_hash,
@@ -143,37 +91,10 @@ async def select_blocked(request, conn, page, per_page, last):
              ORDER BY a.published DESC LIMIT $2 OFFSET $3''',
         status.mod, per_page, per_page*(page-1))
     if q:
-        return {'page': page,
-                'next': page + 1 if page + 1 <= last else None,
-                'prev': page - 1 or None,
-                'pages': await iter_pages(page, last),
-                'articles': [
-                    {'id': record.get('id'),
-                     'title': record.get('title'),
-                     'title80': await parse_title(record.get('title'), 80),
-                     'slug': record.get('slug'),
-                     'suffix': record.get('suffix'),
-                     'summary': record.get('summary'),
-                     'published': f'{record.get("published").isoformat()}Z'
-                     if record.get('published') else None,
-                     'edited': f'{record.get("edited").isoformat()}Z',
-                     'state': record.get('state'),
-                     'commented': record.get('commented'),
-                     'viewed': record.get('viewed'),
-                     'author': record.get('username'),
-                     'ava': await get_ava_url(
-                         request, record.get('ava_hash'), size=88),
-                     'likes': await conn.fetchval(
-                         '''SELECT count(*) FROM art_likes
-                              WHERE article_id = $1''', record.get('id')),
-                     'dislikes': await conn.fetchval(
-                         '''SELECT count(*) FROM art_dislikes
-                              WHERE article_id = $1''', record.get('id')),
-                     'commentaries': 0} for record in q]}
+        await parse_arts_query(request, conn, q, target, page, last)
 
 
-
-async def select_banded(request, conn, cuid, page, per_page, last):
+async def select_banded(request, conn, cuid, target, page, per_page, last):
     q = await conn.fetch(
         '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
                   a.edited, a.state, a.commented, a.viewed,
@@ -188,33 +109,7 @@ async def select_banded(request, conn, cuid, page, per_page, last):
         status.pub, status.priv, status.hidden, cuid,
         per_page, per_page*(page-1))
     if q:
-        return {'page': page,
-                'next': page + 1 if page + 1 <= last else None,
-                'prev': page - 1 or None,
-                'pages': await iter_pages(page, last),
-                'articles': [
-                    {'id': record.get('id'),
-                     'title': record.get('title'),
-                     'title80': await parse_title(record.get('title'), 80),
-                     'slug': record.get('slug'),
-                     'suffix': record.get('suffix'),
-                     'summary': record.get('summary'),
-                     'published': f'{record.get("published").isoformat()}Z'
-                     if record.get('published') else None,
-                     'edited': f'{record.get("edited").isoformat()}Z',
-                     'state': record.get('state'),
-                     'commented': record.get('commented'),
-                     'viewed': record.get('viewed'),
-                     'author': record.get('username'),
-                     'ava': await get_ava_url(
-                         request, record.get('ava_hash'), size=88),
-                     'likes': await conn.fetchval(
-                         '''SELECT count(*) FROM art_likes
-                              WHERE article_id = $1''', record.get('id')),
-                     'dislikes': await conn.fetchval(
-                         '''SELECT count(*) FROM art_dislikes
-                              WHERE article_id = $1''', record.get('id')),
-                     'commentaries': 0} for record in q]}
+        await parse_arts_query(request, conn, q, target, page, last)
 
 
 async def check_last_blocked(conn, page, per_page):

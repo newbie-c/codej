@@ -271,14 +271,16 @@ async def show_drafts(request):
         await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
-    pagination = await select_drafts(
-        request, conn, current_user['id'], page,
+    pagination = dict()
+    await select_drafts(
+        request, conn, current_user['id'], pagination, page,
         request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
+    print(pagination)
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'drafts/drafts.html',
         {'request': request,
          'flashed': await get_flashed(request),
-         'pagination': pagination,
+         'pagination': pagination or None,
          'status': status,
          'current_user': current_user})

@@ -1,5 +1,36 @@
-from ..common.aparsers import parse_title
+from ..common.aparsers import iter_pages, parse_title
 from ..common.avatar import get_ava_url
+
+
+async def parse_arts_query(request, conn, query, target, page, last):
+    target['page'] = page
+    target['next'] = page + 1 if page + 1 <= last else None
+    target['prev'] = page - 1 or None
+    target['pages'] = await iter_pages(page, last)
+    target['articles'] = [
+        {'id': record.get('id'),
+         'title': record.get('title'),
+         'title80': await parse_title(record.get('title'), 80),
+         'slug': record.get('slug'),
+         'suffix': record.get('suffix'),
+         'summary': record.get('summary'),
+         'published': f'{record.get("published").isoformat()}Z'
+         if record.get('published') else None,
+         'edited': f'{record.get("edited").isoformat()}Z',
+         'state': record.get('state'),
+         'commented': record.get('commented'),
+         'viewed': record.get('viewed'),
+         'author': record.get('username'),
+         'permissions': record.get('permissions'),
+         'ava': await get_ava_url(
+             request, record.get('ava_hash'), size=88),
+         'likes': await conn.fetchval(
+            '''SELECT count(*) FROM art_likes
+                 WHERE article_id = $1''', record.get('id')),
+         'dislikes': await conn.fetchval(
+            '''SELECT count(*) FROM art_dislikes
+                 WHERE article_id = $1''', record.get('id')),
+         'commentaries': 0} for record in query]
 
 
 async def parse_art_query(request, conn, query, target):
