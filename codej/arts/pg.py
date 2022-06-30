@@ -164,16 +164,14 @@ async def check_art(request, conn, cu, slug, target):
     if permissions.BLOCK_ENTITY in cu['permissions']:
         query = await conn.fetchrow(
             f'''{part} WHERE articles.slug = $1
-                         AND articles.state IN ($2, $3, $4, $5)
                          AND users.id = articles.author_id
-                         AND accounts.user_id = articles.author_id''',
-            slug, status.pub, status.priv, status.hidden, status.mod)
+                         AND accounts.user_id = articles.author_id''', slug)
     else:
         query = await conn.fetchrow(
             f'''{part} WHERE articles.slug = $1
-                         AND articles.state IN ($2, $3, $4)
+                         AND articles.state != $2
                          AND users.id = articles.author_id
                          AND accounts.user_id = articles.author_id''',
-            slug, status.pub, status.priv, status.hidden)
+            slug, status.mod)
     if query:
         await parse_art_query(request, conn, query, target)

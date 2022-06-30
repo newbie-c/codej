@@ -21,7 +21,6 @@ async def parse_arts_query(request, conn, query, target, page, last):
          'commented': record.get('commented'),
          'viewed': record.get('viewed'),
          'author': record.get('username'),
-         'permissions': record.get('permissions'),
          'ava': await get_ava_url(
              request, record.get('ava_hash'), size=88),
          'likes': await conn.fetchval(
