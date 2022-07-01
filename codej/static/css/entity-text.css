@@ -57,7 +57,7 @@
   margin: 2px 0 8px;
 }
 
-.codehilite code {
+.entity-text-block .codehilite code {
   white-space: pre;
 }
 

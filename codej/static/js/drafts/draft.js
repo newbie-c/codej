@@ -18,12 +18,15 @@ $(function() {
         let l = lch.length;
         let j = 0;
         while (j < lch.length) {
-          $(lch[j]).attr({'data-num': m, class: 'editable'});
+          $(lch[j]).attr({'data-num': m});
+          $(lch[j]).addClass('editable');
           j++;
           m++;
         }
       } else {
-        $(ch[i]).attr({'data-num': m, class: 'editable'});
+        $(ch[i]).attr({'data-num': m});
+        $(ch[i]).addClass('editable');
+        //$(ch[i]).attr({'data-num': m, class: 'editable'});
         m++;
       }
     }
