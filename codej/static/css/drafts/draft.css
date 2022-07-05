@@ -1,3 +1,12 @@
+.form-help {
+  text-align: justify;
+  font-style: italic;
+}
+
+.form-help p {
+  margin: 0 0 6px 0;
+}
+
 .form-form {
   margin: 8px;
 }

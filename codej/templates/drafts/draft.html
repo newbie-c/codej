@@ -17,6 +17,7 @@
             'css/entity-details.css',
             'css/entity-text.css',
             'css/pygments.css',
+            'css/labels.css',
             'css/drafts/draft.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
@@ -215,6 +216,35 @@
                     rows="5"></textarea>
         </div>
       </div>
+      <div id="labels-editor" class="form-form to-be-hidden">
+        <div class="form-help">
+          <p>
+            Метки вводятся через запятую, максимальная длина метки - 32 знака,
+            в том числе буквы латинского и русского алфавитов, цифры и дефис,
+            допустимо любое количество меток.
+          </p>
+        </div>
+        <div class="form-group">
+          <textarea id="labels-edit"
+                    placeholder="введите имена меток через запятую"
+                    class="form-control"
+                    rows="2">
+            {%- if labels -%}
+              {%- for label in labels -%}
+              {{- label -}}{% if not loop.last -%}, {% endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          </textarea>
+        </div>
+        <div class="form-group last-group">
+          <button id="labels-submit"
+                  type="button"
+                  class="btn btn-danger btn-block"
+                  data-url="{{ url_for('labels:set-l') }}">
+            Установить
+          </button>
+        </div>
+      </div>
       <div id="meta-description-editor" class="form-form to-be-hidden">
         <div id="d-length-marker">
           Осталось: <span
@@ -326,6 +356,25 @@
           </tbody>
         </table>
       </div>
+    </div>
+    <div class="content-block next-block entity-labels-block">
+      <table>
+        <tbody>
+        <tr>
+          <td>Метки:&nbsp;</td>
+          <td>
+            {% if labels %}
+              {% for label in labels %}
+              <a href="">
+                {{- label -}}</a>{%- if not loop.last -%}, {%- endif -%}
+              {% endfor %}
+            {% else %}
+              не забудьте установить метки.
+            {% endif %}
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
     <div id="options-block" class="content-block next-block">
       <button id="sp-case"

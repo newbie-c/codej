@@ -26,7 +26,6 @@ $(function() {
       } else {
         $(ch[i]).attr({'data-num': m});
         $(ch[i]).addClass('editable');
-        //$(ch[i]).attr({'data-num': m, class: 'editable'});
         m++;
       }
     }
@@ -223,6 +222,62 @@ $(function() {
   });
   $('#labels-button').on('click', function() {
     $(this).blur();
+    let f = $('#labels-editor');
+    if (f.is(':hidden')) {
+      f.slideDown('slow', function() {
+        $('#labels-edit').focus();
+        scrollPanel(f);
+      });
+      $('#new-paragraph-editor').slideUp('slow');
+      $('#entity-title-editor').slideUp('slow');
+      $('#summary-editor').slideUp('slow');
+      $('#status-editor').slideUp('slow');
+      $('#meta-description-editor').slideUp('slow');
+    } else {
+      f.slideUp('slow');
+      $('#new-paragraph-editor').slideDown('slow', function() {
+        $('#html-text-edit').focus();
+      });
+    }
+  });
+  $('#labels-edit').on('keyup blur', function() {
+    let g = $(this).parents('.form-group');
+    g.removeClass('has-error');
+    let c = $(this).val().split(',');
+    for (each in c) {
+      each = $.trim(c[each]);
+      if (each) {
+        let re = /^[A-Za-zА-Яа-яЁё\d\-]{1,32}$/;
+        if (!re.exec(each)) {
+          g.addClass('has-error');
+        }
+      }
+    }
+  });
+  $('#labels-submit').on('click', function() {
+    $(this).blur();
+    let e = $('#labels-edit').parents('.form-group');
+    if (!e.hasClass('has-error')) {
+      $.ajax({
+        method: 'POST',
+        url: $(this).data().url,
+        data: {
+          labels: $('#labels-edit').val(),
+          aid: $('#entity-header-block').data().id
+        },
+        success: function(data) {
+          if (!data.empty) {
+            if (data.error) {
+              e.addClass('has-error');
+            } else {
+              window.location.reload();
+            }
+          }
+        },
+        error: function(data) {},
+        dataType: 'json'
+      });
+    }
   });
   $('#edit-metadesc').on('click', function() {
     $(this).blur();
@@ -236,6 +291,7 @@ $(function() {
       $('#entity-title-editor').slideUp('slow');
       $('#summary-editor').slideUp('slow');
       $('#status-editor').slideUp('slow');
+      $('#labels-editor').slideUp('slow');
     } else {
       f.slideUp('slow');
       $('#new-paragraph-editor').slideDown('slow', function() {
@@ -281,6 +337,7 @@ $(function() {
       $('#meta-description-editor').slideUp('slow');
       $('#summary-editor').slideUp('slow');
       $('#status-editor').slideUp('slow');
+      $('#labels-editor').slideUp('slow');
     } else {
       f.slideUp('slow');
       $('#new-paragraph-editor').slideDown('slow', function() {
@@ -328,6 +385,7 @@ $(function() {
       $('#meta-description-editor').slideUp('slow');
       $('#entity-title-editor').slideUp('slow');
       $('#status-editor').slideUp('slow');
+      $('#labels-editor').slideUp('slow');
     } else {
       f.slideUp('slow');
       $('#new-paragraph-editor').slideDown('slow', function() {
@@ -392,6 +450,7 @@ $(function() {
         $('#meta-description-editor').slideUp('slow');
         $('#entity-title-editor').slideUp('slow');
         $('#summary-editor').slideUp('slow');
+        $('#labels-editor').slideUp('slow');
       } else {
         f.slideUp('slow');
         $('#new-paragraph-editor').slideDown('slow', function() {

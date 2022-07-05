@@ -1,0 +1,10 @@
+.entity-labels-block {
+  padding: 8px;
+  text-shadow: 0 0 3px #d9dcec;
+  font-style: italic;
+}
+
+.entity-labels-block tr {
+  text-align: justify;
+  vertical-align: top;
+}

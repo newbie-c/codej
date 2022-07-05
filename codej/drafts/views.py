@@ -9,6 +9,7 @@ from ..common.aparsers import parse_page
 from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
+from ..labels.pg import select_labels
 from .attri import status
 from .pg import (
     prepend_par, change_par, check_article, create_d,
@@ -229,6 +230,7 @@ async def show_draft(request):
             status_code=404, detail='Такой страницы у нас нет.')
     length = await conn.fetchval(
         'SELECT count(*) FROM paragraphs WHERE article_id = $1', target['id'])
+    labels = await select_labels(conn, target['id'])
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'drafts/draft.html',
@@ -236,6 +238,7 @@ async def show_draft(request):
          'current_user': current_user,
          'status': status,
          'length': length,
+         'labels': labels or None,
          'flashed': await get_flashed(request),
          'target': target or None})
 
