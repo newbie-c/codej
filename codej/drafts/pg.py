@@ -144,6 +144,25 @@ async def save_par(conn, art, text, code):
                 html, datetime.utcnow(), art)
         return html
 
+async def select_labeled_drafts(
+        request, conn, current, label, target, page, per_page, last):
+    query = await conn.fetch(
+        '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
+                  a.edited, a.state, a.commented, a.viewed,
+                  accounts.ava_hash, users.username
+             FROM articles AS a, users, accounts, labels, als
+             WHERE a.author_id = users.id
+               AND accounts.user_id = a.author_id
+               AND a.author_id = $1
+               AND a.id = als.article_id
+               AND labels.label = $2
+               AND labels.id = als.label_id
+               AND a.state IN ($3, $4)
+            ORDER BY a.edited DESC LIMIT $5 OFFSET $6''',
+        current, label, status.draft, status.mod, per_page, per_page*(page-1))
+    if query:
+        await parse_arts_query(request, conn, query, target, page, last)
+
 
 async def select_drafts(request, conn, current, target, page, per_page, last):
     query = await conn.fetch(
@@ -159,6 +178,17 @@ async def select_drafts(request, conn, current, target, page, per_page, last):
         current, status.draft, status.mod, per_page, per_page*(page-1))
     if query:
         await parse_arts_query(request, conn, query, target, page, last)
+
+
+async def check_last_labeled(conn, current, label, page, per_page):
+    return await parse_last_page(page, per_page, await conn.fetchval(
+        '''SELECT count(*) FROM articles, labels, als
+             WHERE articles.author_id = $1
+               AND articles.id = als.article_id
+               AND labels.label = $2
+               AND labels.id = als.label_id
+               AND articles.state IN ($3, $4)''',
+        current, label, status.draft, status.mod))
 
 
 async def check_last_drafts(conn, current, page, per_page):

@@ -365,7 +365,7 @@
           <td>
             {% if labels %}
               {% for label in labels %}
-              <a href="">
+              <a href="{{ url_for('drafts:show-labeled', label=label) }}">
                 {{- label -}}</a>{%- if not loop.last -%}, {%- endif -%}
               {% endfor %}
             {% else %}

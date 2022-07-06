@@ -32,7 +32,8 @@ from .captcha.views import show_captcha
 from .drafts.views import (
     change_title, check_par, create_draft, create_par,
     edit_par, edit_meta, edit_state, edit_sum,
-    insert_par, rem_par, show_draft, show_drafts)
+    insert_par, rem_par, show_draft, show_drafts,
+    show_labeled)
 from .errors import (
     handle_csrf_error, notify_not_found_page,
     refuse_method, refuse_request)
@@ -170,6 +171,7 @@ app = Starlette(
             Mount('/drafts', name='drafts', routes=[
                 Route('/', show_drafts, name='show-drafts'),
                 Route('/{slug}', show_draft, name='show-draft'),
+                Route('/t/{label}', show_labeled, name='show-labeled'),
                 Route('/ajax/create', create_draft,
                       name='create', methods=['POST']),
                 Route('/ajax/create-par', create_par,

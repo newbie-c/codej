@@ -1,0 +1,17 @@
+.entity-details {
+  padding: 4px 0 6px 0;
+}
+
+.entity-summary {
+  text-align: justify;
+}
+
+.entity-summary p {
+  margin: 0;
+  padding: 0;
+}
+
+.entity-alias {
+  text-align: center;
+  padding: 4px 0 0;
+}

@@ -6,80 +6,29 @@
 
 {% block styles %}
   {{ super() }}
-  {% assets filters='cssmin', output='generic/css/drafts/drafts.css',
+  {% assets filters='cssmin', output='generic/css/drafts/labeled.css',
             'css/base.css',
             'css/mc780.css',
             'css/top-flashed.css',
+            'css/empty-message.css',
             'css/next-block.css',
             'css/content-block.css',
             'css/avatar.css',
             'css/entity-attributes.css',
             'css/entity-details.css',
             'css/pagination.css',
-            'css/labeled-form.css',
             'css/entity-summary.css',
-            'css/entity-labels.css',
-            'css/drafts/drafts.css' %}
+            'css/entity-labels.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
 {% endblock styles %}
 
 {% block page_body %}
-  <!-- drafts/drafts.html -->
+  <!-- drafts/labeled.html -->
   <div id="main-container">
     {% if flashed %}
       <div class="top-flashed-block">
         {{ show_messages(flashed) }}
-      </div>
-    {% endif %}
-    {% if permissions.CREATE_ENTITY in current_user['permissions'] %}
-      {% if not pagination or (pagination and pagination['page'] == 1) %}
-        <div class="content-block slidable">
-          <div class="block-header">
-            <h3 class="panel-title">Новый топик для блога</h3>
-          </div>
-          <div class="block-body">
-            <div class="today-field"></div>
-            <div class="form-help">
-              <p>
-                Здесь можно создать новый топик в блог, для этого достаточно
-                заполнить форму ниже и нажать кнопку "Создать". Имейте ввиду,
-                что заголовок обязателен и не может быть длиннее, чем 100
-                символов. Созданный топик можно будет наполнить содержимым
-                и опубликовать.
-              </p>
-            </div>
-            <div id="progress-block" class="text-center to-be-hidden">
-              <img alt="progress show"
-                   src="{{ url_for('static', path='images/upload.gif') }}">
-            </div>
-            <div class="form-form">
-              <table class="inline-form-table">
-                <tbody>
-                  <tr>
-                    <td class="input-field">
-                      <input id="title"
-                             class="form-control"
-                             type="text"
-                             placeholder="введите заголовок топика">
-                    </td>
-                    <td>&nbsp;</td>
-                    <td>
-                      <button id="title-submit"
-                              class="btn btn-primary"
-                              data-url="{{ url_for('drafts:create') }}"
-                              type="button">Создать</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      {% endif %}
-    {% else %}
-      <div class="alert alert-warning content-block">
-        Разрешение вести свой блог можно получить у администраторa.
       </div>
     {% endif %}
     {% if pagination %}
@@ -229,13 +178,17 @@
         </div>
       {% endfor %}
     {% else %}
-      <div class="alert alert-warning next-block">
-        На текущий момент у Вас нет черновиков.
+      <div class="alert alert-warning">
+        <div class="today-field"></div>
+        <div class="message-text">
+          На текущий момент у Вас нет черновиков c меткой "{{ label }}".
+        </div>
       </div>
     {% endif %}
     {% if pagination['prev'] or pagination['next'] %}
       <div class="next-block entity-pagination text-center">
-        {{ paginate(request, pagination, 'drafts:show-drafts') }}
+        {{ paginate(
+          request, pagination, 'drafts:show-labeled', label=label) }}
       </div>
     {% endif %}
   </div>
@@ -243,7 +196,7 @@
 
 {% block scripts %}
   {{ super() }}
-  {% assets filters='rjsmin', output='generic/js/drafts/drafts.js',
+  {% assets filters='rjsmin', output='generic/js/drafts/labeled.js',
             'js/check-mc.js',
             'js/hide-hidden.js',
             'js/render-tf.js',
@@ -254,7 +207,7 @@
             'js/show-datetime.js',
             'js/scroll-panel.js',
             'js/show-hide.js',
-            'js/drafts/drafts.js' %}
+            'js/drafts/labeled.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
 {% endblock scripts %}

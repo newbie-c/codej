@@ -1,5 +1,6 @@
 from ..common.aparsers import iter_pages, parse_title
 from ..common.avatar import get_ava_url
+from ..labels.pg import select_labels
 
 
 async def parse_arts_query(request, conn, query, target, page, last):
@@ -29,6 +30,7 @@ async def parse_arts_query(request, conn, query, target, page, last):
          'dislikes': await conn.fetchval(
             '''SELECT count(*) FROM art_dislikes
                  WHERE article_id = $1''', record.get('id')),
+         'labels': await select_labels(conn, record.get('id')),
          'commentaries': 0} for record in query]
 
 

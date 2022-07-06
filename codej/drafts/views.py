@@ -13,8 +13,8 @@ from ..labels.pg import select_labels
 from .attri import status
 from .pg import (
     prepend_par, change_par, check_article, create_d,
-    check_last_drafts, check_slug, remove_this, save_par,
-    select_drafts)
+    check_last_drafts, check_last_labeled, check_slug, remove_this,
+    save_par, select_drafts, select_labeled_drafts)
 
 spar = '''SELECT par.num, par.article_id, par.mdtext
             FROM paragraphs AS par, articles AS arts
@@ -257,6 +257,37 @@ async def create_draft(request):
                'url': request.url_for('drafts:show-draft', slug=slug)}
         await conn.close()
     return JSONResponse(res)
+
+
+async def show_labeled(request):
+    label = request.path_params.get('label')
+    current_user = await checkcu(request)
+    if current_user is None:
+        await set_flashed(request, 'Требуется авторизация.')
+        return RedirectResponse(
+            await get_next(request, request.app.url_path_for(
+                'drafts:show-labeled', label=label)), 302)
+    conn = await get_conn(request.app.config)
+    if not (page := await parse_page(request)) or \
+       not (last := await check_last_labeled(
+           conn, current_user['id'], label, page,
+           request.app.config.get('ARTS_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    pagination = dict()
+    await select_labeled_drafts(
+        request, conn, current_user['id'], label, pagination, page,
+        request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'drafts/labeled.html',
+        {'request': request,
+         'flashed': await get_flashed(request),
+         'label': label,
+         'status': status,
+         'current_user': current_user,
+         'pagination': pagination or None})
 
 
 async def show_drafts(request):
