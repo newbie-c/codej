@@ -10,8 +10,8 @@ from ..common.urls import get_next
 from ..drafts.attri import status
 from .pg import (
     check_art, check_last_arts, check_last_auth, check_last_banded,
-    check_last_blocked, check_rel, select_arts, select_auth,
-    select_banded, select_blocked)
+    check_last_blocked, check_last_labeled_arts, check_rel, select_arts,
+    select_auth, select_banded, select_blocked, select_labeled_arts)
 
 
 async def censor_art(request):
@@ -275,6 +275,37 @@ async def show_author(request):
          'author': target,
          'status': status,
          'flashed': await get_flashed(request)})
+
+
+async def show_labeled_arts(request):
+    label = request.path_params.get('label')
+    current_user = await checkcu(request)
+    if current_user is None:
+        await set_flashed(request, 'Требуется авторизация.')
+        return RedirectResponse(
+            await get_next(request, request.app.url_path_for(
+                'arts:labeled-arts', label=label)), 302)
+    conn = await get_conn(request.app.config)
+    if not (page := await parse_page(request)) or \
+       not (last := await check_last_labeled_arts(
+           conn, current_user, label, page,
+           request.app.config.get('ARTS_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    pagination = dict()
+    await select_labeled_arts(
+        request, conn, current_user, label, pagination, page,
+        request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'arts/show-labeled-arts.html',
+        {'request': request,
+         'label': label,
+         'current_user': current_user,
+         'status': status,
+         'flashed': await get_flashed(request),
+         'pagination': pagination or None})
 
 
 async def show_arts(request):

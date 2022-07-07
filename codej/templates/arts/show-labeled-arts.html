@@ -2,11 +2,11 @@
 {% from "macros/_common.html" import show_messages %}
 {% from "macros/_common.html" import paginate %}
 
-{% block title %}В блогах{% endblock title %}
+{% block title %}С меткой "{{ label }}" в блогах{% endblock title %}
 
 {% block styles %}
   {{ super() }}
-  {% assets filters='cssmin', output='generic/css/arts/show-arts.css',
+  {% assets filters='cssmin', output='generic/css/arts/labeled-arts.css',
             'css/base.css',
             'css/mc780.css',
             'css/top-flashed.css',
@@ -16,15 +16,15 @@
             'css/avatar.css',
             'css/entity-attributes.css',
             'css/entity-details.css',
+            'css/pagination.css',
             'css/entity-summary.css',
-            'css/entity-labels.css',
-            'css/pagination.css' %}
+            'css/entity-labels.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
 {% endblock styles %}
 
 {% block page_body %}
-  <!-- arts/show-arts.html -->
+  <!-- arts/show-labeled-arts.html -->
   <div id="main-container">
     {% if flashed %}
       <div class="top-flashed-block">
@@ -39,7 +39,7 @@
               <a class="entity-link"
                  {% if art['title']|length > 80 -%}
                  title="{{ art['title'] }}"{%- endif %}
-                 href="{{ url_for('arts:show-art', slug=art['slug']) }}">
+                 href="{{ url_for('drafts:show-draft', slug=art['slug']) }}">
                 {{ art['title80'] }}
               </a>
             </h3>
@@ -125,27 +125,27 @@
                   </td>
                   {% if permissions.BLOCK_ENTITY in cuperms or
                         art['author'] == current_user['username'] %}
-                    <td>
-                      {% if art['state'] == status.pub %}
-                        <div class="labeled labeled-text labeled-success">
-                          <span class="glyphicon glyphicon-globe"
-                                aria-hidden="true"></span><span
-                                class="value">public</span>
-                        </div>
-                      {% elif art['state'] == status.priv %}
-                        <div class="labeled labeled-text labeled-info">
-                          <span class="glyphicon glyphicon-share"
-                                aria-hidden="true"></span><span
-                                class="value">share</span>
-                        </div>
-                      {% elif art['state'] == status.hidden %}
-                        <div class="labeled labeled-text labeled-info">
-                          <span class="glyphicon glyphicon-sunglasses"
-                                aria-hidden="true"></span><span
-                                class="value">hidden</span>
-                        </div>
-                      {% endif %}
-                    </td>
+                  <td>
+                    {% if art['state'] == status.pub %}
+                      <div class="labeled labeled-text labeled-success">
+                        <span class="glyphicon glyphicon-globe"
+                              aria-hidden="true"></span><span
+                              class="value">public</span>
+                      </div>
+                    {% elif art['state'] == status.priv %}
+                      <div class="labeled labeled-text labeled-info">
+                        <span class="glyphicon glyphicon-share"
+                              aria-hidden="true"></span><span
+                              class="value">share</span>
+                      </div>
+                    {% elif art['state'] == status.hidden %}
+                      <div class="labeled labeled-text labeled-info">
+                        <span class="glyphicon glyphicon-sunglasses"
+                              aria-hidden="true"></span><span
+                              class="value">hidden</span>
+                      </div>
+                    {% endif %}
+                  </td>
                   {% endif %}
                 </tr>
                 </tbody>
@@ -186,17 +186,18 @@
           </div>
         </div>
       {% endfor %}
-      {% if pagination['prev'] or pagination['next'] %}
-        <div class="next-block entity-pagination text-center">
-          {{ paginate(request, pagination, 'arts:show-arts') }}
-        </div>
-      {% endif %}
     {% else %}
       <div class="alert alert-warning">
         <div class="today-field"></div>
         <div class="message-text">
-          Сайт в стадии разработки, попробуйте зайти позже.
+          На текущий момент у в блогах нет статей c меткой "{{ label }}".
         </div>
+      </div>
+    {% endif %}
+    {% if pagination['prev'] or pagination['next'] %}
+      <div class="next-block entity-pagination text-center">
+        {{ paginate(
+          request, pagination, 'arts:labeled-arts', label=label) }}
       </div>
     {% endif %}
   </div>
@@ -204,17 +205,18 @@
 
 {% block scripts %}
   {{ super() }}
-  {% assets filters='rjsmin', output='generic/js/arts/show-arts.js',
+  {% assets filters='rjsmin', output='generic/js/arts/labeled-arts.js',
             'js/check-mc.js',
             'js/hide-hidden.js',
             'js/render-tf.js',
             'js/footer.js',
             'js/top-flashed.js',
             'js/check-next.js',
+            'js/mark-input-error.js',
             'js/show-datetime.js',
-            'js/show-hide.js',
             'js/scroll-panel.js',
-            'js/arts/show-arts.js' %}
+            'js/show-hide.js',
+            'js/arts/labeled-arts.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
 {% endblock scripts %}

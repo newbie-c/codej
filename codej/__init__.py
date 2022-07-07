@@ -21,8 +21,8 @@ from .admin.views import (
     set_service, show_log)
 from .arts.views import (
     censor_art, follow_auth, show_art, show_arts,
-    show_author, show_banded, show_blocked, send_dislike,
-    send_like, unfollow_auth)
+    show_author, show_banded, show_blocked, show_labeled_arts,
+    send_dislike, send_like, unfollow_auth)
 from .auth.attri import groups, permissions
 from .auth.tasks import check_swapped
 from .auth.views import (
@@ -138,6 +138,7 @@ app = Starlette(
                 Route('/l/', show_banded, name='lenta'),
                 Route('/a/{username}', show_author, name='show-auth'),
                 Route('/b/', show_blocked, name='show-blocked'),
+                Route('/t/{label}', show_labeled_arts, name='labeled-arts'),
                 Route('/ajax/follow-auth', follow_auth,
                       name='follow-auth', methods=['POST']),
                 Route('/ajax/unfollow-auth', unfollow_auth,

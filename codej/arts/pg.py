@@ -51,6 +51,41 @@ async def select_auth(request, conn, auth, cu, target, page, per_page, last):
         await parse_arts_query(request, conn, q, target, page, last)
 
 
+async def select_labeled_arts(
+        request, conn, cu, label, target, page, per_page, last):
+    if permissions.BLOCK_ENTITY in cu['permissions']:
+        q = await conn.fetch(
+            '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
+                      a.edited, a.state, a.commented, a.viewed,
+                      accounts.ava_hash, users.username
+                 FROM articles AS a, users, accounts, labels, als
+                 WHERE a.author_id = users.id
+                   AND accounts.user_id = a.author_id
+                   AND a.id = als.article_id
+                   AND labels.label = $1
+                   AND labels.id = als.label_id
+                   AND a.state IN ($2, $3, $4)
+                 ORDER BY a.published ASC LIMIT $5 OFFSET $6''',
+            label, status.pub, status.priv, status.hidden,
+            per_page, per_page*(page-1))
+    else:
+        q = await conn.fetch(
+            '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
+                      a.edited, a.state, a.commented, a.viewed,
+                      accounts.ava_hash, users.username
+                 FROM articles AS a, users, accounts, labels, als
+                 WHERE a.author_id = users.id
+                   AND accounts.user_id = a.author_id
+                   AND a.id = als.article_id
+                   AND labels.label = $1
+                   AND labels.id = als.label_id
+                   AND a.state IN ($2, $3)
+                 ORDER BY a.published ASC LIMIT $4 OFFSET $5''',
+            label, status.pub, status.priv, per_page, per_page*(page-1))
+    if q:
+        await parse_arts_query(request, conn, q, target, page, last)
+
+
 async def select_arts(request, conn, cu, target, page, per_page, last):
     if permissions.BLOCK_ENTITY in cu['permissions']:
         q = await conn.fetch(
@@ -139,6 +174,26 @@ async def check_last_auth(conn, auth, current_user, page, per_page):
             '''SELECT count(*) FROM articles
                  WHERE author_id = $1 AND state IN ($2, $3)''',
             auth['id'], status.pub, status.priv)
+    return await parse_last_page(page, per_page, q)
+
+
+async def check_last_labeled_arts(conn, current_user, label, page, per_page):
+    if permissions.BLOCK_ENTITY in current_user['permissions']:
+        q = await conn.fetchval(
+            '''SELECT count(*) FROM articles, labels, als
+                 WHERE articles.author_id = als.article_id
+                   AND labels.label = $1
+                   AND labels.id = als.label_id
+                   AND articles.state IN ($2, $3, $4)''',
+            label, status.pub, status.priv, status.hidden)
+    else:
+        q = await conn.fetchval(
+            '''SELECT count(*) FROM articles, labels, als
+                 WHERE articles.author_id = als.article_id
+                   AND labels.label = $1
+                   AND labels.id = als.label_id
+                   AND articles.state IN ($2, $3)''',
+            label, status.pub, status.priv)
     return await parse_last_page(page, per_page, q)
 
 
