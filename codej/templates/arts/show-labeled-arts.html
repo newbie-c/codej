@@ -39,7 +39,7 @@
               <a class="entity-link"
                  {% if art['title']|length > 80 -%}
                  title="{{ art['title'] }}"{%- endif %}
-                 href="{{ url_for('drafts:show-draft', slug=art['slug']) }}">
+                 href="{{ url_for('arts:show-art', slug=art['slug']) }}">
                 {{ art['title80'] }}
               </a>
             </h3>

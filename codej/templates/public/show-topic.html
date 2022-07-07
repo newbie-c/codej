@@ -24,6 +24,7 @@
             'css/entity-details.css',
             'css/entity-text.css',
             'css/pygments.css',
+            'css/labels.css',
             'css/public/show-topic.css' %}
     <link rel="stylesheet" type="text/css", href="{{ ASSET_URL }}">
   {% endassets %}
@@ -166,6 +167,25 @@
     </div>
     <div class="content-block next-block entity-text-block">
       {{ target['html']|safe }}
+    </div>
+    <div class="content-block next-block entity-labels-block">
+      <table>
+        <tbody>
+        <tr>
+          <td>Метки:&nbsp;</td>
+          <td>
+            {% if labels %}
+              {% for label in labels %}
+              <a href="{{ url_for('arts:labeled-arts', label=label) }}">
+                {{- label -}}</a>{%- if not loop.last -%}, {%- endif -%}
+              {% endfor %}
+            {% else %}
+              автор не пожелал установить метки.
+            {% endif %}
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 {% endblock page_body %}

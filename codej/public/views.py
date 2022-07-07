@@ -6,6 +6,7 @@ from ..common.aparsers import parse_page
 from ..common.flashed import get_flashed
 from ..common.pg import get_conn
 from ..drafts.attri import status
+from ..labels.pg import select_labels
 from .pg import check_last_pub, check_topic, select_pub
 
 
@@ -40,13 +41,16 @@ async def show_topic(request):
     conn = await get_conn(request.app.config)
     target = dict()
     await check_topic(request, conn, slug, target)
-    await conn.close()
     if not target :
+        await conn.close()
         raise HTTPException(
             status_code=404, detail='Такой страницы у нас нет.')
+    labels = await select_labels(conn, target['id'])
+    await conn.close()
     return request.app.jinja.TemplateResponse(
         'public/show-topic.html',
         {'request': request,
          'flashed': await get_flashed(request),
          'current_user': current_user,
+         'labels': labels,
          'target': target or None})
