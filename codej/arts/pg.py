@@ -20,6 +20,45 @@ async def check_rel(conn, cu, authid):
             'blocked': bool(bb)}
 
 
+async def select_labeled_auth(
+        request, conn, auth, cu, label, target, page, per_page, last):
+    if permissions.BLOCK_ENTITY in cu['permissions'] or \
+            auth['id'] == cu['id']:
+        q = await conn.fetch(
+            '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
+                      a.edited, a.state, a.commented, a.viewed,
+                      accounts.ava_hash, users.username
+                 FROM articles AS a, users, accounts, labels, als
+                 WHERE a.author_id = users.id
+                   AND a.author_id = $1
+                   AND accounts.user_id = a.author_id
+                   AND a.id = als.article_id
+                   AND labels.label = $2
+                   AND labels.id = als.label_id
+                   AND a.state IN ($3, $4, $5)
+                ORDER BY a.published ASC LIMIT $6 OFFSET $7''',
+            auth['id'], label, status.pub, status.priv, status.hidden,
+            per_page, per_page*(page-1))
+    else:
+        q = await conn.fetch(
+            '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
+                      a.edited, a.state, a.commented, a.viewed,
+                      accounts.ava_hash, users.username
+                 FROM articles AS a, users, accounts, labels, als
+                 WHERE a.author_id = users.id
+                   AND a.author_id = $1
+                   AND accounts.user_id = a.author_id
+                   AND a.id = als.article_id
+                   AND labels.label = $2
+                   AND labels.id = als.label_id
+                   AND a.state IN ($3, $4)
+                ORDER BY a.published ASC LIMIT $5 OFFSET $6''',
+            auth['id'], label, status.pub, status.priv,
+            per_page, per_page*(page-1))
+    if q:
+        await parse_arts_query(request, conn, q, target, page, last)
+
+
 async def select_auth(request, conn, auth, cu, target, page, per_page, last):
     if permissions.BLOCK_ENTITY in cu['permissions'] or \
             auth['id'] == cu['id']:
@@ -160,6 +199,30 @@ async def check_last_banded(conn, cuid, page, per_page):
                AND a.state IN ($1, $2, $3)
                AND f.follower_id = $4''',
         status.pub, status.priv, status.hidden, cuid))
+
+
+async def check_last_labeled_auth(
+        conn, author, current_user, label, page, per_page):
+    if permissions.BLOCK_ENTITY in current_user['permissions'] or \
+            current_user['id'] == author['id']:
+        q = await conn.fetchval(
+            '''SELECT count(*) FROM articles, labels, als
+                 WHERE articles.author_id = $1
+                   AND articles.id = als.article_id
+                   AND labels.label = $2
+                   AND labels.id = als.label_id
+                   AND articles.state IN ($3, $4, $5)''',
+            author['id'], label, status.pub, status.priv, status.hidden)
+    else:
+        q = await conn.fetchval(
+            '''SELECT count(*) FROM articles, labels, als
+                 WHERE articles.author_id = $1
+                   AND articles.id = als.article_id
+                   AND labels.label = $2
+                   AND labels.id = als.label_id
+                   AND articles.state IN ($3, $4)''',
+            author['id'], label, status.pub, status.priv)
+    return await parse_last_page(page, per_page, q)
 
 
 async def check_last_auth(conn, auth, current_user, page, per_page):

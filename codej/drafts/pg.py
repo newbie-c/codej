@@ -144,6 +144,7 @@ async def save_par(conn, art, text, code):
                 html, datetime.utcnow(), art)
         return html
 
+
 async def select_labeled_drafts(
         request, conn, current, label, target, page, per_page, last):
     query = await conn.fetch(

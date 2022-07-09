@@ -19,6 +19,7 @@
             'css/entity-details.css',
             'css/entity-text.css',
             'css/pygments.css',
+            'css/labels.css',
             'css/arts/show-art.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
@@ -195,6 +196,27 @@
     </div>
     <div class="content-block next-block entity-text-block">
       {{ target['html']|safe }}
+    </div>
+    <div class="content-block next-block entity-labels-block">
+      <table>
+        <tbody>
+        <tr>
+          <td>Метки:&nbsp;</td>
+          <td>
+            {% if labels %}
+              {% for label in labels %}
+              <a href="{{ url_for(
+                'arts:labeled-auth',
+                username= target['author'], label=label) }}">
+                {{- label -}}</a>{%- if not loop.last -%}, {%- endif -%}
+              {% endfor %}
+            {% else %}
+              автор не установил метки.
+            {% endif %}
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
     <div id="options-block" class="content-block next-block">
       {% if current_user['id'] == target['author_id'] %}

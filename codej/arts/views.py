@@ -8,10 +8,13 @@ from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
 from ..common.urls import get_next
 from ..drafts.attri import status
+from ..labels.pg import select_labels
 from .pg import (
-    check_art, check_last_arts, check_last_auth, check_last_banded,
-    check_last_blocked, check_last_labeled_arts, check_rel, select_arts,
-    select_auth, select_banded, select_blocked, select_labeled_arts)
+    check_art, check_last_arts, check_last_auth,
+    check_last_banded, check_last_blocked, check_last_labeled_arts,
+    check_last_labeled_auth, check_rel, select_arts,
+    select_labeled_auth, select_auth, select_banded,
+    select_blocked, select_labeled_arts)
 
 
 async def censor_art(request):
@@ -240,6 +243,45 @@ async def show_banded(request):
          'flashed': await get_flashed(request)})
 
 
+async def show_labeled_auth(request):
+    current_user = await checkcu(request)
+    author = request.path_params.get('username')
+    label = request.path_params.get('label')
+    if current_user is None:
+        await set_flashed(request, 'Требуется авторизация.')
+        return RedirectResponse(
+            await get_next(request, request.app.url_path_for(
+                'arts:labeled-auth', username=author, label=label)), 302)
+    conn = await get_conn(request.app.config)
+    author = await conn.fetchrow(
+        '''SELECT id, username, permissions, last_published
+             FROM users WHERE username = $1''', author)
+    if author is None or \
+       (permissions.CREATE_ENTITY not in author['permissions'] and
+        target['last_published'] is None) or \
+       not (page := await parse_page(request)) or \
+       not (last := await check_last_labeled_auth(
+           conn, author, current_user, label, page,
+           request.app.config.get('ARTS_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    pagination = dict()
+    await select_labeled_auth(
+        request, conn, author, current_user, label, pagination, page,
+        request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'arts/labeled-auth.html',
+        {'request': request,
+         'flashed': await get_flashed(request),
+         'current_user': current_user,
+         'status': status,
+         'author': author,
+         'label': label,
+         'pagination': pagination or None})
+
+
 async def show_author(request):
     current_user = await checkcu(request)
     username = request.path_params.get('username')
@@ -355,6 +397,7 @@ async def show_art(request):
     rel = None
     if current_user['id'] != target['author_id']:
         rel = await check_rel(conn, current_user['id'], target['author_id'])
+    labels = await select_labels(conn, target['id'])
     await conn.close()
     return request.app.jinja.TemplateResponse(
         'arts/show-art.html',
@@ -363,4 +406,5 @@ async def show_art(request):
          'current_user': current_user,
          'status': status,
          'rel': rel,
+         'labels': labels,
          'target': target or None})

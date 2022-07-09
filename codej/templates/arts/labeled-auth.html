@@ -3,16 +3,12 @@
 {% from "macros/_common.html" import paginate %}
 
 {% block title %}
-  {% if author['id'] == current_user['id'] %}
-    Свои
-  {% else %}
-    {{ author['username'] }} блог
-  {% endif %}
+  С меткой "{{ label }}" в блоге {{ author['username'] }}
 {% endblock title %}
 
 {% block styles %}
   {{ super() }}
-  {% assets filters='cssmin', output='generic/css/arts/show-author.css',
+  {% assets filters='cssmin', output='generic/css/arts/labeled-auth.css',
             'css/base.css',
             'css/mc780.css',
             'css/top-flashed.css',
@@ -23,27 +19,21 @@
             'css/entity-attributes.css',
             'css/entity-details.css',
             'css/pagination.css',
-            'css/entity-labels.css',
-            'css/arts/show-author.css' %}
+            'css/entity-summary.css',
+            'css/entity-labels.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
   {% endassets %}
 {% endblock styles %}
 
 {% block page_body %}
-  <!-- arts/show-author.html -->
+  <!-- arts/labeled-auth.html -->
   <div id="main-container">
     {% if flashed %}
       <div class="top-flashed-block">
         {{ show_messages(flashed) }}
       </div>
     {% endif %}
-    {% if author and author['description'] and
-          pagination and pagination['page'] == 1 %}
-      <div class="content-block description-block">
-        {{ author['description'] }}
-      </div>
-    {% endif %}
-    {% if author and author['description'] and pagination %}
+    {% if pagination %}
       {% for art in pagination['articles'] %}
         <div class="content-block slidable">
           <div class="block-header">
@@ -137,27 +127,27 @@
                   </td>
                   {% if permissions.BLOCK_ENTITY in cuperms or
                         art['author'] == current_user['username'] %}
-                    <td>
-                      {% if art['state'] == status.pub %}
-                        <div class="labeled labeled-text labeled-success">
-                          <span class="glyphicon glyphicon-globe"
-                                aria-hidden="true"></span><span
-                                class="value">public</span>
-                        </div>
-                      {% elif art['state'] == status.priv %}
-                        <div class="labeled labeled-text labeled-info">
-                          <span class="glyphicon glyphicon-share"
-                                aria-hidden="true"></span><span
-                                class="value">share</span>
-                        </div>
-                      {% elif art['state'] == status.hidden %}
-                        <div class="labeled labeled-text labeled-info">
-                          <span class="glyphicon glyphicon-sunglasses"
-                                aria-hidden="true"></span><span
-                                class="value">hidden</span>
-                        </div>
-                      {% endif %}
-                    </td>
+                  <td>
+                    {% if art['state'] == status.pub %}
+                      <div class="labeled labeled-text labeled-success">
+                        <span class="glyphicon glyphicon-globe"
+                              aria-hidden="true"></span><span
+                              class="value">public</span>
+                      </div>
+                    {% elif art['state'] == status.priv %}
+                      <div class="labeled labeled-text labeled-info">
+                        <span class="glyphicon glyphicon-share"
+                              aria-hidden="true"></span><span
+                              class="value">share</span>
+                      </div>
+                    {% elif art['state'] == status.hidden %}
+                      <div class="labeled labeled-text labeled-info">
+                        <span class="glyphicon glyphicon-sunglasses"
+                              aria-hidden="true"></span><span
+                              class="value">hidden</span>
+                      </div>
+                    {% endif %}
+                  </td>
                   {% endif %}
                 </tr>
                 </tbody>
@@ -169,6 +159,11 @@
               {% else %}
                 <div class="alert alert-warning">Аннотация отсутствует.</div>
               {% endif %}
+            </div>
+            <div class="entity-alias">
+              <a href="{{ url_for('jump', suffix=art['suffix']) }}">
+                подробности и комментарии
+              </a>
             </div>
             <div class="entity-labels">
               <table>
@@ -195,26 +190,20 @@
           </div>
         </div>
       {% endfor %}
-      {% if (pagination['prev'] or pagination['next']) %}
-        <div class="next-block entity-pagination text-center">
-          {{ paginate(
-            request, pagination,
-            'arts:show-auth', username=author['username']) }}
-        </div>
-      {% endif %}
     {% else %}
       <div class="alert alert-warning">
         <div class="today-field"></div>
         <div class="message-text">
-          {% if current_user['id'] == author['id'] %}
-            У блога до сих пор нет описания, его можно создать в
-            <a href={{ url_for('profile', username=author['username']) }}>
-              профиле</a>.
-          {% else %}
-            Похоже, что {{ author['username'] }} пока ничего не написал в
-            свой блог.
-          {% endif %}
+          На текущий момент у {{ author['username'] }} нет ничего
+          c меткой "{{ label }}".
         </div>
+      </div>
+    {% endif %}
+    {% if pagination['prev'] or pagination['next'] %}
+      <div class="next-block entity-pagination text-center">
+        {{ paginate(
+          request, pagination, 'arts:labeled-auth',
+          username=author['username'], label=label) }}
       </div>
     {% endif %}
   </div>
@@ -222,17 +211,18 @@
 
 {% block scripts %}
   {{ super() }}
-  {% assets filters='rjsmin', output='generic/js/arts/show-author.js',
+  {% assets filters='rjsmin', output='generic/js/arts/labeled-auth.js',
             'js/check-mc.js',
             'js/hide-hidden.js',
             'js/render-tf.js',
             'js/footer.js',
             'js/top-flashed.js',
             'js/check-next.js',
+            'js/mark-input-error.js',
             'js/show-datetime.js',
-            'js/show-hide.js',
             'js/scroll-panel.js',
-            'js/arts/show-author.js' %}
+            'js/show-hide.js',
+            'js/arts/labeled-auth.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
 {% endblock scripts %}
