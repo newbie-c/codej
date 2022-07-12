@@ -6,7 +6,7 @@
 
 {% block styles %}
   {{ super() }}
-  {% assets filters='cssmin', output='generic/css/arts/show-banded.css',
+  {% assets filters='cssmin', output='generic/css/arts/labeled-banded.css',
             'css/base.css',
             'css/mc780.css',
             'css/top-flashed.css',
@@ -24,7 +24,7 @@
 {% endblock styles %}
 
 {% block page_body %}
-  <!-- arts/show-banded.html -->
+  <!-- arts/labeled-banded.html -->
   <div id="main-container">
     {% if flashed %}
       <div class="top-flashed-block">
@@ -187,14 +187,15 @@
       {% endfor %}
       {% if pagination['prev'] or pagination['next'] %}
         <div class="next-block entity-pagination text-center">
-          {{ paginate(request, pagination, 'arts:lenta') }}
+          {{ paginate(
+            request, pagination, 'arts:labeled-banded', label=label) }}
         </div>
       {% endif %}
     {% else %}
       <div class="alert alert-warning">
         <div class="today-field"></div>
         <div class="message-text">
-          Похоже, что в вашу ленту не добавлен ни один блог.
+          Похоже, что в вашей ленте ничего с меткой "{{ label }}".
         </div>
       </div>
     {% endif %}
@@ -203,7 +204,7 @@
 
 {% block scripts %}
   {{ super() }}
-  {% assets filters='rjsmin', output='generic/js/arts/show-banded.js',
+  {% assets filters='rjsmin', output='generic/js/arts/labeled-banded.js',
             'js/check-mc.js',
             'js/hide-hidden.js',
             'js/render-tf.js',

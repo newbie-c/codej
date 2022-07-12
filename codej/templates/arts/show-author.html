@@ -23,6 +23,7 @@
             'css/entity-attributes.css',
             'css/entity-details.css',
             'css/pagination.css',
+            'css/entity-summary.css',
             'css/entity-labels.css',
             'css/arts/show-author.css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
@@ -169,6 +170,11 @@
               {% else %}
                 <div class="alert alert-warning">Аннотация отсутствует.</div>
               {% endif %}
+            </div>
+            <div class="entity-alias">
+              <a href="{{ url_for('jump', suffix=art['suffix']) }}">
+                подробности и комментарии
+              </a>
             </div>
             <div class="entity-labels">
               <table>

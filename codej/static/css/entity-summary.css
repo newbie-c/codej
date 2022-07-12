@@ -12,6 +12,8 @@
 }
 
 .entity-alias {
+  text-shadow: 0 0 3px #d9dcec;
+  font-style: italic;
   text-align: center;
   padding: 4px 0 0;
 }

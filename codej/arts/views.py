@@ -12,9 +12,10 @@ from ..labels.pg import select_labels
 from .pg import (
     check_art, check_last_arts, check_last_auth,
     check_last_banded, check_last_blocked, check_last_labeled_arts,
-    check_last_labeled_auth, check_rel, select_arts,
-    select_labeled_auth, select_auth, select_banded,
-    select_blocked, select_labeled_arts)
+    check_last_labeled_banded, check_last_labeled_auth, check_rel,
+    select_arts, select_labeled_auth, select_auth,
+    select_banded, select_blocked, select_labeled_arts,
+    select_labeled_banded)
 
 
 async def censor_art(request):
@@ -212,6 +213,40 @@ async def show_blocked(request):
          'flashed': await get_flashed(request)})
 
 
+async def show_labeled_banded(request):
+    current_user = await checkcu(request)
+    label = request.path_params.get('label')
+    if current_user is None:
+        await set_flashed(request, 'Требуется авторизация.')
+        return RedirectResponse(
+            await get_next(request, request.app.url_path_for(
+                'arts:labeled-banded', label=label)), 302)
+    if permissions.FOLLOW_USERS not in current_user['permissions']:
+        raise HTTPException(
+            status_code=403, detail='Для вас доступ ограничен.')
+    conn = await get_conn(request.app.config)
+    if not (page := await parse_page(request)) or \
+       not (last := await check_last_labeled_banded(
+           conn, current_user['id'], label, page,
+           request.app.config.get('ARTS_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    pagination = dict()
+    await select_labeled_banded(
+        request, conn, current_user['id'], label, pagination, page,
+        request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'arts/labeled-banded.html',
+        {'request': request,
+         'label': label,
+         'pagination': pagination or None,
+         'current_user': current_user,
+         'status': status,
+         'flashed': await get_flashed(request)})
+
+
 async def show_banded(request):
     current_user = await checkcu(request)
     if current_user is None:
@@ -220,7 +255,8 @@ async def show_banded(request):
             await get_next(request, request.app.url_path_for(
                 'arts:lenta')), 302)
     if permissions.FOLLOW_USERS not in current_user['permissions']:
-        raise HTTPException(status_code=403,detail='Для вас доступ ограничен.')
+        raise HTTPException(
+            status_code=403, detail='Для вас доступ ограничен.')
     conn = await get_conn(request.app.config)
     if not (page := await parse_page(request)) or \
        not (last := await check_last_banded(
