@@ -6,7 +6,7 @@
 
 {% block styles %}
   {{ super() }}
-  {% assets filters='cssmin', output='generic/css/arts/show-blocked.css',
+  {% assets filters='cssmin', output='generic/css/arts/labeled-blocked.css',
             'css/base.css',
             'css/mc780.css',
             'css/top-flashed.css',
@@ -171,14 +171,15 @@
       {% endfor %}
       {% if pagination['prev'] or pagination['next'] %}
         <div class="next-block entity-pagination text-center">
-          {{ paginate(request, pagination, 'arts:show-blocked') }}
+          {{ paginate(
+            request, pagination, 'arts:labeled-blocked', label=label) }}
         </div>
       {% endif %}
     {% else %}
       <div class="alert alert-warning">
         <div class="today-field"></div>
         <div class="message-text">
-          В нашей базе заблокированных статей не нашлось.
+          Среди заблокированных нет ничего с меткой "{{ label }}".
         </div>
       </div>
     {% endif %}
@@ -187,7 +188,7 @@
 
 {% block scripts %}
   {{ super() }}
-  {% assets filters='rjsmin', output='generic/js/arts/show-blocked.js',
+  {% assets filters='rjsmin', output='generic/js/arts/labeled-blocked.js',
             'js/check-mc.js',
             'js/hide-hidden.js',
             'js/render-tf.js',

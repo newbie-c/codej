@@ -153,6 +153,25 @@ async def select_arts(request, conn, cu, target, page, per_page, last):
         await parse_arts_query(request, conn, q, target, page, last)
 
 
+async def select_labeled_blocked(
+        request, conn, label, target, page, per_page, last):
+    q = await conn.fetch(
+        '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
+                  a.edited, a.state, a.commented, a.viewed, acc.ava_hash,
+                  u.username
+             FROM articles AS a, accounts AS acc, users AS u, labels, als
+             WHERE a.author_id = u.id
+               AND acc.user_id = a.author_id
+               AND a.id = als.article_id
+               AND labels.label = $1
+               AND labels.id = als.label_id
+               AND a.state = $2
+             ORDER BY a.published ASC LIMIT $3 OFFSET $4''',
+        label, status.mod, per_page, per_page*(page-1))
+    if q:
+        await parse_arts_query(request, conn, q, target, page, last)
+
+
 async def select_blocked(request, conn, target, page, per_page, last):
     q = await conn.fetch(
         '''SELECT a.id, a.title, a.slug, a.suffix, a.summary, a.published,
@@ -201,11 +220,21 @@ async def select_labeled_banded(
                AND a.id = als.article_id
                AND labels.label = $2
                AND labels.id = als.label_id AND a.state IN ($3, $4, $5)
-             ORDER BY a.published DESC LIMIT $6 OFFSET $7''',
+             ORDER BY a.published ASC LIMIT $6 OFFSET $7''',
         cuid, label, status.pub, status.priv, status.hidden,
         per_page, per_page*(page-1))
     if q:
         await parse_arts_query(request, conn, q, target, page, last)
+
+
+async def check_last_labeled_blocked(conn, label, page, per_page):
+    return await parse_last_page(
+        page, per_page, await conn.fetchval(
+            '''SELECT count(*) FROM articles, labels, als
+                 WHERE articles.id = als.article_id
+                   AND labels.label = $1
+                   AND labels.id = als.label_id
+                   AND articles.state = $2''', label, status.mod))
 
 
 async def check_last_blocked(conn, page, per_page):

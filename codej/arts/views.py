@@ -12,10 +12,11 @@ from ..labels.pg import select_labels
 from .pg import (
     check_art, check_last_arts, check_last_auth,
     check_last_banded, check_last_blocked, check_last_labeled_arts,
-    check_last_labeled_banded, check_last_labeled_auth, check_rel,
-    select_arts, select_labeled_auth, select_auth,
-    select_banded, select_blocked, select_labeled_arts,
-    select_labeled_banded)
+    check_last_labeled_banded, check_last_labeled_auth,
+    check_last_labeled_blocked, check_rel, select_arts,
+    select_labeled_auth, select_auth, select_banded,
+    select_blocked, select_labeled_arts, select_labeled_banded,
+    select_labeled_blocked)
 
 
 async def censor_art(request):
@@ -179,6 +180,40 @@ async def follow_auth(request):
                     f'Блог {target.get("username")} добавлен в вашу ленту.')
         await conn.close()
     return JSONResponse(res)
+
+
+async def show_labeled_blocked(request):
+    current_user = await checkcu(request)
+    label = request.path_params.get('label')
+    if current_user is None:
+        await set_flashed(request, 'Требуется авторизация.')
+        return RedirectResponse(
+            await get_next(request, request.app.url_path_for(
+                'arts:labeled-blocked', label=label)), 302)
+    if permissions.BLOCK_ENTITY not in current_user['permissions']:
+        raise HTTPException(
+            status_code=403, detail='Для вас доступ ограничен.')
+    conn = await get_conn(request.app.config)
+    if not (page := await parse_page(request)) or \
+       not (last := await check_last_labeled_blocked(
+           conn, label, page,
+           request.app.config.get('ARTS_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    pagination = dict()
+    await select_labeled_blocked(
+        request, conn, label, pagination, page,
+        request.app.config.get('ARTS_PER_PAGE', cast=int, default=3), last)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'arts/labeled-blocked.html',
+        {'request': request,
+         'current_user': current_user,
+         'label': label,
+         'status': status,
+         'pagination': pagination or None,
+         'flashed': await get_flashed(request)})
 
 
 async def show_blocked(request):
