@@ -107,3 +107,14 @@ CREATE TABLE art_dislikes (
     user_id integer REFERENCES users(id),
     CONSTRAINT article_d_user_uni UNIQUE (article_id, user_id)
 );
+
+CREATE TABLE labels (
+    id serial PRIMARY KEY,
+    label varchar(32) UNIQUE
+);
+
+CREATE TABLE als (
+    article_id integer REFERENCES articles(id),
+    label_id integer REFERENCES labels(id),
+    CONSTRAINT art_label_uni UNIQUE (article_id, label_id)
+);
