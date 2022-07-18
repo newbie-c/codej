@@ -38,7 +38,7 @@ from .drafts.views import (
 from .errors import (
     handle_csrf_error, notify_not_found_page,
     refuse_method, refuse_request)
-from .labels.views import set_labels
+from .labels.views import find_label, show_labels, set_labels
 from .main.views import (
     count_views, edit_desc, make_friend, jump,
     ping, show_favicon, show_index, show_picture,
@@ -201,6 +201,9 @@ app = Starlette(
                 Route('/ajax/edit-state', edit_state,
                       name='edit-state', methods=['POST'])]),
             Mount('/labels', name='labels', routes=[
+                Route('/', show_labels, name='show'),
+                Route('/ajax/find-l', find_label,
+                      name='find-l', methods=['POST']),
                 Route('/ajax/set-l', set_labels,
                       name='set-l', methods=['POST'])]),
             Mount('/pictures', name='pictures', routes=[

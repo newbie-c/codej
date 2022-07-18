@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "macros/_common.html" import show_messages %}
+{% from "macros/_common.html" import paginate %}
+{% from "macros/_labels.html" import show_labels %}
+
+{% block title %}Поиск по меткам{% endblock title %}
+
+{% block styles %}
+  {{ super() }}
+  {% assets filters='cssmin', output='generic/css/labels/show.css',
+            'css/base.css',
+            'css/mc780.css',
+            'css/top-flashed.css',
+            'css/find-block.css',
+            'css/content-block.css',
+            'css/next-block.css',
+            'css/pagination.css',
+            'css/labels/show.css' %}
+    <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles %}
+
+{% block page_body %}
+  <!-- labels/show.html -->
+  <div id="main-container">
+    {% if flashed %}
+      <div class="top-flashed-block">
+        {{ show_messages(flashed) }}
+      </div>
+    {% endif %}
+    {% if pagination and pagination['page'] == 1 and pagination['next'] %}
+      <div class="content-block find-block">
+        <div class="find-label text-right">
+          <label for="labelname-input">Найти метку:</label>
+        </div>
+        <div class="find-input">
+          <input type="text"
+                 id="labelname-input"
+                 data-url="{{ url_for('labels:find-l') }}"
+                 name="labelname-input"
+                 class="form-control"
+                 placeholder="вводите название метки по одному знаку">
+        </div>
+      </div>
+    {% endif %}
+    {{ show_labels(request, pagination, current_user, permissions, 1) }}
+    {% if pagination['prev'] or pagination['next'] %}
+      <div class="next-block entity-pagination text-center">
+        {{ paginate(request, pagination, 'labels:show') }}
+      </div>
+    {% endif %}
+
+  </div>
+{% endblock page_body %}
+
+{% block scripts %}
+  {{ super() }}
+  {% assets filters='rjsmin', output='generic/js/labels/show.js',
+            'js/check-mc.js',
+            'js/hide-hidden.js',
+            'js/footer.js',
+            'js/check-next.js',
+            'js/labels/show.js' %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock scripts %}

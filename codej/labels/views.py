@@ -1,12 +1,60 @@
 import re
 
-from starlette.responses import JSONResponse
+from starlette.exceptions import HTTPException
+from starlette.responses import JSONResponse, RedirectResponse
 
 from ..auth.attri import permissions
 from ..auth.common import checkcu
-from ..common.flashed import set_flashed
+from ..common.aparsers import parse_page
+from ..common.flashed import get_flashed, set_flashed
 from ..common.pg import get_conn
-from .pg import select_labels
+from ..common.urls import get_next
+from .pg import check_last, select_found, select_labels, select_ls
+
+
+async def find_label(request):
+    res = {'empty': True}
+    value = (await request.form()).get('value')
+    current_user = await checkcu(request)
+    if value and current_user:
+        conn = await get_conn(request.app.config)
+        pagination = dict()
+        await select_found(conn, pagination, value)
+        res = {'empty': False,
+               'html': request.app.jinja.get_template(
+                   'labels/found.html').render(
+                   current_user=current_user, pagination=pagination,
+                   request=request)}
+        await conn.close()
+    return JSONResponse(res)
+
+
+async def show_labels(request):
+    current_user = await checkcu(request)
+    if current_user is None:
+        await set_flashed(request, 'Требуется авторизация.')
+        return RedirectResponse(
+            await get_next(request, request.app.url_path_for(
+                'labels:show')), 302)
+    conn = await get_conn(request.app.config)
+    if not (page := await parse_page(request)) or \
+       not (last := await check_last(
+           conn, page,
+           request.app.config.get('LABELS_PER_PAGE', cast=int, default=3))):
+        await conn.close()
+        raise HTTPException(
+            status_code=404, detail='Такой страницы у нас нет.')
+    pagination = dict()
+    await select_ls(
+        conn, pagination, page,
+        request.app.config.get('LABELS_PER_PAGE', cast=int, default=3), last)
+    await conn.close()
+    return request.app.jinja.TemplateResponse(
+        'labels/show.html',
+        {'request': request,
+         'current_user': current_user,
+         'pagination': pagination or None,
+         'flashed': await get_flashed(request)})
 
 
 async def set_labels(request):

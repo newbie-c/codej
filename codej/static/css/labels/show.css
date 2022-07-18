@@ -1,0 +1,21 @@
+.labels-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.labels-table th {
+  border-bottom: 2px solid #dddddd;
+  padding: 8px 4px;
+}
+
+.labels-table td {
+  padding: 8px 4px 2px;
+}
+
+.bordered {
+  border-bottom: 1px dashed #dddddd;
+}
+
+.blog-label-field {
+  text-shadow: 0 0 3px #d9dcec;
+}

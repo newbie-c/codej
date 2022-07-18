@@ -1,0 +1,54 @@
+{% macro show_labels(request, pagination, current_user, permissions, view) %}
+  <div class="content-block
+              {% if view == 1 %}labels-block{% else %}
+              found-labels-block{% endif %}">
+    <div class="block-header">
+      <h3 class="panel-title">
+        {% if view == 1 %}
+        Метки в блогах
+        {% else %}
+        Найденные по запросу метки
+        {% endif %}
+      </h3>
+    </div>
+    <div class="block-body">
+      {% if pagination and pagination['labels'] %}
+        <table class="labels-table">
+          <tbody>
+          <tr>
+            <th>Метка</th>
+            <th class="text-right">публичных</th>
+            <th class="text-right">скрытых</th>
+            {% if permissions.BLOCK_ENTITY in current_user['permissions'] %}
+            <th class="text-right">в топке</th>
+            {% endif %}
+          </tr>
+          {% for label in pagination['labels'] %}
+            <tr {% if not loop.last %}class="bordered"{% endif %}>
+              <td class="blog-label-field">
+                <a href="{{ request.url_for(
+                    'arts:labeled-arts', label=label.get('label')) }}">
+                  {{ label.get('label') }}
+                </a>
+              </td>
+              <td class="text-right">{{ label['public'] }}</td>
+              <td class="text-right">{{ label['hidden'] }}</td>
+              {% if permissions.BLOCK_ENTITY in current_user['permissions'] %}
+              <td class="text-right">{{ label['mod'] }}</td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="alert alert-warning">
+          {% if view == 1 %}
+          В блогах нет ни одной метки.
+          {% else %}
+          Нет ни одной метки начинающейся с этих символов.
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endmacro %}
