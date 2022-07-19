@@ -6,10 +6,7 @@ from bleach import clean, linkify
 from bleach.callbacks import nofollow, target_blank
 from markdown import markdown
 from markdown.extensions.codehilite import CodeHiliteExtension
-from mdx_del_ins import DelInsExtension
-from pyembed.core.error import PyEmbedError
-
-from .embed import PyEmbedMarkdown
+from markdown_del_ins import DelInsExtension
 
 
 def prevent_py(attrs, new=False):
@@ -48,25 +45,25 @@ def clean_this(html, sc=False):
 
 
 def html_this(md_text, sc=False):
-    try:
-        html = markdown(
-            md_text,
-            extensions=['markdown.extensions.fenced_code',
-                        'markdown.extensions.nl2br',
-                        'markdown.extensions.md_in_html',
-                        CodeHiliteExtension(),
-                        DelInsExtension(),
-                        PyEmbedMarkdown()],
-            output_format='html5')
-    except PyEmbedError:
-        html = markdown(
-            md_text,
-            extensions=['markdown.extensions.fenced_code',
-                        'markdown.extensions.nl2br',
-                        'markdown.extensions.md_in_html',
-                        CodeHiliteExtension(),
-                        DelInsExtension()],
-            output_format='html5')
+#    try:
+#        html = markdown(
+#            md_text,
+#            extensions=['markdown.extensions.fenced_code',
+#                        'markdown.extensions.nl2br',
+#                        'markdown.extensions.md_in_html',
+#                        CodeHiliteExtension(),
+#                        DelInsExtension(),
+#                        PyEmbedMarkdown()],
+#            output_format='html5')
+#    except PyEmbedError:
+    html = markdown(
+        md_text,
+        extensions=['markdown.extensions.fenced_code',
+                    'markdown.extensions.nl2br',
+                    'markdown.extensions.md_in_html',
+                    CodeHiliteExtension(),
+                    DelInsExtension()],
+        output_format='html5')
     return clean_this(html, sc=sc)
 
 
