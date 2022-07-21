@@ -24,6 +24,31 @@ spar = '''SELECT par.num, par.article_id, par.mdtext
                 AND par.article_id = arts.id'''
 
 
+async def change_commented(request):
+    res = {'empty': True}
+    id = int((await request.form()).get('id'))
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.CREATE_ENTITY in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        query = await conn.fetchrow(
+            '''SELECT id, commented, author_id FROM articles
+                 WHERE id = $1 AND author_id = $2''',
+            id, current_user['id'])
+        if query:
+            await conn.execute(
+                'UPDATE articles SET commented = $1 WHERE id = $2',
+                not query.get('commented'), query.get('id'))
+            res = {'empty': False}
+            if query.get('commented'):
+                message = 'Комментарии закрыты.'
+            else:
+                message = 'Комментарии открыты.'
+            await set_flashed(request, message)
+        await conn.close()
+    return JSONResponse(res)
+
+
 async def edit_state(request):
     res = {'empty': True}
     d = await request.form()

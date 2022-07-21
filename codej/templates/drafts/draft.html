@@ -428,6 +428,16 @@
                 aria-hidden="true"></span>
         </button>
       {% endif %}
+      <button id="comments-state"
+              type="button"
+              title="{% if target['commented'] %}закрыть комментарии
+                     {% else %}открыть комментарии{% endif %}"
+              data-url="{{ url_for('drafts:change-comm') }}"
+              class="btn {% if target['commented'] %}btn-warning
+                         {% else %}btn-info{% endif %} btn-sm">
+        <span class="glyphicon glyphicon-comment"
+              aria-hidden="true"></span>
+      </button>
     </div>
   </div>
 {% endblock page_body %}

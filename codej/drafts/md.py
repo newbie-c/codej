@@ -45,17 +45,6 @@ def clean_this(html, sc=False):
 
 
 def html_this(md_text, sc=False):
-#    try:
-#        html = markdown(
-#            md_text,
-#            extensions=['markdown.extensions.fenced_code',
-#                        'markdown.extensions.nl2br',
-#                        'markdown.extensions.md_in_html',
-#                        CodeHiliteExtension(),
-#                        DelInsExtension(),
-#                        PyEmbedMarkdown()],
-#            output_format='html5')
-#    except PyEmbedError:
     html = markdown(
         md_text,
         extensions=['markdown.extensions.fenced_code',
