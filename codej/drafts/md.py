@@ -86,6 +86,6 @@ def check_text(text, code):
     return text, spec
 
 
-def parse_md(query):
+def parse_md(query, sc=False):
     md = '\n\n'.join([par.get('mdtext') for par in query])
-    return html_this(md)
+    return html_this(md, sc=sc)

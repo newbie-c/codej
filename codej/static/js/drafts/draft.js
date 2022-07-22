@@ -474,19 +474,12 @@ $(function() {
       });
     });
   }
-  $('#comments-state').on('click', function() {
-    $(this).blur();
-    $.ajax({
-      method: 'POST',
-      url: $(this).data().url,
-      data: {
-        id: $('#entity-header-block').data().id
-      },
-      success: function(data) {
-        if (!data.empty) window.location.reload();
-      },
-      error: function(data) {},
-      dataType: 'json'
-    });
-  });
+  let cst = $('#comments-state');
+  if (cst.length) {
+    cst.on('click', checkSC);
+  }
+  let spc = $('#special-case');
+  if (spc.length) {
+    spc.on('click', checkSC);
+  }
 });

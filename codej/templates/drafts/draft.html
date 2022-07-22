@@ -428,16 +428,27 @@
                 aria-hidden="true"></span>
         </button>
       {% endif %}
-      <button id="comments-state"
-              type="button"
-              title="{% if target['commented'] %}закрыть комментарии
-                     {% else %}открыть комментарии{% endif %}"
-              data-url="{{ url_for('drafts:change-comm') }}"
-              class="btn {% if target['commented'] %}btn-warning
-                         {% else %}btn-info{% endif %} btn-sm">
-        <span class="glyphicon glyphicon-comment"
-              aria-hidden="true"></span>
-      </button>
+      {% if target['state'] != status.mod %}
+        <button id="comments-state"
+                type="button"
+                title="{% if target['commented'] %}закрыть комментарии
+                       {% else %}открыть комментарии{% endif %}"
+                data-url="{{ url_for('drafts:change-comm') }}"
+                class="btn {% if target['commented'] %}btn-warning
+                           {% else %}btn-info{% endif %} btn-sm">
+          <span class="glyphicon glyphicon-comment"
+                aria-hidden="true"></span>
+        </button>
+        {% if permissions.SPECIAL_CASE in cuperms %}
+          <button id="special-case"
+                  type="button"
+                  data-url="{{ url_for('drafts:special-case') }}"
+                  class="btn btn-primary btn-sm">
+            <span class="glyphicon glyphicon-link"
+                  aria-hidden="true"></span>
+          </button>
+        {% endif %}
+      {% endif %}
     </div>
   </div>
 {% endblock page_body %}
@@ -465,6 +476,7 @@
             'js/copy-this.js',
             'js/mark-input-error.js',
             'js/track-marker.js',
+            'js/spec-case.js',
             'js/drafts/draft.js' %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}

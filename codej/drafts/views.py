@@ -1,3 +1,6 @@
+import asyncio
+import functools
+
 from datetime import datetime
 
 from starlette.exceptions import HTTPException
@@ -11,6 +14,7 @@ from ..common.pg import get_conn
 from ..common.urls import get_next
 from ..labels.pg import select_labels
 from .attri import status
+from .md import parse_md
 from .pg import (
     prepend_par, change_par, check_article, create_d,
     check_last_drafts, check_last_labeled, check_slug, remove_this,
@@ -215,6 +219,33 @@ async def check_par(request):
                        'drafts/check-par.html').render(
                        request=request, mdtext=target.get('mdtext'),
                        num=num, art=art)}
+        await conn.close()
+    return JSONResponse(res)
+
+
+async def rem_rel(request):
+    res = {'empty': True}
+    id = int((await request.form()).get('id'))
+    current_user = await checkcu(request)
+    if current_user and \
+            permissions.SPECIAL_CASE in current_user['permissions']:
+        conn = await get_conn(request.app.config)
+        query = await conn.fetchrow(
+            '''SELECT id, author_id FROM articles
+                 WHERE id = $1 AND author_id = $2''', id, current_user['id'])
+        if query:
+            pars = await conn.fetch(
+                '''SELECT mdtext FROM paragraphs
+                     WHERE article_id = $1 ORDER BY num ASC''',
+                query.get('id'))
+            loop = asyncio.get_running_loop()
+            html = await loop.run_in_executor(
+                None, functools.partial(parse_md, pars, True))
+            await conn.execute(
+                'UPDATE articles SET html = $1 WHERE id = $2',
+                html, query.get('id'))
+            await set_flashed(request, 'Аттрибут удалён.')
+            res = {'empty': False}
         await conn.close()
     return JSONResponse(res)
 
